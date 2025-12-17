@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Clients/">
+    <Project Path="Clients/AIKit.Clients.AzureClaude/AIKit.Clients.AzureClaude.csproj" Id="64270ef4-f3ac-477e-8a54-8cd07a08c345" />
+    <Project Path="Clients/AIKit.Clients.AzureOpenAI/AIKit.Clients.AzureOpenAI.csproj" />
+    <Project Path="Clients/AIKit.Clients.Bedrock/AIKit.Clients.Bedrock.csproj" Id="5318a867-c8fd-4620-875e-8386827f08b2" />
+    <Project Path="Clients/AIKit.Clients.Claude/AIKit.Clients.Claude.csproj" Id="cb6f24e4-a951-4691-a140-2730085b72b0" />
+    <Project Path="Clients/AIKit.Clients.Gemini/AIKit.Clients.Gemini.csproj" Id="d084897f-1c53-4183-9da3-65bf4630bada" />
+    <Project Path="Clients/AIKit.Clients.GitHub/AIKit.Clients.GitHub.csproj" Id="5dba59f1-904b-428c-932e-39cb020e79ea" />
+    <Project Path="Clients/AIKit.Clients.Ollama/AIKit.Clients.Ollama.csproj" Id="b39732ec-8199-4fbf-a1e8-9742bcd3b516" />
+    <Project Path="Clients/AIKit.Clients.OpenAI/AIKit.Clients.OpenAI.csproj" />
+    <Project Path="Clients/AIKit.Core.Clients/AIKit.Core.Clients.csproj" Id="6c69f866-c5cd-4805-bd61-dcf21492d3cf" />
+  </Folder>
+  <Project Path="AIKit.AppHost/AIKit.AppHost.csproj" />
+  <Project Path="AIKit.Core/AIKit.Core.csproj" Id="ad1d71d1-33c7-42c2-9a21-3a45734aebeb" />
+  <Project Path="AIKit.ServiceDefaults/AIKit.ServiceDefaults.csproj" />
+</Solution>
