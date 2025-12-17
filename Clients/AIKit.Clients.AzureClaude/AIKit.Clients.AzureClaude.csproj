@@ -4,6 +4,13 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<PackageId>AIKit.Clients.AzureClaude</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>AIKit Team</Authors>
+		<Description>Azure Claude client provider for AIKit, supporting chat with managed identity.</Description>
+		<PackageTags>AI, Azure, Claude, Chat</PackageTags>
+		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
