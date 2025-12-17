@@ -38,7 +38,23 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     private static void Validate(AIClientSettings settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(settings.AwsAccessKey))
+            throw new ArgumentException(
+                "AwsAccessKey is required.",
+                nameof(AIClientSettings.AwsAccessKey));
+
+        if (string.IsNullOrWhiteSpace(settings.AwsSecretKey))
+            throw new ArgumentException(
+                "AwsSecretKey is required.",
+                nameof(AIClientSettings.AwsSecretKey));
+
+        if (string.IsNullOrWhiteSpace(settings.AwsRegion))
+            throw new ArgumentException(
+                "AwsRegion is required.",
+                nameof(AIClientSettings.AwsRegion));
+
         AIClientSettingsValidator.RequireModel(settings);
     }
 }

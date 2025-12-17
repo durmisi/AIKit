@@ -42,7 +42,13 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     private static void Validate(AIClientSettings settings)
     {
-        AIClientSettingsValidator.RequireEndpoint(settings);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
+            throw new ArgumentException(
+                "GitHubToken is required.",
+                nameof(AIClientSettings.GitHubToken));
+
         AIClientSettingsValidator.RequireModel(settings);
     }
 }

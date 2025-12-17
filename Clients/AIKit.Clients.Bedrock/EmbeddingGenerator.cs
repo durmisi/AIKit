@@ -5,11 +5,11 @@ using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Bedrock;
 
-public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorProvider
+public sealed class EmbeddingGenerator : IEmbeddingGeneratorProvider
 {
     private readonly AIClientSettings _defaultSettings;
 
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGenerator(AIClientSettings settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -37,7 +37,23 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorProvider
 
     private static void Validate(AIClientSettings settings)
     {
-        AIClientSettingsValidator.RequireEndpoint(settings);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(settings.AwsAccessKey))
+            throw new ArgumentException(
+                "AwsAccessKey is required.",
+                nameof(AIClientSettings.AwsAccessKey));
+
+        if (string.IsNullOrWhiteSpace(settings.AwsSecretKey))
+            throw new ArgumentException(
+                "AwsSecretKey is required.",
+                nameof(AIClientSettings.AwsSecretKey));
+
+        if (string.IsNullOrWhiteSpace(settings.AwsRegion))
+            throw new ArgumentException(
+                "AwsRegion is required.",
+                nameof(AIClientSettings.AwsRegion));
+
         AIClientSettingsValidator.RequireModel(settings);
     }
 }

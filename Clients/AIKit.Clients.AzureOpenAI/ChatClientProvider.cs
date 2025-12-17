@@ -49,7 +49,11 @@ public sealed class ChatClientProvider : IChatClientProvider
     private static void Validate(AIClientSettings settings)
     {
         AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireApiKey(settings);
         AIClientSettingsValidator.RequireModel(settings);
+
+        if (!settings.UseDefaultAzureCredential)
+        {
+            AIClientSettingsValidator.RequireApiKey(settings);
+        }
     }
 }

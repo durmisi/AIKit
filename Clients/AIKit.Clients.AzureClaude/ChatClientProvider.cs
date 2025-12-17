@@ -6,7 +6,7 @@ using Microsoft.Extensions.AI;
 namespace AIKit.Clients.AzureClaude;
 
 /// <summary>
-/// Requires GitHubToken, ModelId. Uses https://models.github.ai/inference
+/// Requires Endpoint, ModelId, and either ApiKey or UseDefaultAzureCredential.
 /// </summary>
 public sealed class ChatClientProvider : IChatClientProvider
 {
@@ -46,5 +46,10 @@ public sealed class ChatClientProvider : IChatClientProvider
     {
         AIClientSettingsValidator.RequireEndpoint(settings);
         AIClientSettingsValidator.RequireModel(settings);
+
+        if (!settings.UseDefaultAzureCredential)
+        {
+            AIClientSettingsValidator.RequireApiKey(settings);
+        }
     }
 }

@@ -38,7 +38,13 @@ public sealed class EmbeddingGenerator : IEmbeddingGeneratorProvider
 
     private static void Validate(AIClientSettings settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
+            throw new ArgumentException(
+                "GitHubToken is required.",
+                nameof(AIClientSettings.GitHubToken));
+
         AIClientSettingsValidator.RequireModel(settings);
     }
 }

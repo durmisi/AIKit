@@ -1,6 +1,7 @@
 ﻿using AIKit.Core.Clients;
 using Azure;
 using Azure.AI.Inference;
+using Azure.Identity;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.AzureOpenAI;
@@ -25,17 +26,33 @@ public sealed class EmbeddingGenerator : IEmbeddingGeneratorProvider
     {
         Validate(settings);
 
-        var client = new EmbeddingsClient(
-            new Uri(settings.Endpoint!),
-            new AzureKeyCredential(settings.ApiKey!));
+        EmbeddingsClient client;
+
+        if (settings.UseDefaultAzureCredential)
+        {
+            client = new EmbeddingsClient(
+                new Uri(settings.Endpoint!),
+                new DefaultAzureCredential());
+        }
+        else
+        {
+            client = new EmbeddingsClient(
+                new Uri(settings.Endpoint!),
+                new AzureKeyCredential(settings.ApiKey!));
+        }
 
         return client.AsIEmbeddingGenerator(settings.ModelId!);
     }
 
     private static void Validate(AIClientSettings settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
+        AIClientSettingsValidator.RequireEndpoint(settings);
         AIClientSettingsValidator.RequireModel(settings);
+
+        if (!settings.UseDefaultAzureCredential)
+        {
+            AIClientSettingsValidator.RequireApiKey(settings);
+        }
     }
 }
 
