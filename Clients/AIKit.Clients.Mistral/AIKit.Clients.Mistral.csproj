@@ -7,7 +7,7 @@
 		<PackageId>AIKit.Clients.Mistral</PackageId>
 		<Version>1.0.0</Version>
 		<Authors>AIKit Team</Authors>
-		<Description>Mistral client provider for AIKit, supporting chat.</Description>
+		<Description>Mistral client provider for AIKit, supporting chat and embeddings.</Description>
 		<PackageTags>AI, Mistral, Chat</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
