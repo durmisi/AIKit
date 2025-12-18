@@ -20,7 +20,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => "azure-claude";
+    public string Provider => _defaultSettings.ProviderName ?? "azure-claude";
 
     public IChatClient Create(string? modelName = null)
         => Create(_defaultSettings);

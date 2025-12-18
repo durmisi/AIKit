@@ -20,7 +20,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => "github-models";
+    public string Provider => _defaultSettings.ProviderName ?? "github-models";
 
     public IChatClient Create(string? model = null)
         => Create(_defaultSettings, model);

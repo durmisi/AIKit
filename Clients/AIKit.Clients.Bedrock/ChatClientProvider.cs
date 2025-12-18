@@ -17,7 +17,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => "aws-bedrock";
+    public string Provider => _defaultSettings.ProviderName ?? "aws-bedrock";
 
     public IChatClient Create(string? model = null)
         => Create(_defaultSettings, model);

@@ -51,6 +51,22 @@ public sealed class AIClientSettings
     public string? ModelId { get; init; }
 
     /// <summary>
+    /// Optional name to uniquely identify this provider instance.
+    /// If not set, a default provider name will be used.
+    /// Useful for registering multiple instances of the same provider type with different settings.
+    /// </summary>
+    /// <example>
+    /// Registering multiple OpenAI providers:
+    /// <code>
+    /// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
+    ///     new AIClientSettings { ApiKey = "key1", ProviderName = "open-ai-1" }));
+    /// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
+    ///     new AIClientSettings { ApiKey = "key2", ProviderName = "open-ai-2" }));
+    /// </code>
+    /// </example>
+    public string? ProviderName { get; init; }
+
+    /// <summary>
     /// The organization ID (optional, used by OpenAI only).
     /// </summary>
     public string? Organization { get; init; }

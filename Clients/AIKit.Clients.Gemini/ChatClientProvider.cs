@@ -17,7 +17,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => "gemini";
+    public string Provider => _defaultSettings.ProviderName ?? "gemini";
 
     public IChatClient Create(string? model = null)
         => Create(_defaultSettings, model);
