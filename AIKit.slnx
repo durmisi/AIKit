@@ -6,6 +6,8 @@
     <Project Path="Clients/AIKit.Clients.Claude/AIKit.Clients.Claude.csproj" Id="cb6f24e4-a951-4691-a140-2730085b72b0" />
     <Project Path="Clients/AIKit.Clients.Gemini/AIKit.Clients.Gemini.csproj" Id="d084897f-1c53-4183-9da3-65bf4630bada" />
     <Project Path="Clients/AIKit.Clients.GitHub/AIKit.Clients.GitHub.csproj" Id="5dba59f1-904b-428c-932e-39cb020e79ea" />
+    <Project Path="Clients/AIKit.Clients.Groq/AIKit.Clients.Groq.csproj" />
+    <Project Path="Clients/AIKit.Clients.Mistral/AIKit.Clients.Mistral.csproj" />
     <Project Path="Clients/AIKit.Clients.Ollama/AIKit.Clients.Ollama.csproj" Id="b39732ec-8199-4fbf-a1e8-9742bcd3b516" />
     <Project Path="Clients/AIKit.Clients.OpenAI/AIKit.Clients.OpenAI.csproj" />
     <Project Path="Clients/AIKit.Core.Clients/AIKit.Core.Clients.csproj" Id="6c69f866-c5cd-4805-bd61-dcf21492d3cf" />
