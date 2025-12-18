@@ -3,12 +3,54 @@ using System.Collections.Concurrent;
 
 namespace AIKit.Core.Clients;
 
-public interface IChatClientFactory
-{
-    IChatClient Create(string provider, string model);
-}
-
-public sealed class ChatClientFactory : IChatClientFactory
+/// <summary>
+/// Factory for creating IChatClient instances from registered providers.
+/// </summary>
+/// <example>
+/// Registering the factory and providers in DI:
+/// <code>
+/// // Register providers
+/// services.AddSingleton<IChatClientProvider>(new OpenAI.ChatClientProvider(
+///     new AIClientSettings { ApiKey = "key1", ModelId = "gpt-4", ProviderName = "open-ai-gpt4" }));
+/// services.AddSingleton<IChatClientProvider>(new OpenAI.ChatClientProvider(
+///     new AIClientSettings { ApiKey = "key2", ModelId = "gpt-3.5-turbo", ProviderName = "open-ai-gpt35" }));
+/// 
+/// // Register the factory
+/// services.AddSingleton&lt;ChatClientFactory&gt;();
+/// </code>
+///
+/// Usage:
+/// <code>
+/// var factory = serviceProvider.GetRequiredService&lt;ChatClientFactory&gt;();
+/// var client = factory.Create("open-ai-gpt4", "gpt-4");
+/// </code>
+///
+/// Dynamic registration from database:
+/// <code>
+/// public class ProviderLoader
+/// {
+///     private readonly ChatClientFactory _factory;
+///     private readonly MyDbContext _db;
+/// 
+///     public ProviderLoader(ChatClientFactory factory, MyDbContext db)
+///     {
+///         _factory = factory;
+///         _db = db;
+///     }
+/// 
+///     public async Task LoadProvidersAsync()
+///     {
+///         var settings = await _db.AIClientSettings.ToListAsync();
+///         foreach (var setting in settings)
+///         {
+///             var provider = new OpenAI.ChatClientProvider(setting);
+///             _factory.AddProvider(provider);
+///         }
+///     }
+/// }
+/// </code>
+/// </example>
+public sealed class ChatClientFactory
 {
     private readonly ConcurrentDictionary<string, IChatClientProvider> _providers = new(StringComparer.OrdinalIgnoreCase);
 
