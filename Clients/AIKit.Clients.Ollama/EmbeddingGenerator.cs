@@ -3,7 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Ollama;
 
-public sealed class EmbeddingGenerator : IEmbeddingGeneratorProvider
+public sealed class EmbeddingGenerator : IEmbeddingProvider
 {
     private readonly AIClientSettings _defaultSettings;
 
