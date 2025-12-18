@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.AI;
+using System.Collections.Concurrent;
 
 namespace AIKit.Core.Clients;
 
@@ -7,35 +8,21 @@ public interface IChatClientFactory
     IChatClient Create(string provider, string model);
 }
 
-/// <summary>
-/// Factory for creating IChatClient instances from registered providers.
-/// </summary>
-/// <example>
-/// Registering multiple providers with different settings:
-/// <code>
-/// // Register OpenAI for GPT-4
-/// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
-///     new AIClientSettings { ApiKey = "key1", ModelId = "gpt-4", ProviderName = "open-ai-gpt4" }));
-/// 
-/// // Register OpenAI for GPT-3.5
-/// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
-///     new AIClientSettings { ApiKey = "key2", ModelId = "gpt-3.5-turbo", ProviderName = "open-ai-gpt35" }));
-/// 
-/// // Usage
-/// var client = factory.Create("open-ai-gpt4", "gpt-4");
-/// </code>
-/// </example>
 public sealed class ChatClientFactory : IChatClientFactory
 {
-    private readonly IReadOnlyDictionary<string, IChatClientProvider> _providers;
+    private readonly ConcurrentDictionary<string, IChatClientProvider> _providers = new(StringComparer.OrdinalIgnoreCase);
 
     public ChatClientFactory(IEnumerable<IChatClientProvider> providers)
     {
-        _providers = providers.ToDictionary(
-            p => p.Provider,
-            p => p,
-            StringComparer.OrdinalIgnoreCase
-        );
+        foreach (var provider in providers)
+        {
+            _providers[provider.Provider] = provider;
+        }
+    }
+
+    public void AddProvider(IChatClientProvider provider)
+    {
+        _providers[provider.Provider] = provider;
     }
 
     public IChatClient Create(string provider, string? model = null)
