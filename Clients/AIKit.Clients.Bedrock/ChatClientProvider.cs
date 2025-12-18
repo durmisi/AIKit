@@ -19,10 +19,10 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "aws-bedrock";
 
-    public IChatClient Create()
-        => Create(_defaultSettings);
+    public IChatClient Create(string? model = null)
+        => Create(_defaultSettings, model);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? model = null)
     {
         Validate(settings);
 
@@ -33,7 +33,9 @@ public sealed class ChatClientProvider : IChatClientProvider
             settings.AwsSecretKey!,
             regionEndpoint);
 
-        return runtime.AsIChatClient(settings.ModelId!);
+        var targetModel = model ?? settings.ModelId;    
+
+        return runtime.AsIChatClient(targetModel);
     }
 
     private static void Validate(AIClientSettings settings)

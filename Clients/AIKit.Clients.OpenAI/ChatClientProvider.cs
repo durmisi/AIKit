@@ -19,10 +19,10 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "open-ai";
 
-    public IChatClient Create()
-        => Create(_defaultSettings);
+    public IChatClient Create(string? model = null)
+        => Create(_defaultSettings, model);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? model = null)
     {
         Validate(settings);
 
@@ -42,7 +42,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         var client = new OpenAIClient(credential, options);
 
         return client
-            .GetChatClient(settings.ModelId!)
+            .GetChatClient(model ?? settings.ModelId!)
             .AsIChatClient();
     }
 

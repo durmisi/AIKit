@@ -19,17 +19,17 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "gemini";
 
-    public IChatClient Create()
-        => Create(_defaultSettings);
+    public IChatClient Create(string? model = null)
+        => Create(_defaultSettings, model);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? model = null)
     {
         Validate(settings);
 
         var options = new GeminiClientOptions
         {
             ApiKey = settings.ApiKey!,
-            ModelId = settings.ModelId!
+            ModelId = model ?? settings.ModelId!
         };
 
         return new GeminiChatClient(options);

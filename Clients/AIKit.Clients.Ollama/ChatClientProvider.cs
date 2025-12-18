@@ -20,15 +20,15 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "ollama";
 
-    public IChatClient Create()
-        => Create(_defaultSettings);
+    public IChatClient Create(string? model = null)
+        => Create(_defaultSettings, model);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? model = null)
     {
         Validate(settings);
 
         var endpoint = new Uri(settings.Endpoint!);
-        return new OllamaChatClient(endpoint, settings.ModelId!);
+        return new OllamaChatClient(endpoint, model ?? settings.ModelId!);
     }
 
     private static void Validate(AIClientSettings settings)

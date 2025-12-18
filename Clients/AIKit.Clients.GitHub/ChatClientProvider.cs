@@ -22,10 +22,10 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "github-models";
 
-    public IChatClient Create()
-        => Create(_defaultSettings);
+    public IChatClient Create(string? model = null)
+        => Create(_defaultSettings, model);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? model = null)
     {
         Validate(settings);
 
@@ -37,7 +37,9 @@ public sealed class ChatClientProvider : IChatClientProvider
         var credential = new ApiKeyCredential(settings.GitHubToken!);
         var client = new OpenAIClient(credential, options);
 
-        return client.GetChatClient(settings.ModelId!).AsIChatClient();
+        var targetModel = model ?? settings.ModelId;    
+
+        return client.GetChatClient(targetModel).AsIChatClient();
     }
 
     private static void Validate(AIClientSettings settings)

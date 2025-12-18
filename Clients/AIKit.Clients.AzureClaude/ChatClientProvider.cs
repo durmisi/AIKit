@@ -22,23 +22,30 @@ public sealed class ChatClientProvider : IChatClientProvider
 
     public string Provider => "azure-claude";
 
-    public IChatClient Create()
+    public IChatClient Create(string? modelName = null)
         => Create(_defaultSettings);
 
-    public IChatClient Create(AIClientSettings settings)
+    public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
         Validate(settings);
 
         var endpoint = new Uri(settings.Endpoint!);
 
+        var targetModelId = modelName ?? settings.ModelId;  
+
+        if(string.IsNullOrWhiteSpace(targetModelId))
+        {
+            throw new ArgumentException("ModelId must be provided either in settings or as modelName parameter.");
+        }
+
         if (settings.UseDefaultAzureCredential)
         {
             var credential = new DefaultAzureCredential();
-            return new AzureClaudeClient(endpoint, settings.ModelId!, credential);
+            return new AzureClaudeClient(endpoint, targetModelId, credential);
         }
         else
         {
-            return new AzureClaudeClient(endpoint, settings.ModelId!, settings.ApiKey!);
+            return new AzureClaudeClient(endpoint, targetModelId, settings.ApiKey!);
         }
     }
 
