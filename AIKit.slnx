@@ -19,6 +19,9 @@
     <Project Path="Storage/AIKit.Core.Storage/AIKit.Core.Storage.csproj" Id="32289835-b9d5-4fc1-a329-7c604c93cc46" />
     <Project Path="Storage/AIKit.Storage.Local/AIKit.Storage.Local.csproj" Id="2801912a-fd54-401c-b832-5a364e6c23a8" />
   </Folder>
+  <Folder Name="/Vector Stores/">
+    <Project Path="VectorStores/AIKit.Core.VectorStores/AIKit.Core.VectorStores.csproj" Id="3d115aa4-4350-47ef-8f92-741a6fe7c6aa" />
+  </Folder>
   <Project Path="AIKit.AppHost/AIKit.AppHost.csproj" />
   <Project Path="AIKit.Core/AIKit.Core.csproj" Id="ad1d71d1-33c7-42c2-9a21-3a45734aebeb" />
   <Project Path="AIKit.ServiceDefaults/AIKit.ServiceDefaults.csproj" />

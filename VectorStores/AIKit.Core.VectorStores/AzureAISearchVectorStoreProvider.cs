@@ -1,0 +1,60 @@
+using Azure.Core;
+using Azure.Identity;
+using Azure.Search.Documents.Indexes;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel.Connectors.AzureAISearch;
+using System.Diagnostics;
+
+namespace AIKit.Core.Vector;
+
+public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
+{
+    public string Provider => "azure-ai-search";
+
+    public VectorStore Create()
+        => throw new InvalidOperationException(
+            "AzureAISearchVectorStoreProvider requires VectorStoreSettings");
+
+    public VectorStore Create(VectorStoreSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
+
+        // 1️ Credential resolution
+        var credential = ResolveCredential(settings);
+
+        // 2️ Native Azure SDK client
+        var searchIndexClient = new SearchIndexClient(new Uri(settings.Endpoint), credential);
+
+        // 3️ Vector store options (AI-specific concerns)
+        var options = new AzureAISearchVectorStoreOptions
+        {
+            EmbeddingGenerator = ResolveEmbeddingGenerator(settings),
+            JsonSerializerOptions = ResolveJsonSerializerOptions(settings),
+        };
+
+        return new AzureAISearchVectorStore(searchIndexClient, options);
+    }
+
+    private static TokenCredential ResolveCredential(VectorStoreSettings settings)
+    {
+        return new DefaultAzureCredential();
+    }
+
+    private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
+        VectorStoreSettings settings)
+    {
+        return settings.EmbeddingGenerator ?? throw new InvalidOperationException(
+            "An IEmbeddingGenerator must be provided in VectorStoreSettings for AzureAISearchVectorStoreProvider.");
+    }
+
+    private static System.Text.Json.JsonSerializerOptions? ResolveJsonSerializerOptions(
+        VectorStoreSettings settings)
+    {
+        return new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = Debugger.IsAttached,
+        };
+    }
+}
