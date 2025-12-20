@@ -19,21 +19,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <PackageReference Include="Testcontainers" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.Core.Clients\AIKit.Core.Clients.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.OpenAI\AIKit.Clients.OpenAI.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.Gemini\AIKit.Clients.Gemini.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.Mistral\AIKit.Clients.Mistral.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.Groq\AIKit.Clients.Groq.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.AzureOpenAI\AIKit.Clients.AzureOpenAI.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.Bedrock\AIKit.Clients.Bedrock.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.GitHub\AIKit.Clients.GitHub.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.AzureClaude\AIKit.Clients.AzureClaude.csproj" />
-    <ProjectReference Include="..\AIKit.Clients.Ollama\AIKit.Clients.Ollama.csproj" />
+    <ProjectReference Include="..\AIKit.Core.Storage\AIKit.Core.Storage.csproj" />
+    <ProjectReference Include="..\AIKit.Storage.Local\AIKit.Storage.Local.csproj" />
+    <ProjectReference Include="..\..\AIKit.Storage.Azure\AIKit.Storage.Azure.csproj" />
   </ItemGroup>
 
 </Project>

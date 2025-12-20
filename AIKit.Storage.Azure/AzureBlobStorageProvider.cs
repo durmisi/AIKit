@@ -1,7 +1,6 @@
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 
 namespace AIKit.Core.Storage;
@@ -28,7 +27,12 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentException.ThrowIfNullOrWhiteSpace(containerName);
 
-        _containerClient = new BlobContainerClient(connectionString, containerName);
+        // Force a version compatible with Azurite
+        var blobOptions = new BlobClientOptions(BlobClientOptions.ServiceVersion.V2021_08_06);
+
+        var serviceClient = new BlobServiceClient(connectionString, blobOptions);
+        _containerClient = serviceClient.GetBlobContainerClient(containerName);
+
         _options = options ?? new AzureBlobStorageOptions();
     }
 

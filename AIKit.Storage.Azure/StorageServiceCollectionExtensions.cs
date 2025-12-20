@@ -1,4 +1,3 @@
-using Amazon.S3;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,56 +9,6 @@ namespace AIKit.Core.Storage;
 /// </summary>
 public static class StorageServiceCollectionExtensions
 {
-    #region Local Storage
-
-    /// <summary>
-    /// Adds the local versioned storage provider to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="basePath">The base path for storing files.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddLocalVersionedStorage(
-        this IServiceCollection services,
-        string basePath)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(basePath);
-
-        services.TryAddSingleton<IStorageProvider>(sp =>
-            new LocalVersionedStorageProvider(basePath));
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds the local versioned storage provider to the service collection with configuration.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configure">Action to configure local storage options.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddLocalVersionedStorage(
-        this IServiceCollection services,
-        Action<LocalStorageOptions> configure)
-    {
-        ArgumentNullException.ThrowIfNull(configure);
-
-        var options = new LocalStorageOptions();
-        configure(options);
-
-        if (string.IsNullOrWhiteSpace(options.BasePath))
-        {
-            throw new InvalidOperationException("BasePath must be configured for local storage.");
-        }
-
-        services.TryAddSingleton<IStorageProvider>(sp =>
-            new LocalVersionedStorageProvider(options.BasePath));
-
-        return services;
-    }
-
-    #endregion
-
-    #region Azure Blob Storage
-
     /// <summary>
     /// Adds the Azure Blob storage provider to the service collection.
     /// </summary>
@@ -77,7 +26,7 @@ public static class StorageServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentException.ThrowIfNullOrWhiteSpace(containerName);
 
-        var options = new AzureBlobStorageOptions();
+        var options = new AzureBlobStorageOptions() { };
         configure?.Invoke(options);
 
         services.TryAddSingleton<IStorageProvider>(sp =>
@@ -146,30 +95,6 @@ public static class StorageServiceCollectionExtensions
         return services;
     }
 
-    #endregion
-
-    #region Keyed Services
-
-    /// <summary>
-    /// Adds a keyed local versioned storage provider to the service collection.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="serviceKey">The service key for resolving the provider.</param>
-    /// <param name="basePath">The base path for storing files.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddKeyedLocalVersionedStorage(
-        this IServiceCollection services,
-        string serviceKey,
-        string basePath)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(serviceKey);
-        ArgumentException.ThrowIfNullOrWhiteSpace(basePath);
-
-        services.AddKeyedSingleton<IStorageProvider>(serviceKey, (sp, key) =>
-            new LocalVersionedStorageProvider(basePath));
-
-        return services;
-    }
 
     /// <summary>
     /// Adds a keyed Azure Blob storage provider to the service collection.
@@ -200,20 +125,6 @@ public static class StorageServiceCollectionExtensions
         return services;
     }
 
-    #endregion
-}
-
-#region Configuration Options
-
-/// <summary>
-/// Configuration options for local storage provider.
-/// </summary>
-public sealed class LocalStorageOptions
-{
-    /// <summary>
-    /// The base path for storing files locally.
-    /// </summary>
-    public string BasePath { get; set; } = default!;
 }
 
 /// <summary>
@@ -237,4 +148,3 @@ public sealed class AzureBlobStorageConnectionOptions
     public AzureBlobStorageOptions Options { get; set; } = new();
 }
 
-#endregion
