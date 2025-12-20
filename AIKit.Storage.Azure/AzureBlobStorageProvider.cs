@@ -28,7 +28,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(containerName);
 
         // Force a version compatible with Azurite
-        var blobOptions = new BlobClientOptions(BlobClientOptions.ServiceVersion.V2021_08_06);
+        var blobOptions = new BlobClientOptions(BlobClientOptions.ServiceVersion.V2023_11_03);
 
         var serviceClient = new BlobServiceClient(connectionString, blobOptions);
         _containerClient = serviceClient.GetBlobContainerClient(containerName);

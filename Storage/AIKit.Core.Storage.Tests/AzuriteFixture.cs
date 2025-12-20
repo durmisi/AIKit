@@ -17,6 +17,7 @@ public class AzuriteFixture : IAsyncLifetime
             .WithPortBinding(10000, 10000)
             .WithPortBinding(10001, 10001) // For queue and table if needed
             .WithEnvironment("AZURITE_SKIP_API_VERSION_CHECK", "true")
+            .WithEnvironment("AZURITE_BLOB_VERSIONING_ENABLED", "true")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(10000))
             .Build();
 
