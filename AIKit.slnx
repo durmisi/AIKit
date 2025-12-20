@@ -10,6 +10,7 @@
     <Project Path="Clients/AIKit.Clients.Mistral/AIKit.Clients.Mistral.csproj" />
     <Project Path="Clients/AIKit.Clients.Ollama/AIKit.Clients.Ollama.csproj" Id="b39732ec-8199-4fbf-a1e8-9742bcd3b516" />
     <Project Path="Clients/AIKit.Clients.OpenAI/AIKit.Clients.OpenAI.csproj" />
+    <Project Path="Clients/AIKit.Core.Clients.Tests/AIKit.Core.Clients.Tests.csproj" />
     <Project Path="Clients/AIKit.Core.Clients/AIKit.Core.Clients.csproj" Id="6c69f866-c5cd-4805-bd61-dcf21492d3cf" />
   </Folder>
   <Project Path="AIKit.AppHost/AIKit.AppHost.csproj" />
