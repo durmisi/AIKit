@@ -21,13 +21,14 @@ public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
 
-        // 1️ Credential resolution
+        // 1? Credential resolution
         var credential = ResolveCredential(settings);
 
-        // 2️ Native Azure SDK client
-        var searchIndexClient = new SearchIndexClient(new Uri(settings.Endpoint), credential);
+        // 2? Native Azure SDK client
+        var searchIndexClient = new SearchIndexClient(new Uri(settings.Endpoint), credential,
+            options: new Azure.Search.Documents.SearchClientOptions());
 
-        // 3️ Vector store options (AI-specific concerns)
+        // 3? Vector store options (AI-specific concerns)
         var options = new AzureAISearchVectorStoreOptions
         {
             EmbeddingGenerator = ResolveEmbeddingGenerator(settings),
@@ -39,6 +40,14 @@ public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
 
     private static TokenCredential ResolveCredential(VectorStoreSettings settings)
     {
+        if (!string.IsNullOrWhiteSpace(settings.ClientId) && !string.IsNullOrWhiteSpace(settings.ClientSecret))
+        {
+            return new ClientSecretCredential(
+                settings.TenantId ?? throw new InvalidOperationException("TenantId must be provided when using ClientId and ClientSecret."),
+                settings.ClientId,
+                settings.ClientSecret);
+        }
+
         return new DefaultAzureCredential();
     }
 
@@ -52,7 +61,7 @@ public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
     private static System.Text.Json.JsonSerializerOptions? ResolveJsonSerializerOptions(
         VectorStoreSettings settings)
     {
-        return new System.Text.Json.JsonSerializerOptions
+        return settings.JsonSerializerOptions ?? new System.Text.Json.JsonSerializerOptions
         {
             WriteIndented = Debugger.IsAttached,
         };

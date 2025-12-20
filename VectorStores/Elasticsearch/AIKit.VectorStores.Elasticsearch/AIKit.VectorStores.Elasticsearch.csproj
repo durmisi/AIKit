@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackageId>AIKit.VectorStores.Elasticsearch</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>AIKit Team</Authors>
+		<Description>Elasticsearch vector store provider for AIKit.</Description>
+		<PackageTags>AI, VectorStore, Elasticsearch</PackageTags>
+		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Remove="C:\Users\Admir\.nuget\packages\elastic.semantickernel.connectors.elasticsearch\0.3.1\contentFiles\any\netstandard2.0\packages.lock.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Elastic.SemanticKernel.Connectors.Elasticsearch" Version="0.3.1" />
+		<PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\AIKit.Core.VectorStores\AIKit.Core.VectorStores.csproj" />
+	</ItemGroup>
+
+</Project>

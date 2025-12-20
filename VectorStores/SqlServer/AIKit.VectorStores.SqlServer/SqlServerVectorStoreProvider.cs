@@ -1,4 +1,3 @@
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
 
@@ -17,6 +16,12 @@ public sealed class SqlServerVectorStoreProvider : IVectorStoreProvider
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
 
-        return new SqlServerVectorStore(settings.ConnectionString);
+        var options = new SqlServerVectorStoreOptions
+        {
+            Schema = settings.Schema ?? "dbo",
+            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new ArgumentNullException(nameof(settings.EmbeddingGenerator)),
+        };
+
+        return new SqlServerVectorStore(settings.ConnectionString, options);
     }
 }

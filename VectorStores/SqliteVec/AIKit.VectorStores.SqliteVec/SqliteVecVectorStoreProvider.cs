@@ -1,4 +1,3 @@
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.SqliteVec;
 
@@ -17,6 +16,13 @@ public sealed class SqliteVecVectorStoreProvider : IVectorStoreProvider
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
 
-        return new SqliteVectorStore(settings.ConnectionString);
+        var options = new SqliteVectorStoreOptions
+        {
+            VectorVirtualTableName = settings.TableName,
+            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new InvalidOperationException(
+                "An IEmbeddingGenerator must be provided in VectorStoreSettings for SqliteVecVectorStoreProvider."),
+        };
+
+        return new SqliteVectorStore(settings.ConnectionString, options);
     }
 }

@@ -21,6 +21,18 @@
   </Folder>
   <Folder Name="/Vector Stores/">
     <Project Path="VectorStores/AIKit.Core.VectorStores/AIKit.Core.VectorStores.csproj" Id="3d115aa4-4350-47ef-8f92-741a6fe7c6aa" />
+    <Project Path="VectorStores/AzureAISearch/AIKit.VectorStores.AzureAISearch/AIKit.VectorStores.AzureAISearch.csproj" />
+    <Project Path="VectorStores/CosmosMongoDB/AIKit.VectorStores.CosmosMongoDB/AIKit.VectorStores.CosmosMongoDB.csproj" />
+    <Project Path="VectorStores/CosmosNoSQL/AIKit.VectorStores.CosmosNoSQL/AIKit.VectorStores.CosmosNoSQL.csproj" />
+    <Project Path="VectorStores/Elasticsearch/AIKit.VectorStores.Elasticsearch/AIKit.VectorStores.Elasticsearch.csproj" />
+    <Project Path="VectorStores/InMemory/AIKit.VectorStores.InMemory/AIKit.VectorStores.InMemory.csproj" />
+    <Project Path="VectorStores/MongoDB/AIKit.VectorStores.MongoDB/AIKit.VectorStores.MongoDB.csproj" />
+    <Project Path="VectorStores/PgVector/AIKit.VectorStores.PgVector/AIKit.VectorStores.PgVector.csproj" />
+    <Project Path="VectorStores/Qdrant/AIKit.VectorStores.Qdrant/AIKit.VectorStores.Qdrant.csproj" />
+    <Project Path="VectorStores/Redis/AIKit.VectorStores.Redis/AIKit.VectorStores.Redis.csproj" />
+    <Project Path="VectorStores/SqliteVec/AIKit.VectorStores.SqliteVec/AIKit.VectorStores.SqliteVec.csproj" />
+    <Project Path="VectorStores/SqlServer/AIKit.VectorStores.SqlServer/AIKit.VectorStores.SqlServer.csproj" />
+    <Project Path="VectorStores/Weaviate/AIKit.VectorStores.Weaviate/AIKit.VectorStores.Weaviate.csproj" />
   </Folder>
   <Project Path="AIKit.AppHost/AIKit.AppHost.csproj" />
   <Project Path="AIKit.Core/AIKit.Core.csproj" Id="ad1d71d1-33c7-42c2-9a21-3a45734aebeb" />

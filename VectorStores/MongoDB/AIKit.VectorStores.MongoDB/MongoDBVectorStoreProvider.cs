@@ -19,8 +19,13 @@ public sealed class MongoDBVectorStoreProvider : IVectorStoreProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
 
         var mongoClient = new MongoClient(settings.ConnectionString);
-        var mongoDatabase = mongoClient.GetDatabase(settings.DatabaseName ?? "aikit_vector_store");
+        var mongoDatabase = mongoClient.GetDatabase(settings.DatabaseName ?? "vectorstore");
 
-        return new MongoVectorStore(mongoDatabase);
+        var options = new MongoVectorStoreOptions
+        {
+            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new ArgumentNullException(nameof(settings.EmbeddingGenerator)),
+        };
+
+        return new MongoVectorStore(mongoDatabase, options);
     }
 }

@@ -7,26 +7,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="C:\Users\Admir\.nuget\packages\elastic.semantickernel.connectors.elasticsearch\0.3.1\contentFiles\any\net8.0\packages.lock.json" />
+		<Content Remove="C:\Users\Admir\.nuget\packages\elastic.semantickernel.connectors.elasticsearch\0.3.1\contentFiles\any\net8.0\packages.lock.json" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Identity" Version="1.17.1" />
-		<PackageReference Include="Elastic.SemanticKernel.Connectors.Elasticsearch" Version="0.3.1" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureAISearch" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.CosmosMongoDB" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.CosmosNoSql" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.MongoDB" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.PgVector" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Pinecone" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Redis" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.SqliteVec" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.SqlServer" Version="1.68.0-preview" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.Weaviate" Version="1.68.0-preview" />
 		<PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" Version="9.7.0" />
 	</ItemGroup>
-
-
 </Project>

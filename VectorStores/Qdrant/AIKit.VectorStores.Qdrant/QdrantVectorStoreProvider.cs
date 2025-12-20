@@ -20,7 +20,13 @@ public sealed class QdrantVectorStoreProvider : IVectorStoreProvider
 
         var client = new QdrantClient(settings.Endpoint);
 
-        return new QdrantVectorStore(client, ownsClient: true);
-    }
+        var options = new QdrantVectorStoreOptions
+        {
+            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new InvalidOperationException(
+                "An IEmbeddingGenerator must be provided in VectorStoreSettings for QdrantVectorStoreProvider"),
+            HasNamedVectors = true,
+        };
 
+        return new QdrantVectorStore(client, ownsClient: true, options);
+    }
 }

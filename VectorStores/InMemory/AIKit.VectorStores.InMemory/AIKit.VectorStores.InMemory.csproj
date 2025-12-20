@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackageId>AIKit.VectorStores.InMemory</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>AIKit Team</Authors>
+		<Description>In-memory vector store provider for AIKit.</Description>
+		<PackageTags>AI, VectorStore, InMemory</PackageTags>
+		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" Version="1.68.0-preview" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\AIKit.Core.VectorStores\AIKit.Core.VectorStores.csproj" />
+	</ItemGroup>
+
+</Project>
