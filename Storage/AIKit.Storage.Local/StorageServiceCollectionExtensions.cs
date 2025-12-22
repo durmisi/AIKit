@@ -1,7 +1,8 @@
+using AIKit.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Storage.Local;
 
 /// <summary>
 /// Extension methods for registering storage providers with dependency injection.

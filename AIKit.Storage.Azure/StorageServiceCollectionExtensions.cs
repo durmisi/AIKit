@@ -1,8 +1,9 @@
+using AIKit.Core.Storage;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Storage.Azure;
 
 /// <summary>
 /// Extension methods for registering storage providers with dependency injection.

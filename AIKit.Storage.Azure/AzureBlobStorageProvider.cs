@@ -1,9 +1,10 @@
+using AIKit.Core.Storage;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Storage.Azure;
 
 /// <summary>
 /// Azure Blob Storage provider with native blob versioning support.

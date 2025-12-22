@@ -2,7 +2,7 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Xunit;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Core.Storage.Tests;
 
 public class AzuriteFixture : IAsyncLifetime
 {

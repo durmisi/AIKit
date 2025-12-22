@@ -1,7 +1,7 @@
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 
-namespace AIKit.Core.Vector;
+namespace AIKit.Core.VectorStores;
 
 public sealed class VectorStoreSettings
 {
@@ -22,6 +22,8 @@ public sealed class VectorStoreSettings
     public int? MongoConnectionTimeoutSeconds { get; set; }
     public int? MongoMaxConnectionPoolSize { get; set; }
     public bool? MongoUseSsl { get; set; }
+
+    public Dictionary<string, object>? AdditionalSettings { get; set; }
 
     public IEmbeddingGenerator? EmbeddingGenerator { get; internal set; }
 }

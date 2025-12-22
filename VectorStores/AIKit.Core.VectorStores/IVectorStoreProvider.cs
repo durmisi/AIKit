@@ -1,6 +1,6 @@
 using Microsoft.Extensions.VectorData;
 
-namespace AIKit.Core.Vector;
+namespace AIKit.Core.VectorStores;
 
 public interface IVectorStoreProvider
 {

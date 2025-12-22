@@ -1,6 +1,7 @@
+using AIKit.Core.Storage;
 using System.Text.Json;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Storage.Local;
 
 /// <summary>
 /// Local file system storage provider with versioning support.

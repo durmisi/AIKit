@@ -1,7 +1,8 @@
+using AIKit.Storage.Azure;
 using FluentAssertions;
 using Xunit;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Core.Storage.Tests;
 
 public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<AzuriteFixture>
 {

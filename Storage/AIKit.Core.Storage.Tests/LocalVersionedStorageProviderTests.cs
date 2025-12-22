@@ -1,7 +1,8 @@
+using AIKit.Storage.Local;
 using FluentAssertions;
 using Xunit;
 
-namespace AIKit.Core.Storage;
+namespace AIKit.Core.Storage.Tests;
 
 public class LocalVersionedStorageProviderTests : IDisposable
 {
