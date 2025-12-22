@@ -1,6 +1,6 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Azure.Core;
-using Azure.Identity;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.CosmosNoSql;
 
@@ -39,15 +39,7 @@ public sealed class CosmosNoSQLVectorStoreProvider : IVectorStoreProvider
 
     private static TokenCredential ResolveCredential(VectorStoreSettings settings)
     {
-        if (!string.IsNullOrWhiteSpace(settings.ClientId) && !string.IsNullOrWhiteSpace(settings.ClientSecret))
-        {
-            return new ClientSecretCredential(
-                settings.TenantId ?? throw new InvalidOperationException("TenantId must be provided when using ClientId and ClientSecret."),
-                settings.ClientId,
-                settings.ClientSecret);
-        }
-
-        return new DefaultAzureCredential();
+        return VectorStoreProviderHelpers.ResolveAzureCredential(settings);
     }
 
 }

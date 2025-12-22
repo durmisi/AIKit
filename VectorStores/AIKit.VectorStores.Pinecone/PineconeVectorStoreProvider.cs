@@ -1,3 +1,5 @@
+using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Pinecone;
@@ -44,7 +46,6 @@ public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
     private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
         VectorStoreSettings settings)
     {
-        return settings.EmbeddingGenerator ?? throw new InvalidOperationException(
-            "An IEmbeddingGenerator must be provided in VectorStoreSettings for PineconeVectorStoreProvider.");
+        return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
-}
+}}

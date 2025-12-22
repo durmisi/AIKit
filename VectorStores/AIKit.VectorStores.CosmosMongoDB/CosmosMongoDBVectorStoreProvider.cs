@@ -1,7 +1,9 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.CosmosMongoDB;
 using MongoDB.Driver;
+using Azure.Core;
 
 namespace AIKit.VectorStores.CosmosMongoDB;
 

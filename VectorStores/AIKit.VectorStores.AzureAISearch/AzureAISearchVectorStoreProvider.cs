@@ -1,4 +1,5 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Search.Documents.Indexes;
@@ -116,56 +117,60 @@ public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
         return new AzureAISearchVectorStore(searchIndexClient, options);
     }
 
-    private static TokenCredential ResolveCredential(VectorStoreSettings settings)
-    {
-        if (!string.IsNullOrWhiteSpace(settings.ClientId) && !string.IsNullOrWhiteSpace(settings.ClientSecret))
-        {
-            return new ClientSecretCredential(
-                settings.TenantId ?? throw new InvalidOperationException("TenantId must be provided when using ClientId and ClientSecret."),
-                settings.ClientId,
-                settings.ClientSecret);
-        }
+    // REUSABLE PATTERNS - Can be copied to other providers
 
-        return new DefaultAzureCredential();
+    /// <summary>
+    /// Resolves Azure credentials from settings. Supports ClientSecretCredential and DefaultAzureCredential.
+    /// Can be reused in CosmosNoSQL, CosmosMongoDB providers.
+    /// </summary>
+    public static TokenCredential ResolveCredential(VectorStoreSettings settings)
+    {
+        return VectorStoreProviderHelpers.ResolveAzureCredential(settings);
     }
 
-    private static Azure.Search.Documents.SearchClientOptions ResolveClientOptions(VectorStoreSettings settings)
+    /// <summary>
+    /// Resolves Azure Search client options from settings AdditionalSettings.
+    /// Can be adapted for other Azure services (Cosmos, etc.).
+    /// </summary>
+    public static Azure.Search.Documents.SearchClientOptions ResolveClientOptions(VectorStoreSettings settings)
     {
         var options = new Azure.Search.Documents.SearchClientOptions();
 
         // Apply additional settings for client configuration
-        if (settings.AdditionalSettings != null)
+        var retryDelay = VectorStoreProviderHelpers.GetAdditionalSetting<TimeSpan>(settings, "RetryDelay");
+        if (retryDelay != default)
         {
-            if (settings.AdditionalSettings.TryGetValue("RetryDelay", out var retryDelay) && retryDelay is TimeSpan delay)
-            {
-                options.Retry.Delay = delay;
-            }
+            options.Retry.Delay = retryDelay;
+        }
 
-            if (settings.AdditionalSettings.TryGetValue("RetryMaxRetries", out var maxRetries) && maxRetries is int retries)
-            {
-                options.Retry.MaxRetries = retries;
-            }
+        var maxRetries = VectorStoreProviderHelpers.GetAdditionalSetting<int>(settings, "RetryMaxRetries");
+        if (maxRetries > 0)
+        {
+            options.Retry.MaxRetries = maxRetries;
+        }
 
-            if (settings.AdditionalSettings.TryGetValue("RequestTimeout", out var timeout) && timeout is TimeSpan timeSpan)
-            {
-                options.Retry.NetworkTimeout = timeSpan;
-            }
+        var timeout = VectorStoreProviderHelpers.GetAdditionalSetting<TimeSpan>(settings, "RequestTimeout");
+        if (timeout != default)
+        {
+            options.Retry.NetworkTimeout = timeout;
         }
 
         return options;
     }
 
-    private static IEmbeddingGenerator? ResolveEmbeddingGenerator(VectorStoreSettings settings)
+    /// <summary>
+    /// Ensures an embedding generator is provided. Can be reused in all vector store providers.
+    /// </summary>
+    public static IEmbeddingGenerator ResolveEmbeddingGenerator(VectorStoreSettings settings)
     {
-        return settings.EmbeddingGenerator ?? throw new InvalidOperationException(
-            "An IEmbeddingGenerator must be provided in VectorStoreSettings for AzureAISearchVectorStoreProvider.");
+        return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
 
-    private static System.Text.Json.JsonSerializerOptions? ResolveJsonSerializerOptions(VectorStoreSettings settings)
+    /// <summary>
+    /// Resolves JSON serializer options with smart defaults. Can be reused in providers that support JSON options.
+    /// </summary>
+    public static System.Text.Json.JsonSerializerOptions ResolveJsonSerializerOptions(VectorStoreSettings settings)
     {
-        return settings.JsonSerializerOptions ?? new System.Text.Json.JsonSerializerOptions
-        {
-            WriteIndented = Debugger.IsAttached,
-        };
+        return VectorStoreProviderHelpers.ResolveJsonSerializerOptions(settings);
     }
 }

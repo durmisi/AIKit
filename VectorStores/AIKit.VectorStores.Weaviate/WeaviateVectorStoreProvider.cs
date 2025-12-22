@@ -1,4 +1,5 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Weaviate;
@@ -54,7 +55,6 @@ public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
     private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
         VectorStoreSettings settings)
     {
-        return settings.EmbeddingGenerator ?? throw new InvalidOperationException(
-            "An IEmbeddingGenerator must be provided in VectorStoreSettings for WeaviateVectorStoreProvider.");
+        return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
 }
