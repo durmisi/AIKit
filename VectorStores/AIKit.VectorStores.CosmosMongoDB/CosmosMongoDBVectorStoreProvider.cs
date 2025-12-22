@@ -11,10 +11,6 @@ public sealed class CosmosMongoDBVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "cosmos-mongodb";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "CosmosMongoDBVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -26,7 +22,7 @@ public sealed class CosmosMongoDBVectorStoreProvider : IVectorStoreProvider
 
         return new CosmosMongoVectorStore(mongoDatabase, new CosmosMongoVectorStoreOptions()
         {
-            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new InvalidOperationException("An IEmbeddingGenerator must be provided in VectorStoreSettings."),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         });
     }
 

@@ -10,10 +10,6 @@ public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "weaviate";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "WeaviateVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);

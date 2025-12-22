@@ -1,4 +1,5 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.MongoDB;
@@ -10,10 +11,6 @@ public sealed class MongoDBVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "mongodb";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "MongoDBVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -24,7 +21,7 @@ public sealed class MongoDBVectorStoreProvider : IVectorStoreProvider
 
         var options = new MongoVectorStoreOptions
         {
-            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new ArgumentNullException(nameof(settings.EmbeddingGenerator)),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         };
 
         return new MongoVectorStore(mongoDatabase, options);

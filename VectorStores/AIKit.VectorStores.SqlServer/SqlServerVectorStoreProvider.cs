@@ -1,4 +1,5 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
 
@@ -8,10 +9,6 @@ public sealed class SqlServerVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "sql-server";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "SqlServerVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -20,7 +17,7 @@ public sealed class SqlServerVectorStoreProvider : IVectorStoreProvider
         var options = new SqlServerVectorStoreOptions
         {
             Schema = settings.Schema ?? "dbo",
-            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new ArgumentNullException(nameof(settings.EmbeddingGenerator)),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         };
 
         return new SqlServerVectorStore(settings.ConnectionString, options);

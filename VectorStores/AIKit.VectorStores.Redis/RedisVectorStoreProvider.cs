@@ -10,10 +10,6 @@ public sealed class RedisVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "redis";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "RedisVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);

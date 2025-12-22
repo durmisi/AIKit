@@ -10,14 +10,10 @@ public sealed class CosmosNoSQLVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "cosmos-nosql";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "CosmosNoSQLVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
+        ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
 
         var credential = ResolveCredential(settings);
 
@@ -30,11 +26,11 @@ public sealed class CosmosNoSQLVectorStoreProvider : IVectorStoreProvider
         };
         var storeOptions = new CosmosNoSqlVectorStoreOptions
         {
-            EmbeddingGenerator = settings.EmbeddingGenerator ?? throw new InvalidOperationException("An IEmbeddingGenerator must be provided in VectorStoreSettings for CosmosNoSQLVectorStore."),
-            JsonSerializerOptions = settings.JsonSerializerOptions
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
+            JsonSerializerOptions = VectorStoreProviderHelpers.ResolveJsonSerializerOptions(settings)
         };
 
-        return new CosmosNoSqlVectorStore(settings.ConnectionString!, settings.DatabaseName!, clientOptions, storeOptions);
+        return new CosmosNoSqlVectorStore(settings.ConnectionString, settings.DatabaseName!, clientOptions, storeOptions);
     }
 
     private static TokenCredential ResolveCredential(VectorStoreSettings settings)

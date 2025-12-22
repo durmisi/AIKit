@@ -5,15 +5,11 @@ using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Pinecone;
 using Pinecone;
 
-namespace AIKit.Core.Vector;
+namespace AIKit.VectorStores.Pinecone;
 
 public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "pinecone";
-
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "PineconeVectorStoreProvider requires VectorStoreSettings");
 
     public VectorStore Create(VectorStoreSettings settings)
     {
@@ -48,4 +44,4 @@ public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
     {
         return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
-}}
+}

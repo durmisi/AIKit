@@ -10,10 +10,6 @@ public sealed class QdrantVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "qdrant";
 
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "QdrantVectorStoreProvider requires VectorStoreSettings");
-
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);

@@ -15,13 +15,6 @@ public sealed class AzureAISearchVectorStoreProvider : IVectorStoreProvider
     public string Provider => "azure-ai-search";
 
     /// <summary>
-    /// Creates a vector store with default settings (requires VectorStoreSettings).
-    /// </summary>
-    public VectorStore Create()
-        => throw new InvalidOperationException(
-            "AzureAISearchVectorStoreProvider requires VectorStoreSettings");
-
-    /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
     public VectorStore Create(VectorStoreSettings settings)
