@@ -1,12 +1,18 @@
 using AIKit.Core.VectorStores;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.InMemory;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.InMemory;
 
-public sealed class InMemoryVectorStoreProvider : IVectorStoreProvider
+public sealed class InMemoryVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "in-memory";
+
+
+    public InMemoryVectorStoreFactory()
+    {
+    }
 
     /// <summary>
     /// Creates a default in-memory vector store.
@@ -15,14 +21,16 @@ public sealed class InMemoryVectorStoreProvider : IVectorStoreProvider
     {
         return new InMemoryVectorStore();
     }
+}
 
-    /// <summary>
-    /// Creates a vector store with full configuration from settings.
-    /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddInMemoryVectorStore(
+        this IServiceCollection services)
     {
-        ArgumentNullException.ThrowIfNull(settings);
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, InMemoryVectorStoreFactory>();
 
-        return new InMemoryVectorStore();
+        return services;
     }
 }
