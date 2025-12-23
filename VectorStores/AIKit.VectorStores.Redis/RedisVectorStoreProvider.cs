@@ -1,4 +1,5 @@
 using AIKit.Core.VectorStores;
+using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Redis;
@@ -10,6 +11,9 @@ public sealed class RedisVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "redis";
 
+    /// <summary>
+    /// Creates a vector store with full configuration from settings.
+    /// </summary>
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -19,10 +23,72 @@ public sealed class RedisVectorStoreProvider : IVectorStoreProvider
 
         var options = new RedisVectorStoreOptions
         {
-            EmbeddingGenerator = ResolveEmbeddingGenerator(settings),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         };
 
         return new RedisVectorStore(db, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with minimal configuration using endpoint and embedding generator.
+    /// Uses default Redis configuration.
+    /// </summary>
+    public VectorStore Create(string endpoint, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var configuration = new ConfigurationOptions
+        {
+            EndPoints = { endpoint }
+        };
+
+        var connection = ConnectionMultiplexer.Connect(configuration);
+        var db = connection.GetDatabase();
+
+        var options = new RedisVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new RedisVectorStore(db, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with endpoint, password, and embedding generator.
+    /// </summary>
+    public VectorStore Create(string endpoint, string password, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var configuration = new ConfigurationOptions
+        {
+            EndPoints = { endpoint },
+            Password = password
+        };
+
+        var connection = ConnectionMultiplexer.Connect(configuration);
+        var db = connection.GetDatabase();
+
+        var options = new RedisVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new RedisVectorStore(db, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with a pre-configured Redis database and options.
+    /// For advanced scenarios where full control over the Redis connection is needed.
+    /// </summary>
+    public VectorStore Create(IDatabase database, RedisVectorStoreOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new RedisVectorStore(database, options);
     }
 
     private static IDatabase CreateRedisDatabase(VectorStoreSettings settings)
@@ -60,12 +126,5 @@ public sealed class RedisVectorStoreProvider : IVectorStoreProvider
 
         var connection = ConnectionMultiplexer.Connect(configuration);
         return connection.GetDatabase();
-    }
-
-    private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
-        VectorStoreSettings settings)
-    {
-        return settings.EmbeddingGenerator ?? throw new InvalidOperationException(
-            "An IEmbeddingGenerator must be provided in VectorStoreSettings for RedisVectorStoreProvider.");
     }
 }

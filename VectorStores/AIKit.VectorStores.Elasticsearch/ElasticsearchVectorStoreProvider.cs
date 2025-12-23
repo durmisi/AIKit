@@ -30,6 +30,42 @@ public sealed class ElasticsearchVectorStoreProvider : IVectorStoreProvider
 #pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     }
 
+    /// <summary>
+    /// Creates a vector store with minimal configuration using endpoint and embedding generator.
+    /// </summary>
+    public VectorStore Create(string endpoint, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var settingsBuilder = new ElasticsearchClientSettings(new Uri(endpoint));
+        var client = new ElasticsearchClient(settingsBuilder);
+
+#pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        var options = new ElasticsearchVectorStoreOptions()
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new ElasticsearchVectorStore(client, ownsClient: true, options);
+
+#pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    }
+
+    /// <summary>
+    /// Creates a vector store with a pre-configured ElasticsearchClient and options.
+    /// For advanced scenarios where full control over the Elasticsearch connection is needed.
+    /// </summary>
+#pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    public VectorStore Create(ElasticsearchClient elasticsearchClient, ElasticsearchVectorStoreOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(elasticsearchClient);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new ElasticsearchVectorStore(elasticsearchClient, ownsClient: true, options);
+    }
+#pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     private static ElasticsearchClient CreateElasticsearchClient(VectorStoreSettings settings)
     {
         var settingsBuilder = new ElasticsearchClientSettings(new Uri(settings.Endpoint));

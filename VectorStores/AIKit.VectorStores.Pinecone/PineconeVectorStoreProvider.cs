@@ -11,6 +11,9 @@ public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "pinecone";
 
+    /// <summary>
+    /// Creates a vector store with full configuration from settings.
+    /// </summary>
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -20,10 +23,59 @@ public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
 
         var options = new PineconeVectorStoreOptions
         {
-            EmbeddingGenerator = ResolveEmbeddingGenerator(settings),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         };
 
         return new PineconeVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with minimal configuration using API key and embedding generator.
+    /// </summary>
+    public VectorStore Create(string apiKey, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var client = new PineconeClient(apiKey);
+
+        var options = new PineconeVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new PineconeVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with API key, environment, and embedding generator.
+    /// </summary>
+    public VectorStore Create(string apiKey, string environment, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(environment);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var client = new PineconeClient(apiKey, environment);
+
+        var options = new PineconeVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new PineconeVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with a pre-configured PineconeClient and options.
+    /// For advanced scenarios where full control over the Pinecone client is needed.
+    /// </summary>
+    public VectorStore Create(PineconeClient pineconeClient, PineconeVectorStoreOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(pineconeClient);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new PineconeVectorStore(pineconeClient, options);
     }
 
     private static PineconeClient CreatePineconeClient(VectorStoreSettings settings)
@@ -37,11 +89,5 @@ public sealed class PineconeVectorStoreProvider : IVectorStoreProvider
         }
 
         return new PineconeClient(settings.ApiKey, environment);
-    }
-
-    private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
-        VectorStoreSettings settings)
-    {
-        return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
 }

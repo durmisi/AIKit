@@ -10,6 +10,9 @@ public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
 {
     public string Provider => "weaviate";
 
+    /// <summary>
+    /// Creates a vector store with full configuration from settings.
+    /// </summary>
     public VectorStore Create(VectorStoreSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -19,10 +22,59 @@ public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
 
         var options = new WeaviateVectorStoreOptions
         {
-            EmbeddingGenerator = ResolveEmbeddingGenerator(settings),
+            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
         };
 
         return new WeaviateVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with minimal configuration using endpoint and embedding generator.
+    /// </summary>
+    public VectorStore Create(string endpoint, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var client = new HttpClient { BaseAddress = new Uri(endpoint) };
+
+        var options = new WeaviateVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new WeaviateVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with endpoint, API key, and embedding generator.
+    /// </summary>
+    public VectorStore Create(string endpoint, string apiKey, IEmbeddingGenerator embeddingGenerator)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+
+        var client = new HttpClient { BaseAddress = new Uri(endpoint) };
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+        var options = new WeaviateVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+
+        return new WeaviateVectorStore(client, options);
+    }
+
+    /// <summary>
+    /// Creates a vector store with a pre-configured HttpClient and options.
+    /// For advanced scenarios where full control over the HTTP client is needed.
+    /// </summary>
+    public VectorStore Create(HttpClient httpClient, WeaviateVectorStoreOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new WeaviateVectorStore(httpClient, options);
     }
 
     private static HttpClient CreateHttpClient(VectorStoreSettings settings)
@@ -46,11 +98,5 @@ public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
         }
 
         return client;
-    }
-
-    private static IEmbeddingGenerator? ResolveEmbeddingGenerator(
-        VectorStoreSettings settings)
-    {
-        return VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings);
     }
 }
