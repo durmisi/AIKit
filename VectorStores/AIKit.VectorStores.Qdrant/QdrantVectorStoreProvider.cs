@@ -3,56 +3,114 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Qdrant.Client;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.Qdrant;
 
-public sealed class QdrantVectorStoreProvider : IVectorStoreProvider
+public sealed class QdrantVectorStoreOptionsConfig
+{
+    public required Uri Endpoint { get; init; }
+}
+
+public sealed class QdrantVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "qdrant";
 
-    /// <summary>
-    /// Creates a vector store with full configuration from settings.
-    /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
-    {
-        ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
+    private readonly QdrantVectorStoreOptionsConfig _config;
 
-        var client = CreateQdrantClient(settings);
+    public QdrantVectorStoreFactory(IOptions<QdrantVectorStoreOptionsConfig> config)
+    {
+        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+    }
+
+    public VectorStore Create()
+    {
+        if (_config.Endpoint is null)
+        {
+            throw new InvalidOperationException("Qdrant endpoint is not configured.");
+        }
+
+        var client = new QdrantClient(_config.Endpoint.ToString());
 
         return new QdrantVectorStore(client, ownsClient: true);
     }
+}
 
-    /// <summary>
-    /// Creates a vector store with minimal configuration using endpoint.
-    /// </summary>
-    public VectorStore Create(string endpoint)
+public sealed class QdrantVectorStoreBuilder
+{
+    private Uri? _endpoint;
+    private QdrantClient? _client;
+
+    public QdrantVectorStoreBuilder WithEndpoint(Uri endpoint)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
+        _endpoint = endpoint;
+        return this;
+    }
 
-        var client = new QdrantClient(endpoint);
+    public QdrantVectorStoreBuilder WithClient(QdrantClient client)
+    {
+        _client = client;
+        return this;
+    }
 
+    public VectorStore Build()
+    {
+        if (_client is not null)
+        {
+            return new QdrantVectorStore(_client, ownsClient: true);
+        }
+
+        if (_endpoint is null)
+            throw new InvalidOperationException("Endpoint must be set if no client is provided.");
+
+        var client = new QdrantClient(_endpoint.ToString());
         return new QdrantVectorStore(client, ownsClient: true);
     }
+}
 
-    /// <summary>
-    /// Creates a vector store with a pre-configured QdrantClient.
-    /// For advanced scenarios where full control over the Qdrant client is needed.
-    /// </summary>
-    public VectorStore Create(QdrantClient qdrantClient)
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddQdrantVectorStore(
+        this IServiceCollection services,
+        Action<QdrantVectorStoreOptionsConfig> configure)
     {
-        ArgumentNullException.ThrowIfNull(qdrantClient);
+        // Configure options
+        services.Configure(configure);
 
-        return new QdrantVectorStore(qdrantClient, ownsClient: true);
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, QdrantVectorStoreFactory>();
+
+        return services;
     }
 
-    private static QdrantClient CreateQdrantClient(VectorStoreSettings settings)
+    public static IServiceCollection AddQdrantVectorStore(
+        this IServiceCollection services,
+        QdrantVectorStore store)
     {
-        var client = new QdrantClient(settings.Endpoint);
+        if (store == null) throw new ArgumentNullException(nameof(store));
 
-        // Note: ApiKey configuration may require different approach
-        // QdrantClient may not support apiKey in constructor
+        var factory = new QdrantFactory(store);
 
-        return client;
+        services.AddSingleton<IVectorStoreFactory>(factory);
+
+        return services;
+    }
+
+    private sealed class QdrantFactory : IVectorStoreFactory
+    {
+        private readonly QdrantVectorStore _store;
+
+        public QdrantFactory(QdrantVectorStore store)
+        {
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
+
+        public string Provider => "qdrant";
+
+        public VectorStore Create()
+        {
+            return _store;
+        }
     }
 }
