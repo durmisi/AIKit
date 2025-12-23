@@ -1,102 +1,177 @@
 using AIKit.Core.VectorStores;
-using AIKit.Core.Vector;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Weaviate;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.Weaviate;
 
-public sealed class WeaviateVectorStoreProvider : IVectorStoreProvider
+public sealed class WeaviateVectorStoreOptionsConfig
+{
+    public required Uri Endpoint { get; init; }
+    public string? ApiKey { get; init; }
+    public int? TimeoutSeconds { get; init; }
+}
+
+public sealed class WeaviateVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "weaviate";
+
+    private readonly WeaviateVectorStoreOptionsConfig _config;
+    private readonly IEmbeddingGenerator _embeddingGenerator;
+
+    public WeaviateVectorStoreFactory(
+        IOptions<WeaviateVectorStoreOptionsConfig> config,
+        IEmbeddingGenerator embeddingGenerator)
+    {
+        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+    }
 
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
+    public VectorStore Create()
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
-
-        var client = CreateHttpClient(settings);
-
-        var options = new WeaviateVectorStoreOptions
+        if (_config.Endpoint is null)
         {
-            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
-        };
+            throw new InvalidOperationException("Weaviate endpoint is not configured.");
+        }
+
+        var client = CreateHttpClient(_config);
+
+        var options = WeaviateVectorStoreOptionsFactory.Create(_embeddingGenerator);
 
         return new WeaviateVectorStore(client, options);
     }
 
-    /// <summary>
-    /// Creates a vector store with minimal configuration using endpoint and embedding generator.
-    /// </summary>
-    public VectorStore Create(string endpoint, IEmbeddingGenerator embeddingGenerator)
+    private static HttpClient CreateHttpClient(WeaviateVectorStoreOptionsConfig config)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+        var client = new HttpClient { BaseAddress = config.Endpoint };
 
-        var client = new HttpClient { BaseAddress = new Uri(endpoint) };
-
-        var options = new WeaviateVectorStoreOptions
+        if (!string.IsNullOrEmpty(config.ApiKey))
         {
-            EmbeddingGenerator = embeddingGenerator,
-        };
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
+        }
 
-        return new WeaviateVectorStore(client, options);
-    }
-
-    /// <summary>
-    /// Creates a vector store with endpoint, API key, and embedding generator.
-    /// </summary>
-    public VectorStore Create(string endpoint, string apiKey, IEmbeddingGenerator embeddingGenerator)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
-
-        var client = new HttpClient { BaseAddress = new Uri(endpoint) };
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-
-        var options = new WeaviateVectorStoreOptions
+        if (config.TimeoutSeconds.HasValue)
         {
-            EmbeddingGenerator = embeddingGenerator,
-        };
-
-        return new WeaviateVectorStore(client, options);
-    }
-
-    /// <summary>
-    /// Creates a vector store with a pre-configured HttpClient and options.
-    /// For advanced scenarios where full control over the HTTP client is needed.
-    /// </summary>
-    public VectorStore Create(HttpClient httpClient, WeaviateVectorStoreOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(httpClient);
-        ArgumentNullException.ThrowIfNull(options);
-
-        return new WeaviateVectorStore(httpClient, options);
-    }
-
-    private static HttpClient CreateHttpClient(VectorStoreSettings settings)
-    {
-        var client = new HttpClient { BaseAddress = new Uri(settings.Endpoint) };
-
-        // Apply additional settings
-        if (settings.AdditionalSettings != null)
-        {
-            if (settings.AdditionalSettings.TryGetValue("ApiKey", out var apiKey) && apiKey is string apiKeyStr)
-            {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKeyStr}");
-            }
-
-            if (settings.AdditionalSettings.TryGetValue("TimeoutSeconds", out var timeout) && timeout is int timeoutSec)
-            {
-                client.Timeout = TimeSpan.FromSeconds(timeoutSec);
-            }
-
-            // Add more settings as needed
+            client.Timeout = TimeSpan.FromSeconds(config.TimeoutSeconds.Value);
         }
 
         return client;
+    }
+}
+
+internal static class WeaviateVectorStoreOptionsFactory
+{
+    public static WeaviateVectorStoreOptions Create(IEmbeddingGenerator embeddingGenerator)
+    {
+        return new WeaviateVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+    }
+}
+
+public sealed class WeaviateVectorStoreBuilder
+{
+    private Uri? _endpoint;
+    private string? _apiKey;
+    private int? _timeoutSeconds;
+    private WeaviateVectorStoreOptions? _options;
+
+    public WeaviateVectorStoreBuilder WithEndpoint(Uri endpoint)
+    {
+        _endpoint = endpoint;
+        return this;
+    }
+
+    public WeaviateVectorStoreBuilder WithApiKey(string apiKey)
+    {
+        _apiKey = apiKey;
+        return this;
+    }
+
+    public WeaviateVectorStoreBuilder WithTimeout(int timeoutSeconds)
+    {
+        _timeoutSeconds = timeoutSeconds;
+        return this;
+    }
+
+    public WeaviateVectorStoreBuilder WithOptions(WeaviateVectorStoreOptions options)
+    {
+        _options = options;
+        return this;
+    }
+
+    public VectorStore Build()
+    {
+        if (_endpoint is null)
+            throw new InvalidOperationException("Endpoint must be set.");
+
+        if (_options is null)
+            throw new InvalidOperationException("WeaviateVectorStoreOptions must be set.");
+
+        var client = new HttpClient { BaseAddress = _endpoint };
+
+        if (!string.IsNullOrEmpty(_apiKey))
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+        }
+
+        if (_timeoutSeconds.HasValue)
+        {
+            client.Timeout = TimeSpan.FromSeconds(_timeoutSeconds.Value);
+        }
+
+        return new WeaviateVectorStore(client, _options);
+    }
+}
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddWeaviateVectorStore(
+        this IServiceCollection services,
+        Action<WeaviateVectorStoreOptionsConfig> configure)
+    {
+        // Configure options
+        services.Configure(configure);
+
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, WeaviateVectorStoreFactory>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddWeaviateVectorStore(
+        this IServiceCollection services,
+        WeaviateVectorStore store)
+    {
+        if (store == null) throw new ArgumentNullException(nameof(store));
+
+        var factory = new WeaviateFactory(store);
+
+        services.AddSingleton<IVectorStoreFactory>(factory);
+
+        return services;
+    }
+
+    private sealed class WeaviateFactory : IVectorStoreFactory
+    {
+        private readonly WeaviateVectorStore _store;
+
+        public WeaviateFactory(WeaviateVectorStore store)
+        {
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
+
+        public string Provider => "weaviate";
+
+        public VectorStore Create()
+        {
+            return _store;
+        }
     }
 }
