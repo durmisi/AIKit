@@ -1,130 +1,219 @@
 using AIKit.Core.VectorStores;
-using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Redis;
 using StackExchange.Redis;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.Redis;
 
-public sealed class RedisVectorStoreProvider : IVectorStoreProvider
+public sealed class RedisVectorStoreOptionsConfig
+{
+    public required string Endpoint { get; init; }
+    public string? Password { get; init; }
+    public int? Database { get; init; }
+    public int? ConnectTimeout { get; init; }
+    public int? SyncTimeout { get; init; }
+}
+
+public sealed class RedisVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "redis";
+
+    private readonly RedisVectorStoreOptionsConfig _config;
+    private readonly IEmbeddingGenerator _embeddingGenerator;
+
+    public RedisVectorStoreFactory(
+        IOptions<RedisVectorStoreOptionsConfig> config,
+        IEmbeddingGenerator embeddingGenerator)
+    {
+        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+    }
 
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
+    public VectorStore Create()
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.Endpoint);
-
-        var db = CreateRedisDatabase(settings);
-
-        var options = new RedisVectorStoreOptions
+        if (string.IsNullOrWhiteSpace(_config.Endpoint))
         {
-            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
-        };
-
-        return new RedisVectorStore(db, options);
-    }
-
-    /// <summary>
-    /// Creates a vector store with minimal configuration using endpoint and embedding generator.
-    /// Uses default Redis configuration.
-    /// </summary>
-    public VectorStore Create(string endpoint, IEmbeddingGenerator embeddingGenerator)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+            throw new InvalidOperationException("Redis endpoint is not configured.");
+        }
 
         var configuration = new ConfigurationOptions
         {
-            EndPoints = { endpoint }
+            EndPoints = { _config.Endpoint }
         };
 
-        var connection = ConnectionMultiplexer.Connect(configuration);
-        var db = connection.GetDatabase();
-
-        var options = new RedisVectorStoreOptions
+        if (!string.IsNullOrEmpty(_config.Password))
         {
-            EmbeddingGenerator = embeddingGenerator,
-        };
+            configuration.Password = _config.Password;
+        }
 
-        return new RedisVectorStore(db, options);
-    }
-
-    /// <summary>
-    /// Creates a vector store with endpoint, password, and embedding generator.
-    /// </summary>
-    public VectorStore Create(string endpoint, string password, IEmbeddingGenerator embeddingGenerator)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
-
-        var configuration = new ConfigurationOptions
+        if (_config.Database.HasValue)
         {
-            EndPoints = { endpoint },
-            Password = password
-        };
+            configuration.DefaultDatabase = _config.Database.Value;
+        }
 
-        var connection = ConnectionMultiplexer.Connect(configuration);
-        var db = connection.GetDatabase();
-
-        var options = new RedisVectorStoreOptions
+        if (_config.ConnectTimeout.HasValue)
         {
-            EmbeddingGenerator = embeddingGenerator,
-        };
+            configuration.ConnectTimeout = _config.ConnectTimeout.Value;
+        }
 
-        return new RedisVectorStore(db, options);
-    }
-
-    /// <summary>
-    /// Creates a vector store with a pre-configured Redis database and options.
-    /// For advanced scenarios where full control over the Redis connection is needed.
-    /// </summary>
-    public VectorStore Create(IDatabase database, RedisVectorStoreOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(options);
-
-        return new RedisVectorStore(database, options);
-    }
-
-    private static IDatabase CreateRedisDatabase(VectorStoreSettings settings)
-    {
-        var configuration = new ConfigurationOptions
+        if (_config.SyncTimeout.HasValue)
         {
-            EndPoints = { settings.Endpoint }
-        };
-
-        // Apply additional settings
-        if (settings.AdditionalSettings != null)
-        {
-            if (settings.AdditionalSettings.TryGetValue("Password", out var password) && password is string pwd)
-            {
-                configuration.Password = pwd;
-            }
-
-            if (settings.AdditionalSettings.TryGetValue("Database", out var database) && database is int dbNum)
-            {
-                configuration.DefaultDatabase = dbNum;
-            }
-
-            if (settings.AdditionalSettings.TryGetValue("ConnectTimeout", out var timeout) && timeout is int timeoutMs)
-            {
-                configuration.ConnectTimeout = timeoutMs;
-            }
-
-            if (settings.AdditionalSettings.TryGetValue("SyncTimeout", out var syncTimeout) && syncTimeout is int syncTimeoutMs)
-            {
-                configuration.SyncTimeout = syncTimeoutMs;
-            }
-
-            // Add more as needed
+            configuration.SyncTimeout = _config.SyncTimeout.Value;
         }
 
         var connection = ConnectionMultiplexer.Connect(configuration);
-        return connection.GetDatabase();
+        var db = connection.GetDatabase();
+
+        var options = RedisVectorStoreOptionsFactory.Create(_embeddingGenerator);
+
+        return new RedisVectorStore(db, options);
+    }
+}
+
+internal static class RedisVectorStoreOptionsFactory
+{
+    public static RedisVectorStoreOptions Create(IEmbeddingGenerator embeddingGenerator)
+    {
+        return new RedisVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator,
+        };
+    }
+}
+
+public sealed class RedisVectorStoreBuilder
+{
+    private string? _endpoint;
+    private string? _password;
+    private int? _database;
+    private int? _connectTimeout;
+    private int? _syncTimeout;
+    private RedisVectorStoreOptions? _options;
+
+    public RedisVectorStoreBuilder WithEndpoint(string endpoint)
+    {
+        _endpoint = endpoint;
+        return this;
+    }
+
+    public RedisVectorStoreBuilder WithPassword(string password)
+    {
+        _password = password;
+        return this;
+    }
+
+    public RedisVectorStoreBuilder WithDatabase(int database)
+    {
+        _database = database;
+        return this;
+    }
+
+    public RedisVectorStoreBuilder WithConnectTimeout(int timeout)
+    {
+        _connectTimeout = timeout;
+        return this;
+    }
+
+    public RedisVectorStoreBuilder WithSyncTimeout(int timeout)
+    {
+        _syncTimeout = timeout;
+        return this;
+    }
+
+    public RedisVectorStoreBuilder WithOptions(RedisVectorStoreOptions options)
+    {
+        _options = options;
+        return this;
+    }
+
+    public VectorStore Build()
+    {
+        if (string.IsNullOrWhiteSpace(_endpoint))
+            throw new InvalidOperationException("Endpoint must be set.");
+
+        if (_options is null)
+            throw new InvalidOperationException("RedisVectorStoreOptions must be set.");
+
+        var configuration = new ConfigurationOptions
+        {
+            EndPoints = { _endpoint }
+        };
+
+        if (!string.IsNullOrEmpty(_password))
+        {
+            configuration.Password = _password;
+        }
+
+        if (_database.HasValue)
+        {
+            configuration.DefaultDatabase = _database.Value;
+        }
+
+        if (_connectTimeout.HasValue)
+        {
+            configuration.ConnectTimeout = _connectTimeout.Value;
+        }
+
+        if (_syncTimeout.HasValue)
+        {
+            configuration.SyncTimeout = _syncTimeout.Value;
+        }
+
+        var connection = ConnectionMultiplexer.Connect(configuration);
+        var db = connection.GetDatabase();
+
+        return new RedisVectorStore(db, _options);
+    }
+}
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddRedisVectorStore(
+        this IServiceCollection services,
+        Action<RedisVectorStoreOptionsConfig> configure)
+    {
+        // Configure options
+        services.Configure(configure);
+
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, RedisVectorStoreFactory>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedisVectorStore(
+        this IServiceCollection services,
+        RedisVectorStore store)
+    {
+        if (store == null) throw new ArgumentNullException(nameof(store));
+
+        var factory = new RedisFactory(store);
+
+        services.AddSingleton<IVectorStoreFactory>(factory);
+
+        return services;
+    }
+
+    private sealed class RedisFactory : IVectorStoreFactory
+    {
+        private readonly RedisVectorStore _store;
+
+        public RedisFactory(RedisVectorStore store)
+        {
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
+
+        public string Provider => "redis";
+
+        public VectorStore Create()
+        {
+            return _store;
+        }
     }
 }
