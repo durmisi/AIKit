@@ -1,83 +1,145 @@
 using AIKit.Core.VectorStores;
-using AIKit.Core.Vector;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.MongoDB;
 using MongoDB.Driver;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.MongoDB;
 
-public sealed class MongoDBVectorStoreProvider : IVectorStoreProvider
+public sealed class MongoDBVectorStoreOptionsConfig
+{
+    public required string ConnectionString { get; init; }
+    public string? DatabaseName { get; init; }
+}
+
+public sealed class MongoDBVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "mongodb";
+
+    private readonly MongoDBVectorStoreOptionsConfig _config;
+    private readonly IEmbeddingGenerator _embeddingGenerator;
+
+    public MongoDBVectorStoreFactory(
+        IOptions<MongoDBVectorStoreOptionsConfig> config,
+        IEmbeddingGenerator embeddingGenerator)
+    {
+        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+    }
 
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
+    public VectorStore Create()
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
-
-        var mongoClient = new MongoClient(settings.ConnectionString);
-        var mongoDatabase = mongoClient.GetDatabase(settings.DatabaseName ?? "vectorstore");
-
-        var options = new MongoVectorStoreOptions
+        if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
-            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
-        };
+            throw new InvalidOperationException("MongoDB connection string is not configured.");
+        }
+
+        var mongoClient = new MongoClient(_config.ConnectionString);
+        var mongoDatabase = mongoClient.GetDatabase(_config.DatabaseName ?? "vectorstore");
+
+        var options = MongoDBVectorStoreOptionsFactory.Create(_embeddingGenerator);
 
         return new MongoVectorStore(mongoDatabase, options);
     }
+}
 
-    /// <summary>
-    /// Creates a vector store with minimal configuration using connection string and embedding generator.
-    /// </summary>
-    public VectorStore Create(string connectionString, IEmbeddingGenerator embeddingGenerator)
+internal static class MongoDBVectorStoreOptionsFactory
+{
+    public static MongoVectorStoreOptions Create(IEmbeddingGenerator embeddingGenerator)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
-
-        var mongoClient = new MongoClient(connectionString);
-        var mongoDatabase = mongoClient.GetDatabase("vectorstore");
-
-        var options = new MongoVectorStoreOptions
+        return new MongoVectorStoreOptions
         {
             EmbeddingGenerator = embeddingGenerator,
         };
+    }
+}
 
-        return new MongoVectorStore(mongoDatabase, options);
+public sealed class MongoDBVectorStoreBuilder
+{
+    private string? _connectionString;
+    private string? _databaseName;
+    private MongoVectorStoreOptions? _options;
+
+    public MongoDBVectorStoreBuilder WithConnectionString(string connectionString)
+    {
+        _connectionString = connectionString;
+        return this;
     }
 
-    /// <summary>
-    /// Creates a vector store with connection string, database name, and embedding generator.
-    /// </summary>
-    public VectorStore Create(string connectionString, string databaseName, IEmbeddingGenerator embeddingGenerator)
+    public MongoDBVectorStoreBuilder WithDatabaseName(string databaseName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        ArgumentException.ThrowIfNullOrWhiteSpace(databaseName);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+        _databaseName = databaseName;
+        return this;
+    }
 
-        var mongoClient = new MongoClient(connectionString);
-        var mongoDatabase = mongoClient.GetDatabase(databaseName);
+    public MongoDBVectorStoreBuilder WithOptions(MongoVectorStoreOptions options)
+    {
+        _options = options;
+        return this;
+    }
 
-        var options = new MongoVectorStoreOptions
+    public VectorStore Build()
+    {
+        if (string.IsNullOrWhiteSpace(_connectionString))
+            throw new InvalidOperationException("ConnectionString must be set.");
+
+        if (_options is null)
+            throw new InvalidOperationException("MongoVectorStoreOptions must be set.");
+
+        var mongoClient = new MongoClient(_connectionString);
+        var mongoDatabase = mongoClient.GetDatabase(_databaseName ?? "vectorstore");
+
+        return new MongoVectorStore(mongoDatabase, _options);
+    }
+}
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddMongoDBVectorStore(
+        this IServiceCollection services,
+        Action<MongoDBVectorStoreOptionsConfig> configure)
+    {
+        // Configure options
+        services.Configure(configure);
+
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, MongoDBVectorStoreFactory>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddMongoDBVectorStore(
+        this IServiceCollection services,
+        MongoVectorStore store)
+    {
+        if (store == null) throw new ArgumentNullException(nameof(store));
+
+        var factory = new MongoDBFactory(store);
+
+        services.AddSingleton<IVectorStoreFactory>(factory);
+
+        return services;
+    }
+
+    private sealed class MongoDBFactory : IVectorStoreFactory
+    {
+        private readonly MongoVectorStore _store;
+
+        public MongoDBFactory(MongoVectorStore store)
         {
-            EmbeddingGenerator = embeddingGenerator,
-        };
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
 
-        return new MongoVectorStore(mongoDatabase, options);
-    }
+        public string Provider => "mongodb";
 
-    /// <summary>
-    /// Creates a vector store with a pre-configured MongoDatabase and options.
-    /// For advanced scenarios where full control over the MongoDB connection is needed.
-    /// </summary>
-    public VectorStore Create(IMongoDatabase mongoDatabase, MongoVectorStoreOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(mongoDatabase);
-        ArgumentNullException.ThrowIfNull(options);
-
-        return new MongoVectorStore(mongoDatabase, options);
+        public VectorStore Create()
+        {
+            return _store;
+        }
     }
 }
