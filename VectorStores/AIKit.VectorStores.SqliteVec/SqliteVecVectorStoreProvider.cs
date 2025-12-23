@@ -1,64 +1,141 @@
 using AIKit.Core.VectorStores;
-using AIKit.Core.Vector;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.SqliteVec;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.SqliteVec;
 
-public sealed class SqliteVecVectorStoreProvider : IVectorStoreProvider
+public sealed class SqliteVecVectorStoreOptionsConfig
+{
+    public required string ConnectionString { get; init; }
+    public string? TableName { get; init; }
+}
+
+public sealed class SqliteVecVectorStoreFactory : IVectorStoreFactory
 {
     public string Provider => "sqlite-vec";
+
+    private readonly SqliteVecVectorStoreOptionsConfig _config;
+    private readonly IEmbeddingGenerator _embeddingGenerator;
+
+    public SqliteVecVectorStoreFactory(
+        IOptions<SqliteVecVectorStoreOptionsConfig> config,
+        IEmbeddingGenerator embeddingGenerator)
+    {
+        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+    }
 
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create(VectorStoreSettings settings)
+    public VectorStore Create()
     {
-        ArgumentNullException.ThrowIfNull(settings);
-        ArgumentException.ThrowIfNullOrWhiteSpace(settings.ConnectionString);
-
-        var options = new SqliteVectorStoreOptions
+        if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
-            VectorVirtualTableName = settings.TableName,
-            EmbeddingGenerator = VectorStoreProviderHelpers.ResolveEmbeddingGenerator(settings),
-        };
+            throw new InvalidOperationException("SQLite connection string is not configured.");
+        }
 
-        return new SqliteVectorStore(settings.ConnectionString, options);
+        var options = SqliteVecVectorStoreOptionsFactory.Create(_config, _embeddingGenerator);
+
+        return new SqliteVectorStore(_config.ConnectionString, options);
     }
+}
 
-    /// <summary>
-    /// Creates a vector store with minimal configuration using connection string and embedding generator.
-    /// </summary>
-    public VectorStore Create(string connectionString, IEmbeddingGenerator embeddingGenerator)
+internal static class SqliteVecVectorStoreOptionsFactory
+{
+    public static SqliteVectorStoreOptions Create(
+        SqliteVecVectorStoreOptionsConfig config,
+        IEmbeddingGenerator embeddingGenerator)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
-
-        var options = new SqliteVectorStoreOptions
+        return new SqliteVectorStoreOptions
         {
-            VectorVirtualTableName = "vectors",
+            VectorVirtualTableName = config.TableName ?? "vectors",
             EmbeddingGenerator = embeddingGenerator,
         };
+    }
+}
 
-        return new SqliteVectorStore(connectionString, options);
+public sealed class SqliteVecVectorStoreBuilder
+{
+    private string? _connectionString;
+    private string? _tableName;
+    private SqliteVectorStoreOptions? _options;
+
+    public SqliteVecVectorStoreBuilder WithConnectionString(string connectionString)
+    {
+        _connectionString = connectionString;
+        return this;
     }
 
-    /// <summary>
-    /// Creates a vector store with connection string, table name, and embedding generator.
-    /// </summary>
-    public VectorStore Create(string connectionString, string tableName, IEmbeddingGenerator embeddingGenerator)
+    public SqliteVecVectorStoreBuilder WithTableName(string tableName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        ArgumentException.ThrowIfNullOrWhiteSpace(tableName);
-        ArgumentNullException.ThrowIfNull(embeddingGenerator);
+        _tableName = tableName;
+        return this;
+    }
 
-        var options = new SqliteVectorStoreOptions
+    public SqliteVecVectorStoreBuilder WithOptions(SqliteVectorStoreOptions options)
+    {
+        _options = options;
+        return this;
+    }
+
+    public VectorStore Build()
+    {
+        if (string.IsNullOrWhiteSpace(_connectionString))
+            throw new InvalidOperationException("ConnectionString must be set.");
+
+        if (_options is null)
+            throw new InvalidOperationException("SqliteVectorStoreOptions must be set.");
+
+        return new SqliteVectorStore(_connectionString, _options);
+    }
+}
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddSqliteVecVectorStore(
+        this IServiceCollection services,
+        Action<SqliteVecVectorStoreOptionsConfig> configure)
+    {
+        // Configure options
+        services.Configure(configure);
+
+        // Register the factory
+        services.AddSingleton<IVectorStoreFactory, SqliteVecVectorStoreFactory>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddSqliteVecVectorStore(
+        this IServiceCollection services,
+        SqliteVectorStore store)
+    {
+        if (store == null) throw new ArgumentNullException(nameof(store));
+
+        var factory = new SqliteVecFactory(store);
+
+        services.AddSingleton<IVectorStoreFactory>();
+
+        return services;
+    }
+
+    private sealed class SqliteVecFactory : IVectorStoreFactory
+    {
+        private readonly SqliteVectorStore _store;
+
+        public SqliteVecFactory(SqliteVectorStore store)
         {
-            VectorVirtualTableName = tableName,
-            EmbeddingGenerator = embeddingGenerator,
-        };
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
 
-        return new SqliteVectorStore(connectionString, options);
+        public string Provider => "sqlite-vec";
+
+        public VectorStore Create()
+        {
+            return _store;
+        }
     }
 }
