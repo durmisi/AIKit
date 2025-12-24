@@ -13,6 +13,10 @@
     <Project Path="Clients/AIKit.Core.Clients.Tests/AIKit.Core.Clients.Tests.csproj" />
     <Project Path="Clients/AIKit.Core.Clients/AIKit.Core.Clients.csproj" Id="6c69f866-c5cd-4805-bd61-dcf21492d3cf" />
   </Folder>
+  <Folder Name="/Prompts/">
+    <Project Path="Prompts/AIKit.Core.Prompts/AIKit.Core.Prompts.csproj" Id="0ce01590-109c-48e8-99b5-5a5409b6374b" />
+    <Project Path="Prompts/AIKit.Prompts.Handlebars/AIKit.Prompts.Handlebars.csproj" Id="14fcccc2-57a3-4d67-8b11-4978f0774fed" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
