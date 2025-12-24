@@ -1,4 +1,5 @@
 using Microsoft.Extensions.VectorData;
+using System.Linq.Expressions;
 
 namespace AIKit.Core.VectorStores;
 
@@ -14,8 +15,6 @@ public interface IVectorStoreSearch<TRecord>
         HybridSearchRequest<TRecord> request);
 }
 
-
-
 public sealed class VectorSearchResult<TRecord>
 {
     public required TRecord Record { get; init; }
@@ -28,13 +27,19 @@ public sealed class VectorSearchRequest<TRecord>
 {
     public int? Top { get; init; }
     public bool IncludeVectors { get; init; }
+    public Func<TRecord, bool>? VectorProperty { get; init; }
     public Func<TRecord, bool>? Filter { get; init; }
+    public int Skip { get; internal set; }
 }
 
 public sealed class HybridSearchRequest<TRecord>
 {
     public int? Top { get; init; }
+    public int Skip { get; internal set; }
     public Func<TRecord, string>? TextProperty { get; init; }
+    public Func<TRecord, string>? VectorProperty { get; init; }
+    public Expression<Func<TRecord, bool>>? Filter { get; init; }
+    public bool IncludeVectors { get; internal set; }
 }
 
 
@@ -58,6 +63,8 @@ internal sealed class SemanticKernelVectorStoreSearch<TRecord>
         var options = new VectorSearchOptions<TRecord>
         {
             IncludeVectors = request.IncludeVectors,
+            Skip = request.Skip,
+            VectorProperty = request.VectorProperty != null ? r => request.VectorProperty!(r) : null,
             Filter = request.Filter != null ? r => request.Filter!(r) : null
         };
 
@@ -66,7 +73,7 @@ internal sealed class SemanticKernelVectorStoreSearch<TRecord>
             {
                 Record = r.Record,
                 Score = r.Score ?? 0.0,
-                Metadata = null
+                Metadata = null,
             });
     }
 
@@ -78,6 +85,10 @@ internal sealed class SemanticKernelVectorStoreSearch<TRecord>
 
         var options = new HybridSearchOptions<TRecord>
         {
+            Skip = request.Skip,
+            IncludeVectors = request.IncludeVectors,
+            Filter = request.Filter,
+            VectorProperty = request.VectorProperty != null ? r => request.VectorProperty!(r) : null,
             AdditionalProperty = request.TextProperty != null ? r => request.TextProperty!(r) : null
         };
 
@@ -90,7 +101,6 @@ internal sealed class SemanticKernelVectorStoreSearch<TRecord>
             });
     }
 }
-
 
 public sealed class VectorStoreSearchResolver
 {
