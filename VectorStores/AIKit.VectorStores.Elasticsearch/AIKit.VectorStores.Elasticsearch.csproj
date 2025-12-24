@@ -18,7 +18,7 @@
 		<PackageReference Include="Elastic.SemanticKernel.Connectors.Elasticsearch" Version="0.3.1" />
 		<PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.2" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.1" />
-		<PackageReference Include="Microsoft.Extensions.AI" Version="9.7.0" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="10.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>
