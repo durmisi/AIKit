@@ -72,6 +72,7 @@ IngestionChunkProcessor<string> summaryEnricher = new SummaryEnricher(enricherOp
 
 var processors = new IDocumentProcessor[]
 {
+    new MarkdownProcessor(),  // Parse Markdown to HTML
     new ImageAlternativeTextProcessor(imageAlternativeTextEnricher),
 };
 
@@ -83,8 +84,7 @@ var chunkProcessors = new IChunkProcessor[]
 // Build pipeline
 var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
     .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
-    .UseMiddleware<ReaderMiddleware>(new FileSystemDocumentProvider(new DirectoryInfo("./data"), "*.md"))
-    .UseMiddleware<DocumentProcessorMiddleware>(processors)
+    .Use(next => new ReaderMiddleware(new FileSystemDocumentProvider(new DirectoryInfo("./data"), "*.md"), processors).InvokeAsync(ctx, next))  // With processors
     .UseMiddleware<ChunkingMiddleware>(ChunkingStrategyFactory.CreateSemanticSimilarity(chunkingOptions), chunkProcessors)
     .UseMiddleware<WriterMiddleware>(/* writer */)
     .WithLoggerFactory(loggerFactory)
@@ -123,6 +123,7 @@ Implement `IIngestionDocumentProvider` for custom readers:
 Implement `IDocumentProcessor` for custom document processing:
 
 - `ImageAlternativeTextProcessor`: Enriches images with AI-generated alternative text (adapts `ImageAlternativeTextEnricher`).
+- `MarkdownProcessor`: Parses Markdown content to HTML and adds to metadata.
 - Add custom processors for AI enrichments like summarization or metadata extraction.
 
 Configure with `EnricherOptions` including chat client and logger factory.

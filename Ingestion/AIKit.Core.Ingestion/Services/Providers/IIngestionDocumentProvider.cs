@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion.Services.Readers;
+namespace AIKit.Core.Ingestion.Services.Providers;
 
 public interface IIngestionDocumentProvider
 {

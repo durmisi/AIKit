@@ -1,15 +1,18 @@
-using AIKit.Core.Ingestion.Services.Readers;
+using AIKit.Core.Ingestion.Services.Processors;
 using Microsoft.Extensions.Logging;
+using AIKit.Core.Ingestion.Services.Providers;
 
 namespace AIKit.Core.Ingestion.Middleware;
 
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
     private readonly IIngestionDocumentProvider _reader;
+    private readonly IEnumerable<IDocumentProcessor> _processors;
 
-    public ReaderMiddleware(IIngestionDocumentProvider reader)
+    public ReaderMiddleware(IIngestionDocumentProvider reader, IEnumerable<IDocumentProcessor>? processors = null)
     {
         _reader = reader;
+        _processors = processors ?? Array.Empty<IDocumentProcessor>();
     }
 
     public async Task InvokeAsync(
@@ -21,6 +24,12 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
 
         await foreach (var doc in _reader.ReadAsync())
         {
+            // Apply processors to the document
+            foreach (var processor in _processors)
+            {
+                await processor.ProcessAsync(doc, CancellationToken.None);
+            }
+
             ctx.Documents.Add(doc);
         }
 
