@@ -136,3 +136,15 @@ else
 ```
 
 This pipeline reads files, processes the document, chunks it, and writes to a vector store.
+
+## Integration with Vector Stores
+
+The `WriterMiddleware` can be extended to integrate with AIKit's vector stores for storing chunks with embeddings. For example, use `AIKit.VectorStores.SqliteVec` or other providers to persist processed data for retrieval-augmented generation (RAG) workflows.
+
+## Extensibility
+
+The middleware pattern allows easy extension:
+
+- Implement custom `IIngestionMiddleware<DataIngestionContext>` for specific processing steps.
+- Override chunking logic in `ChunkingMiddleware` for semantic or token-based splitting.
+- Add AI enrichments (e.g., summarization) by integrating with AIKit clients in document or chunk processors
