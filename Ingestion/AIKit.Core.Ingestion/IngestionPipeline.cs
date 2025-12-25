@@ -1,4 +1,4 @@
-namespace AIKit.Core;
+namespace AIKit.Core.Ingestion;
 
 public class IngestionPipeline<T>
 {

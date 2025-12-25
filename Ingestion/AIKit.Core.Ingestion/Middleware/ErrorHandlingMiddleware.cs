@@ -1,4 +1,4 @@
-namespace AIKit.Core.Middleware;
+namespace AIKit.Core.Ingestion.Middleware;
 
 public class ErrorHandlingMiddleware<T> : IIngestionMiddleware<T> where T : IngestionContext
 {
