@@ -16,6 +16,11 @@ public sealed class SectionBasedChunkingStrategy : IChunkingStrategy
 
     public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
     {
+        if (_options.Tokenizer is null)
+        {
+            throw new InvalidOperationException("Tokenizer must be provided for section-based chunking.");
+        }
+
         var chunkerOptions = new IngestionChunkerOptions(_options.Tokenizer)
         {
             MaxTokensPerChunk = _options.MaxTokensPerChunk,

@@ -19,6 +19,11 @@ public sealed class SemanticSimilarityChunkingStrategy : IChunkingStrategy
             throw new InvalidOperationException("Embedding generator must be provided for semantic similarity chunking.");
         }
 
+        if (_options.Tokenizer is null)
+        {
+            throw new InvalidOperationException("Tokenizer must be provided for semantic similarity chunking.");
+        }
+
         var chunkerOptions = new IngestionChunkerOptions(_options.Tokenizer)
         {
             MaxTokensPerChunk = _options.MaxTokensPerChunk,

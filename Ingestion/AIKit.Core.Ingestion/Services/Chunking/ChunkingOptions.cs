@@ -9,7 +9,7 @@ public sealed class ChunkingOptions
 
     public int OverlapTokens { get; init; } = 0;
 
-    public required Tokenizer Tokenizer { get; init; }
+    public Tokenizer? Tokenizer { get; init; }
 
     public IEmbeddingGenerator<string, Embedding<float>>? EmbeddingGenerator { get; init; }
 }

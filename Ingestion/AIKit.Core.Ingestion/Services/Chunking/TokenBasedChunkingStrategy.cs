@@ -11,6 +11,11 @@ public sealed class TokenBasedChunkingStrategy : IChunkingStrategy
 
     public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
     {
+        if (_options.Tokenizer is null)
+        {
+            throw new InvalidOperationException("Tokenizer must be provided for token-based chunking.");
+        }
+
         var chunks = new List<DocumentChunk>();
         var tokens = _options.Tokenizer.EncodeToIds(document.Content);
         var start = 0;

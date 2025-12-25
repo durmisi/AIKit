@@ -13,6 +13,11 @@ public sealed class HeaderBasedChunkingStrategy : IChunkingStrategy
 
     public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
     {
+        if (_options.Tokenizer is null)
+        {
+            throw new InvalidOperationException("Tokenizer must be provided for header-based chunking.");
+        }
+
         var chunkerOptions = new IngestionChunkerOptions(_options.Tokenizer)
         {
             MaxTokensPerChunk = _options.MaxTokensPerChunk,
