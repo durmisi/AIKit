@@ -37,19 +37,33 @@ using AIKit.Core.Ingestion.Services.Readers;
 using AIKit.Core.Ingestion.Services.Chunking;
 using AIKit.Core.Ingestion.Services.Writers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.AI;
 
 // Create logger factory
 using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddSimpleConsole());
 
+// Configure embedding generator (requires AIKit clients)
+IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator =
+    // e.g., openAIClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+
 // Define context
 var context = new DataIngestionContext();
 
-// Build pipeline
+// Configure chunking options
+var chunkingOptions = new ChunkingOptions
+{
+    Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4"),
+    MaxTokensPerChunk = 2000,
+    OverlapTokens = 0,
+    EmbeddingGenerator = embeddingGenerator  // For semantic chunking
+};
+
+// Build pipeline with semantic similarity chunking
 var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
     .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
     .UseMiddleware<ReaderMiddleware>(new FileSystemDocumentProvider(new DirectoryInfo("./data"), "*.md"))
     .UseMiddleware<DocumentProcessorMiddleware>(new[] { /* processors */ })
-    .UseMiddleware<ChunkingMiddleware>(ChunkingStrategyFactory.CreateTokenBased(new ChunkingOptions { Tokenizer = /* tokenizer */ }))
+    .UseMiddleware<ChunkingMiddleware>(ChunkingStrategyFactory.CreateSemanticSimilarity(chunkingOptions))
     .UseMiddleware<WriterMiddleware>(/* writer */)
     .WithLoggerFactory(loggerFactory)
     .Build();
@@ -87,7 +101,7 @@ Implement `IIngestionDocumentProvider` for custom readers:
 Implement `IChunkingStrategy` for custom chunking:
 
 - `TokenBasedChunkingStrategy`: Splits by token count.
-- `SemanticSimilarityChunkingStrategy`: Splits by semantic similarity (requires embeddings).
+- `SemanticSimilarityChunkingStrategy`: Splits by semantic similarity (requires embeddings). Falls back to token-based if embeddings unavailable.
 - `HeaderBasedChunkingStrategy`: Splits by Markdown headers.
 - `SectionBasedChunkingStrategy`: Splits by sections.
 
