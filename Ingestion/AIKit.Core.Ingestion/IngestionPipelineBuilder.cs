@@ -1,4 +1,5 @@
 using AIKit.Core.Ingestion.Middleware;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion;
 
@@ -9,6 +10,7 @@ namespace AIKit.Core.Ingestion;
 public class IngestionPipelineBuilder<T>
 {
     private readonly List<Func<IngestionDelegate<T>, IngestionDelegate<T>>> _components = new();
+    private ILoggerFactory? _loggerFactory;
 
     /// <summary>
     /// Adds a middleware function to the pipeline.
@@ -32,11 +34,22 @@ public class IngestionPipelineBuilder<T>
     }
 
     /// <summary>
+    /// Sets the logger factory for the pipeline.
+    /// </summary>
+    /// <param name="loggerFactory">The logger factory.</param>
+    /// <returns>The builder instance for chaining.</returns>
+    public IngestionPipelineBuilder<T> WithLoggerFactory(ILoggerFactory loggerFactory)
+    {
+        _loggerFactory = loggerFactory;
+        return this;
+    }
+
+    /// <summary>
     /// Builds the pipeline with the added middleware.
     /// </summary>
     /// <returns>The constructed pipeline.</returns>
     public IngestionPipeline<T> Build()
     {
-        return new IngestionPipeline<T>(_components);
+        return new IngestionPipeline<T>(_components, _loggerFactory);
     }
 }

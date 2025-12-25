@@ -1,4 +1,5 @@
 using AIKit.Core.Ingestion.Services.Chunking;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion.Middleware;
 
@@ -12,19 +13,16 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
     }
 
     public async Task InvokeAsync(
-        DataIngestionContext context,
+        DataIngestionContext ctx,
         IngestionDelegate<DataIngestionContext> next)
     {
-        var allChunks = new List<DocumentChunk>();
+        var logger = ctx.LoggerFactory?.CreateLogger("ChunkingMiddleware");
+        logger?.LogInformation("Starting chunking for {DocumentCount} documents", ctx.Documents.Count);
 
-        foreach (var document in context.Documents)
-        {
-            var chunks = await _chunkingStrategy.Chunk(document);
-            allChunks.AddRange(chunks);
-        }
+        ctx.Properties["chunks"] = (await Task.WhenAll(ctx.Documents.Select(d => _chunkingStrategy.Chunk(d)))).SelectMany(c => c).ToList();
 
-        context.Properties["chunks"] = allChunks;
+        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", ((List<DocumentChunk>)ctx.Properties["chunks"]).Count);
 
-        await next(context);
+        await next(ctx);
     }
 }

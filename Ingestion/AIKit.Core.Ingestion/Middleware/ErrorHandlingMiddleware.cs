@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace AIKit.Core.Ingestion.Middleware;
 
 /// <summary>
@@ -14,6 +16,7 @@ public class ErrorHandlingMiddleware<T> : IIngestionMiddleware<T> where T : Inge
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InvokeAsync(T ctx, IngestionDelegate<T> next)
     {
+        var logger = (ctx as DataIngestionContext)?.LoggerFactory?.CreateLogger("ErrorHandlingMiddleware");
         try
         {
             await next(ctx);
@@ -21,6 +24,7 @@ public class ErrorHandlingMiddleware<T> : IIngestionMiddleware<T> where T : Inge
         catch (Exception ex)
         {
             ctx.Errors.Add(ex.Message);
+            logger?.LogError(ex, "An error occurred during pipeline execution");
         }
     }
 }

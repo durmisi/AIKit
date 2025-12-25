@@ -1,4 +1,5 @@
 using AIKit.Core.Ingestion.Middleware;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion;
 
@@ -9,14 +10,17 @@ namespace AIKit.Core.Ingestion;
 public class IngestionPipeline<T>
 {
     private readonly IList<Func<IngestionDelegate<T>, IngestionDelegate<T>>> _components;
+    private readonly ILoggerFactory? _loggerFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IngestionPipeline{T}"/> class.
     /// </summary>
     /// <param name="c">The list of middleware components.</param>
-    public IngestionPipeline(IList<Func<IngestionDelegate<T>, IngestionDelegate<T>>> c)
+    /// <param name="loggerFactory">The logger factory for logging.</param>
+    public IngestionPipeline(IList<Func<IngestionDelegate<T>, IngestionDelegate<T>>> c, ILoggerFactory? loggerFactory = null)
     {
         _components = c;
+        _loggerFactory = loggerFactory;
     }
 
     /// <summary>
@@ -26,8 +30,31 @@ public class IngestionPipeline<T>
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task ExecuteAsync(T ctx)
     {
+        if (ctx is DataIngestionContext dataCtx)
+        {
+            dataCtx.LoggerFactory = _loggerFactory;
+        }
+
+        var logger = _loggerFactory?.CreateLogger("IngestionPipeline");
+        logger?.LogInformation("Starting pipeline execution");
+
         IngestionDelegate<T> app = _ => Task.CompletedTask;
         foreach (var c in _components.Reverse()) app = c(app);
-        return app(ctx);
+
+        var task = app(ctx);
+
+        task.ContinueWith(t => 
+        {
+            if (t.IsCompletedSuccessfully)
+            {
+                logger?.LogInformation("Pipeline execution completed successfully");
+            }
+            else if (t.IsFaulted)
+            {
+                logger?.LogError(t.Exception, "Pipeline execution failed");
+            }
+        });
+
+        return task;
     }
 }
