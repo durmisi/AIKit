@@ -16,4 +16,9 @@ public static class ChunkingStrategyFactory
     {
         return new HeaderBasedChunkingStrategy(options);
     }
+
+    public static IChunkingStrategy CreateSectionBased(ChunkingOptions options)
+    {
+        return new SectionBasedChunkingStrategy(options);
+    }
 }
