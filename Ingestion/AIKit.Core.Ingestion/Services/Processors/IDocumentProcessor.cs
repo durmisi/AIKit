@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion.Services;
+namespace AIKit.Core.Ingestion.Services.Processors;
 
 public interface IDocumentProcessor
 {

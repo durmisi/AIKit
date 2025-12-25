@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion.Services;
+namespace AIKit.Core.Ingestion.Services.Writers;
 
 public interface IDocumentWriter
 {

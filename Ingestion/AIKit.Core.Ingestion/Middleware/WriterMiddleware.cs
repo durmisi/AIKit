@@ -1,4 +1,4 @@
-using AIKit.Core.Ingestion.Services;
+using AIKit.Core.Ingestion.Services.Writers;
 
 namespace AIKit.Core.Ingestion.Middleware;
 

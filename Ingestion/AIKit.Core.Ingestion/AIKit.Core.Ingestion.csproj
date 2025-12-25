@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.DataIngestion" Version="10.0.1-preview.1.25571.5" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.1-preview.1.25571.5" />
     <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DataIngestion.Markdig" Version="10.0.1-preview.1.25571.5" />
   </ItemGroup>
 
 </Project>
