@@ -9,7 +9,7 @@ public sealed class TokenBasedChunkingStrategy : IChunkingStrategy
         _options = options;
     }
 
-    public IReadOnlyList<DocumentChunk> Chunk(IngestionDocument document)
+    public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
     {
         var chunks = new List<DocumentChunk>();
         var tokens = _options.Tokenizer.EncodeToIds(document.Content);

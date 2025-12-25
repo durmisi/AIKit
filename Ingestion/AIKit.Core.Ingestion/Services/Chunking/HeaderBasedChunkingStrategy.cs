@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using Microsoft.Extensions.DataIngestion;
 
 namespace AIKit.Core.Ingestion.Services.Chunking;
 
@@ -11,42 +11,27 @@ public sealed class HeaderBasedChunkingStrategy : IChunkingStrategy
         _options = options;
     }
 
-    public IReadOnlyList<DocumentChunk> Chunk(IngestionDocument document)
+    public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
     {
-        var chunks = new List<DocumentChunk>();
-        var lines = document.Content.Split('\n');
-        var currentChunk = new System.Text.StringBuilder();
-        var currentMetadata = new Dictionary<string, object>(document.Metadata);
-
-        foreach (var line in lines)
+        var chunkerOptions = new IngestionChunkerOptions(_options.Tokenizer)
         {
-            if (Regex.IsMatch(line, @"^#{1,6}\s+"))
-            {
-                // New header, save previous chunk if not empty
-                if (currentChunk.Length > 0)
-                {
-                    chunks.Add(new DocumentChunk
-                    {
-                        DocumentId = document.Id,
-                        Content = currentChunk.ToString().Trim(),
-                        Metadata = new Dictionary<string, object>(currentMetadata)
-                    });
-                    currentChunk.Clear();
-                }
-                // Update metadata with header
-                currentMetadata["header"] = line.Trim();
-            }
-            currentChunk.AppendLine(line);
-        }
+            MaxTokensPerChunk = _options.MaxTokensPerChunk,
+            OverlapTokens = _options.OverlapTokens
+        };
 
-        // Add the last chunk
-        if (currentChunk.Length > 0)
+        var chunker = new HeaderChunker(chunkerOptions);
+
+        var dataIngestionDocument = new Microsoft.Extensions.DataIngestion.IngestionDocument(document.Content);
+        var chunks = new List<DocumentChunk>();
+        var asyncChunks = await chunker.ProcessAsync(dataIngestionDocument).ToListAsync();
+
+        foreach (var chunk in asyncChunks)
         {
             chunks.Add(new DocumentChunk
             {
                 DocumentId = document.Id,
-                Content = currentChunk.ToString().Trim(),
-                Metadata = new Dictionary<string, object>(currentMetadata)
+                Content = chunk.Content,
+                Metadata = new Dictionary<string, object>(document.Metadata)
             });
         }
 
