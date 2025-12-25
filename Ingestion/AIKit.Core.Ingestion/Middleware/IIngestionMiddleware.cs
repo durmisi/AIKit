@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion;
+namespace AIKit.Core.Ingestion.Middleware;
 
 /// <summary>
 /// Represents a delegate for the next step in the ingestion pipeline.

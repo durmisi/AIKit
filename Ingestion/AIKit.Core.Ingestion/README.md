@@ -97,3 +97,42 @@ In the example, ErrorHandlingMiddleware runs first (outermost), then ProcessingM
 ## Error Handling
 
 Use `ErrorHandlingMiddleware<T>` to catch exceptions and add them to `ctx.Errors`. Ensure your context inherits from `IngestionContext`.
+
+## Full Data Ingestion Pipeline
+
+For comprehensive data ingestion, use the middleware pipeline with specialized components:
+
+```csharp
+using AIKit.Core.Ingestion;
+using AIKit.Core.Ingestion.Middleware;
+
+// Define context
+var context = new DataIngestionContext
+{
+    Files = new[] { "document1.txt", "document2.txt" }
+};
+
+// Build pipeline
+var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
+    .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
+    .UseMiddleware<ReaderMiddleware>()
+    .UseMiddleware<DocumentProcessorMiddleware>()
+    .UseMiddleware<ChunkingMiddleware>()
+    .UseMiddleware<WriterMiddleware>()
+    .Build();
+
+// Execute
+await pipeline.ExecuteAsync(context);
+
+// Check results
+if (context.Errors.Any())
+{
+    // Handle errors
+}
+else
+{
+    // Ingestion complete
+}
+```
+
+This pipeline reads files, processes the document, chunks it, and writes to a vector store.

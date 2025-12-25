@@ -1,3 +1,5 @@
+using AIKit.Core.Ingestion.Middleware;
+
 namespace AIKit.Core.Ingestion;
 
 /// <summary>
