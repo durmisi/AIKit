@@ -17,6 +17,7 @@ The `IngestionPipeline<T>` allows chaining middleware components that process a 
 - `IIngestionDocumentProvider`: Interface for document readers (e.g., file system, Markdown).
 - `IChunkingStrategy`: Interface for document chunking strategies (token-based, semantic, header-based).
 - `IDocumentWriter`: Interface for writing chunks to vector stores.
+- `IChunkProcessor`: Interface for chunk-level processing.
 
 ## Building a Pipeline
 
@@ -58,12 +59,31 @@ var chunkingOptions = new ChunkingOptions
     EmbeddingGenerator = embeddingGenerator  // For semantic chunking
 };
 
-// Build pipeline with semantic similarity chunking
+// Configure document processor
+EnricherOptions enricherOptions = new(chatClient)
+{
+    // Enricher failures should not fail the whole ingestion pipeline, as they are best-effort enhancements.
+    // This logger factory can be used to create loggers to log such failures.
+    LoggerFactory = loggerFactory
+};
+
+var processors = new IDocumentProcessor[]
+{
+    new ImageAlternativeTextProcessor(enricherOptions),
+    // Add more processors like SummaryProcessor if adapted
+};
+
+var chunkProcessors = new IChunkProcessor[]
+{
+    new SummaryChunkProcessor(enricherOptions)
+};
+
+// Build pipeline
 var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
     .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
     .UseMiddleware<ReaderMiddleware>(new FileSystemDocumentProvider(new DirectoryInfo("./data"), "*.md"))
-    .UseMiddleware<DocumentProcessorMiddleware>(new[] { /* processors */ })
-    .UseMiddleware<ChunkingMiddleware>(ChunkingStrategyFactory.CreateSemanticSimilarity(chunkingOptions))
+    .UseMiddleware<DocumentProcessorMiddleware>(processors)
+    .UseMiddleware<ChunkingMiddleware>(ChunkingStrategyFactory.CreateSemanticSimilarity(chunkingOptions), chunkProcessors)
     .UseMiddleware<WriterMiddleware>(/* writer */)
     .WithLoggerFactory(loggerFactory)
     .Build();
@@ -96,6 +116,15 @@ Implement `IIngestionDocumentProvider` for custom readers:
 
 - `FileSystemDocumentProvider`: Reads files from a directory with search patterns, supports Markdown parsing.
 
+## Document Processors
+
+Implement `IDocumentProcessor` for custom document processing:
+
+- `ImageAlternativeTextProcessor`: Enriches images with AI-generated alternative text (adapts `ImageAlternativeTextEnricher`).
+- Add custom processors for AI enrichments like summarization or metadata extraction.
+
+Configure with `EnricherOptions` including chat client and logger factory.
+
 ## Chunking Strategies
 
 Implement `IChunkingStrategy` for custom chunking:
@@ -106,6 +135,14 @@ Implement `IChunkingStrategy` for custom chunking:
 - `SectionBasedChunkingStrategy`: Splits by sections.
 
 Configure with `ChunkingOptions` including tokenizer, embedding generator, and limits.
+
+## Chunk Processors
+
+Implement `IChunkProcessor` for custom chunk processing:
+
+- `SummaryChunkProcessor`: Generates AI summaries for chunks (adapts `SummaryEnricher`).
+
+Configure with `EnricherOptions` including chat client and logger factory.
 
 ## Logging
 
@@ -125,4 +162,4 @@ Use `IDocumentWriter` implementations to write chunks to AIKit vector stores lik
 - Custom providers via `IIngestionDocumentProvider`.
 - Custom strategies via `IChunkingStrategy`.
 - Custom writers via `IDocumentWriter`.
-- Integrate AI enrichments using AIKit clients
+- Integrate AI enrichments using AIKit clients- Integrate AI enrichments using AIKit clients
