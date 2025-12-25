@@ -1,49 +1,22 @@
-namespace AIKit.Core.Ingestion.Services.ChunkProcessors;
-
 using Microsoft.Extensions.DataIngestion;
+
+namespace AIKit.Core.Ingestion.Services.ChunkProcessors;
 
 public sealed class SummaryChunkProcessor : IChunkProcessor
 {
     private readonly SummaryEnricher _enricher;
 
-    public SummaryChunkProcessor(EnricherOptions options, int? maxWordCount = null)
+    public SummaryChunkProcessor(SummaryEnricher enricher)
     {
-        _enricher = new SummaryEnricher(options, maxWordCount);
+        _enricher = enricher;
     }
 
-    public async Task ProcessAsync(
-        IReadOnlyList<DocumentChunk> chunks,
-        CancellationToken ct)
+    public async Task ProcessAsync(IReadOnlyList<DocumentChunk> chunks, CancellationToken ct)
     {
-        // 1. Convert AIKit chunks → IngestionChunk<string>
-        var ingestionChunks = chunks.Select(ToIngestionChunk);
+        var ingestionChunks = chunks
+            .Select(x => new IngestionChunk<string>(x.Content, new Microsoft.Extensions.DataIngestion.IngestionDocument(x.DocumentId)))
+            .ToAsyncEnumerable();
 
-        // 2. Run Microsoft streaming processor
-        var enriched = _enricher.ProcessAsync(
-            ingestionChunks.ToAsyncEnumerable(),
-            ct);
-
-        // 3. Materialize and map results back
-        await foreach (var enrichedChunk in enriched.WithCancellation(ct))
-        {
-            ApplyMetadata(enrichedChunk, chunks);
-        }
-    }
-
-    private static IngestionChunk<string> ToIngestionChunk(DocumentChunk chunk)
-    {
-        return new IngestionChunk<string>(
-            chunk.Content,
-            new IngestionDocument(chunk.DocumentId)
-        );
-    }
-
-    private static void ApplyMetadata(
-        IngestionChunk<string> enrichedChunk,
-        IReadOnlyList<DocumentChunk> targetChunks)
-    {
-        // Metadata dictionary is shared by reference
-        // so nothing special is required here.
-        // This method exists for clarity and future extensibility.
+        _enricher.ProcessAsync(ingestionChunks, ct);
     }
 }

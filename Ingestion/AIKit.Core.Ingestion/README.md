@@ -67,15 +67,17 @@ EnricherOptions enricherOptions = new(chatClient)
     LoggerFactory = loggerFactory
 };
 
+IngestionDocumentProcessor imageAlternativeTextEnricher = new ImageAlternativeTextEnricher(enricherOptions);
+IngestionChunkProcessor<string> summaryEnricher = new SummaryEnricher(enricherOptions);
+
 var processors = new IDocumentProcessor[]
 {
-    new ImageAlternativeTextProcessor(enricherOptions),
-    // Add more processors like SummaryProcessor if adapted
+    new ImageAlternativeTextProcessor(imageAlternativeTextEnricher),
 };
 
 var chunkProcessors = new IChunkProcessor[]
 {
-    new SummaryChunkProcessor(enricherOptions)
+    new SummaryChunkProcessor(summaryEnricher)
 };
 
 // Build pipeline
