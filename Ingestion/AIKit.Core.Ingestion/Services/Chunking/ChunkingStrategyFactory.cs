@@ -2,11 +2,6 @@ namespace AIKit.Core.Ingestion.Services.Chunking;
 
 public static class ChunkingStrategyFactory
 {
-    public static IChunkingStrategy CreateTokenBased(ChunkingOptions options)
-    {
-        return new TokenBasedChunkingStrategy(options);
-    }
-
     public static IChunkingStrategy CreateSemanticSimilarity(ChunkingOptions options)
     {
         return new SemanticSimilarityChunkingStrategy(options);

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DataIngestion;
+
 namespace AIKit.Core.Ingestion.Services.Providers;
 
 public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
@@ -16,23 +18,13 @@ public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
     {
         var files = _directory.EnumerateFiles(_searchPattern, SearchOption.AllDirectories);
 
+        var reader = new MarkdownReader();
+
         foreach (var file in files)
         {
-            var content = await File.ReadAllTextAsync(file.FullName, cancellationToken);
-            var id = Path.GetFileNameWithoutExtension(file.Name);
+            var ingestionDocument = await reader.ReadAsync(file, cancellationToken);
 
-            var metadata = new Dictionary<string, object>
-            {
-                ["filePath"] = file.FullName,
-                ["fileExtension"] = file.Extension
-            };
-
-            yield return new IngestionDocument
-            {
-                Id = id,
-                Content = content,
-                Metadata = metadata
-            };
+            yield return ingestionDocument;
         }
     }
 }

@@ -1,6 +1,9 @@
+using Microsoft.Extensions.DataIngestion;
+
 namespace AIKit.Core.Ingestion.Services.Chunking;
 
 public interface IChunkingStrategy
 {
-    Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document);
+    Task<IReadOnlyList<IngestionChunk<string>>> Chunk(IngestionDocument document);
 }
+    

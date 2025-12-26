@@ -12,7 +12,7 @@ public sealed class SemanticSimilarityChunkingStrategy : IChunkingStrategy
         _options = options;
     }
 
-    public async Task<IReadOnlyList<DocumentChunk>> Chunk(IngestionDocument document)
+    public async Task<IReadOnlyList<IngestionChunk<string>>> Chunk(IngestionDocument document)
     {
         if (_options.EmbeddingGenerator is null)
         {
@@ -31,20 +31,7 @@ public sealed class SemanticSimilarityChunkingStrategy : IChunkingStrategy
         };
 
         var chunker = new SemanticSimilarityChunker(_options.EmbeddingGenerator, chunkerOptions);
-
-        var dataIngestionDocument = new Microsoft.Extensions.DataIngestion.IngestionDocument(document.Content);
-        var chunks = new List<DocumentChunk>();
-        var asyncChunks = await chunker.ProcessAsync(dataIngestionDocument).ToListAsync();
-
-        foreach (var chunk in asyncChunks)
-        {
-            chunks.Add(new DocumentChunk
-            {
-                DocumentId = document.Id,
-                Content = chunk.Content,
-                Metadata = new Dictionary<string, object>(document.Metadata)
-            });
-        }
+        var chunks = await chunker.ProcessAsync(document).ToListAsync();
 
         return chunks;
     }

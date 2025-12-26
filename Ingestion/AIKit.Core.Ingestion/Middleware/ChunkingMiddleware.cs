@@ -1,5 +1,6 @@
 using AIKit.Core.Ingestion.Services.Chunking;
 using AIKit.Core.Ingestion.Services.ChunkProcessors;
+using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion.Middleware;
@@ -22,17 +23,20 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
         var logger = ctx.LoggerFactory?.CreateLogger("ChunkingMiddleware");
         logger?.LogInformation("Starting chunking for {DocumentCount} documents", ctx.Documents.Count);
 
-        var chunks = (await Task.WhenAll(ctx.Documents.Select(d => _chunkingStrategy.Chunk(d)))).SelectMany(c => c).ToList();
+        var chunks = (await Task.WhenAll(ctx.Documents.Select(d => _chunkingStrategy.Chunk(d)))).SelectMany(c => c);
 
         foreach (var processor in _chunkProcessors)
         {
             logger?.LogInformation("Applying chunk processor: {ProcessorName}", processor.GetType().Name);
-            await processor.ProcessAsync(chunks, CancellationToken.None);
+            await foreach (var chunk in processor.ProcessAsync(chunks.ToAsyncEnumerable(), CancellationToken.None))
+            {
+                // Process each chunk as needed
+            }
         }
 
         ctx.Properties["chunks"] = chunks;
 
-        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", ((List<DocumentChunk>)ctx.Properties["chunks"]).Count);
+        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", ((List<IngestionChunker<string>>)ctx.Properties["chunks"]).Count);
 
         await next(ctx);
     }

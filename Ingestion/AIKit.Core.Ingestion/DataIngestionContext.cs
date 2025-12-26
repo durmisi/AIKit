@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion;

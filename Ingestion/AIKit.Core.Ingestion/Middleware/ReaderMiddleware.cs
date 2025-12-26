@@ -7,12 +7,12 @@ namespace AIKit.Core.Ingestion.Middleware;
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
     private readonly IIngestionDocumentProvider _reader;
-    private readonly IEnumerable<IDocumentProcessor> _processors;
+    private readonly IEnumerable<IIngestionDocumentProcessor> _processors;
 
-    public ReaderMiddleware(IIngestionDocumentProvider reader, IEnumerable<IDocumentProcessor>? processors = null)
+    public ReaderMiddleware(IIngestionDocumentProvider reader, IEnumerable<IIngestionDocumentProcessor>? processors = null)
     {
         _reader = reader;
-        _processors = processors ?? Array.Empty<IDocumentProcessor>();
+        _processors = processors ?? Array.Empty<IIngestionDocumentProcessor>();
     }
 
     public async Task InvokeAsync(

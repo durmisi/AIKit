@@ -2,7 +2,7 @@ using Microsoft.Extensions.DataIngestion;
 
 namespace AIKit.Core.Ingestion.Services.Processors;
 
-public sealed class ImageAlternativeTextProcessor : IDocumentProcessor
+public sealed class ImageAlternativeTextProcessor : IIngestionDocumentProcessor
 {
     private readonly IngestionDocumentProcessor _enricher;
 
@@ -11,9 +11,9 @@ public sealed class ImageAlternativeTextProcessor : IDocumentProcessor
         _enricher = enricher;
     }
 
-    public async Task ProcessAsync(IngestionDocument document, CancellationToken ct)
+    public async Task<IngestionDocument> ProcessAsync(IngestionDocument ingestionDocument, CancellationToken ct)
     {
-        var dataDoc = new Microsoft.Extensions.DataIngestion.IngestionDocument(document.Content);
-        await _enricher.ProcessAsync(dataDoc, ct);
+        var ingestionDocumentProcessed = await _enricher.ProcessAsync(ingestionDocument, ct);
+        return ingestionDocumentProcessed;
     }
 }

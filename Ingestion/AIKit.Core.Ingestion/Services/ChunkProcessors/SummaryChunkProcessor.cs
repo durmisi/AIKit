@@ -11,12 +11,11 @@ public sealed class SummaryChunkProcessor : IChunkProcessor
         _enricher = enricher;
     }
 
-    public async Task ProcessAsync(IReadOnlyList<DocumentChunk> chunks, CancellationToken ct)
+    public async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(IAsyncEnumerable<IngestionChunk<string>> chunks, CancellationToken ct)
     {
-        var ingestionChunks = chunks
-            .Select(x => new IngestionChunk<string>(x.Content, new Microsoft.Extensions.DataIngestion.IngestionDocument(x.DocumentId)))
-            .ToAsyncEnumerable();
-
-        _enricher.ProcessAsync(ingestionChunks, ct);
+       await foreach (var chunk in _enricher.ProcessAsync(chunks, ct))
+       {
+           yield return chunk;
+       }
     }
 }

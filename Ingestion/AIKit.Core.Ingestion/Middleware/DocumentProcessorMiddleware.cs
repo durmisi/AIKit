@@ -5,9 +5,9 @@ namespace AIKit.Core.Ingestion.Middleware;
 
 public sealed class DocumentProcessorMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
-    private readonly IEnumerable<IDocumentProcessor> _processors;
+    private readonly IEnumerable<IIngestionDocumentProcessor> _processors;
 
-    public DocumentProcessorMiddleware(IEnumerable<IDocumentProcessor> processors)
+    public DocumentProcessorMiddleware(IEnumerable<IIngestionDocumentProcessor> processors)
     {
         _processors = processors;
     }
