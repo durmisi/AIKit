@@ -6,9 +6,9 @@ public sealed class ImageAlternativeTextProcessor : IIngestionDocumentProcessor
 {
     private readonly IngestionDocumentProcessor _enricher;
 
-    public ImageAlternativeTextProcessor(IngestionDocumentProcessor enricher)
+    public ImageAlternativeTextProcessor(EnricherOptions options)
     {
-        _enricher = enricher;
+        _enricher = new ImageAlternativeTextEnricher(options);
     }
 
     public async Task<IngestionDocument> ProcessAsync(IngestionDocument ingestionDocument, CancellationToken ct)

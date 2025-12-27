@@ -5,26 +5,28 @@ namespace AIKit.Core.Ingestion.Services.Providers;
 public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
 {
     private readonly DirectoryInfo _directory;
-    private readonly string _searchPattern;
-    private readonly IngestionDocumentReader _reader;
+    private readonly Dictionary<string, IngestionDocumentReader> _readers;
 
-    public FileSystemDocumentProvider(DirectoryInfo directory, IngestionDocumentReader reader, string searchPattern = "*.*")
+    public FileSystemDocumentProvider(DirectoryInfo directory, Dictionary<string, IngestionDocumentReader> readers)
     {
         _directory = directory;
-        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-        _searchPattern = searchPattern;
+        _readers = readers ?? throw new ArgumentNullException(nameof(readers));
     }
 
     public async IAsyncEnumerable<IngestionDocument> ReadAsync(
         CancellationToken cancellationToken = default)
     {
-        var files = _directory.EnumerateFiles(_searchPattern, SearchOption.AllDirectories);
+        var files = _directory.EnumerateFiles("*.*", SearchOption.AllDirectories);
 
         foreach (var file in files)
         {
-            var ingestionDocument = await _reader.ReadAsync(file, cancellationToken);
-
-            yield return ingestionDocument;
+            var extension = file.Extension.ToLowerInvariant();
+            if (_readers.TryGetValue(extension, out var reader))
+            {
+                var ingestionDocument = await reader.ReadAsync(file, cancellationToken);
+                yield return ingestionDocument;
+            }
+            // Skip files with unsupported extensions
         }
     }
 }

@@ -3,6 +3,7 @@ using AIKit.Core.Ingestion.Services.Chunking;
 using AIKit.Core.Ingestion.Services.ChunkProcessors;
 using AIKit.Core.Ingestion.Services.Processors;
 using AIKit.Core.Ingestion.Services.Providers;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.ML.Tokenizers;
 
@@ -13,18 +14,28 @@ public class IngestionPipelineTests
     [Fact]
     public async Task Pipeline_ProcessesDocumentsSuccessfully()
     {
+
+        var readers = new Dictionary<string, IngestionDocumentReader>
+        {
+            { ".md", new MarkdownReader() },
+            // { ".docx", new WordDocumentReader() },
+            // { ".xlsx", new ExcelDocumentReader() },
+            // { ".pptx", new PowerPointDocumentReader() },
+        };
+
         // Arrange
-        var testDataDir = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "TestData"));
+        var source = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "TestData"));
+        var provider = new FileSystemDocumentProvider(source, readers);
 
         var processors = new List<IIngestionDocumentProcessor>(); // Skip AI-dependent processors for test
 
-
+        //IChatClient chatClient = new MockChatClient();
+        //processors.Add(new ImageAlternativeTextProcessor(new EnricherOptions(chatClient)));
 
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
-            .Use(next => async ctx => await new ReaderMiddleware(new FileSystemDocumentProvider(testDataDir, new MarkdownReader(), "*.md"), processors).InvokeAsync(ctx, next))
-            .Use(next => async ctx => await new DocumentProcessorMiddleware(processors).InvokeAsync(ctx, next))
+            .Use(next => async ctx => await new ReaderMiddleware(provider, processors).InvokeAsync(ctx, next))
             .Use(next => async ctx => await new ChunkingMiddleware(new SectionBasedChunkingStrategy(new ChunkingOptions
             {
                 MaxTokensPerChunk = 100,

@@ -14,7 +14,7 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         IEnumerable<IIngestionDocumentProcessor>? processors = null)
     {
         _documentProvider = documentProvider;
-        _processors = processors ?? Array.Empty<IIngestionDocumentProcessor>();
+        _processors = processors ?? [];
     }
 
     public async Task InvokeAsync(
@@ -27,12 +27,14 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         await foreach (var doc in _documentProvider.ReadAsync())
         {
             // Apply processors to the document
+            var doc1 = doc;
             foreach (var processor in _processors)
             {
-                await processor.ProcessAsync(doc, CancellationToken.None);
+                var processedDocument = await processor.ProcessAsync(doc, CancellationToken.None);
+                doc1 = processedDocument ?? doc1;
             }
 
-            ctx.Documents.Add(doc);
+            ctx.Documents.Add(doc1);
         }
 
         logger?.LogInformation("Reading completed, loaded {DocumentCount} documents", ctx.Documents.Count);
