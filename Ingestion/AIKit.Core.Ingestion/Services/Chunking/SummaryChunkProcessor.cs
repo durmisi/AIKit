@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DataIngestion;
+using System.Runtime.CompilerServices;
 
 namespace AIKit.Core.Ingestion.Services.Chunking;
 
@@ -11,11 +12,13 @@ public sealed class SummaryChunkProcessor : IChunkProcessor
         _enricher = enricher;
     }
 
-    public async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(IAsyncEnumerable<IngestionChunk<string>> chunks, CancellationToken ct)
+    public async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(
+        IAsyncEnumerable<IngestionChunk<string>> chunks,
+         [EnumeratorCancellation] CancellationToken ct)
     {
-       await foreach (var chunk in _enricher.ProcessAsync(chunks, ct))
-       {
-           yield return chunk;
-       }
+        await foreach (var chunk in _enricher.ProcessAsync(chunks, ct))
+        {
+            yield return chunk;
+        }
     }
 }

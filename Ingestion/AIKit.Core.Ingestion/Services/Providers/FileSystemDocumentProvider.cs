@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DataIngestion;
+using System.Runtime.CompilerServices;
 
 namespace AIKit.Core.Ingestion.Services.Providers;
 
@@ -14,7 +15,7 @@ public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
     }
 
     public async IAsyncEnumerable<IngestionDocument> ReadAsync(
-        CancellationToken cancellationToken = default)
+       [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var files = _directory.EnumerateFiles("*.*", SearchOption.AllDirectories);
 

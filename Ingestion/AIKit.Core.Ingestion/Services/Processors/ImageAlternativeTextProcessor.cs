@@ -13,7 +13,6 @@ public sealed class ImageAlternativeTextProcessor : IIngestionDocumentProcessor
 
     public async Task<IngestionDocument> ProcessAsync(IngestionDocument ingestionDocument, CancellationToken ct)
     {
-        var ingestionDocumentProcessed = await _enricher.ProcessAsync(ingestionDocument, ct);
-        return ingestionDocumentProcessed;
+        return await _enricher.ProcessAsync(ingestionDocument, ct);
     }
 }
