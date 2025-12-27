@@ -28,13 +28,7 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         {
             var processedDoc = doc;
 
-            // Determine the file extension from the document's URI
-            string extension = string.Empty;
-            var dynamicDoc = (dynamic)processedDoc;
-            if (dynamicDoc.Uri is not null)
-            {
-                extension = Path.GetExtension(dynamicDoc.Uri.LocalPath).ToLowerInvariant();
-            }
+            string extension = Path.GetExtension(doc.Identifier).ToLowerInvariant();
 
             // Apply processors for this extension
             if (_processorsPerExtension.TryGetValue(extension, out var processors))

@@ -40,6 +40,7 @@ public class IngestionPipelineTests
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
+            .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
             .Use(next => async ctx => await new ReaderMiddleware(provider, processors).InvokeAsync(ctx, next))
             .Use(next => async ctx => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next))
             .Build();
