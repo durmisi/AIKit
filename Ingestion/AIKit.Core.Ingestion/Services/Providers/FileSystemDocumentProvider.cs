@@ -6,10 +6,12 @@ public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
 {
     private readonly DirectoryInfo _directory;
     private readonly string _searchPattern;
+    private readonly IngestionDocumentReader _reader;
 
-    public FileSystemDocumentProvider(DirectoryInfo directory, string searchPattern = "*.*")
+    public FileSystemDocumentProvider(DirectoryInfo directory, IngestionDocumentReader reader, string searchPattern = "*.*")
     {
         _directory = directory;
+        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _searchPattern = searchPattern;
     }
 
@@ -18,11 +20,9 @@ public sealed class FileSystemDocumentProvider : IIngestionDocumentProvider
     {
         var files = _directory.EnumerateFiles(_searchPattern, SearchOption.AllDirectories);
 
-        var reader = new MarkdownReader();
-
         foreach (var file in files)
         {
-            var ingestionDocument = await reader.ReadAsync(file, cancellationToken);
+            var ingestionDocument = await _reader.ReadAsync(file, cancellationToken);
 
             yield return ingestionDocument;
         }

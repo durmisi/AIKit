@@ -6,12 +6,14 @@ namespace AIKit.Core.Ingestion.Middleware;
 
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
-    private readonly IIngestionDocumentProvider _reader;
+    private readonly IIngestionDocumentProvider _documentProvider;
     private readonly IEnumerable<IIngestionDocumentProcessor> _processors;
 
-    public ReaderMiddleware(IIngestionDocumentProvider reader, IEnumerable<IIngestionDocumentProcessor>? processors = null)
+    public ReaderMiddleware(
+        IIngestionDocumentProvider documentProvider,
+        IEnumerable<IIngestionDocumentProcessor>? processors = null)
     {
-        _reader = reader;
+        _documentProvider = documentProvider;
         _processors = processors ?? Array.Empty<IIngestionDocumentProcessor>();
     }
 
@@ -22,7 +24,7 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         var logger = ctx.LoggerFactory?.CreateLogger("ReaderMiddleware");
         logger?.LogInformation("Starting document reading");
 
-        await foreach (var doc in _reader.ReadAsync())
+        await foreach (var doc in _documentProvider.ReadAsync())
         {
             // Apply processors to the document
             foreach (var processor in _processors)

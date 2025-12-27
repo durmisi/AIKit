@@ -1,5 +1,3 @@
-// Adapted from Microsoft.Extensions.DataIngestion.Chunkers.SectionChunker
-
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.DataIngestion.Chunkers;
 
