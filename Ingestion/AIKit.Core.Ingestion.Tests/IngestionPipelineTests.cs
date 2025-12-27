@@ -18,22 +18,22 @@ public class IngestionPipelineTests
 
         var processors = new List<IIngestionDocumentProcessor>(); // Skip AI-dependent processors for test
 
-        var chunkingOptions = new ChunkingOptions
-        {
-            MaxTokensPerChunk = 100,
-            OverlapTokens = 10,
-            Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
-        };
-        var chunkingStrategy = new SectionBasedChunkingStrategy(chunkingOptions);
 
-        var chunkProcessors = new List<IChunkProcessor>(); // Skip AI-dependent processors
-        
+
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
             .Use(next => async ctx => await new ReaderMiddleware(new FileSystemDocumentProvider(testDataDir, new MarkdownReader(), "*.md"), processors).InvokeAsync(ctx, next))
             .Use(next => async ctx => await new DocumentProcessorMiddleware(processors).InvokeAsync(ctx, next))
-            .Use(next => async ctx => await new ChunkingMiddleware(chunkingStrategy, chunkProcessors).InvokeAsync(ctx, next))
+            .Use(next => async ctx => await new ChunkingMiddleware(new SectionBasedChunkingStrategy(new ChunkingOptions
+            {
+                MaxTokensPerChunk = 100,
+                OverlapTokens = 10,
+                Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
+            }), new List<IChunkProcessor>()
+            {
+
+            }).InvokeAsync(ctx, next))
             .Build();
 
         // Act
