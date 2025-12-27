@@ -1,6 +1,5 @@
 ﻿using AIKit.Core.Ingestion.Middleware;
 using AIKit.Core.Ingestion.Services.Chunking;
-using AIKit.Core.Ingestion.Services.ChunkProcessors;
 using AIKit.Core.Ingestion.Services.Processors;
 using AIKit.Core.Ingestion.Services.Providers;
 using Microsoft.Extensions.AI;

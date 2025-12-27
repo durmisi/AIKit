@@ -1,5 +1,4 @@
 using AIKit.Core.Ingestion.Services.Chunking;
-using AIKit.Core.Ingestion.Services.ChunkProcessors;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
