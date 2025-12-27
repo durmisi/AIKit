@@ -1,20 +1,21 @@
 using AIKit.Core.Ingestion.Services.Processors;
 using Microsoft.Extensions.Logging;
 using AIKit.Core.Ingestion.Services.Providers;
+using System.IO;
 
 namespace AIKit.Core.Ingestion.Middleware;
 
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
     private readonly IIngestionDocumentProvider _documentProvider;
-    private readonly IEnumerable<IIngestionDocumentProcessor> _processors;
+    private readonly Dictionary<string, IEnumerable<IIngestionDocumentProcessor>> _processorsPerExtension;
 
     public ReaderMiddleware(
         IIngestionDocumentProvider documentProvider,
-        IEnumerable<IIngestionDocumentProcessor>? processors = null)
+        Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>? processorsPerExtension = null)
     {
         _documentProvider = documentProvider;
-        _processors = processors ?? [];
+        _processorsPerExtension = processorsPerExtension ?? new Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>();
     }
 
     public async Task InvokeAsync(
@@ -26,15 +27,26 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
 
         await foreach (var doc in _documentProvider.ReadAsync())
         {
-            // Apply processors to the document
-            var doc1 = doc;
-            foreach (var processor in _processors)
+            var processedDoc = doc;
+
+            // Determine the file extension from the document's URI
+            string extension = string.Empty;
+            var dynamicDoc = (dynamic)processedDoc;
+            if (dynamicDoc.Uri is not null)
             {
-                var processedDocument = await processor.ProcessAsync(doc, CancellationToken.None);
-                doc1 = processedDocument ?? doc1;
+                extension = Path.GetExtension(dynamicDoc.Uri.LocalPath).ToLowerInvariant();
             }
 
-            ctx.Documents.Add(doc1);
+            // Apply processors for this extension
+            if (_processorsPerExtension.TryGetValue(extension, out var processors))
+            {
+                foreach (var processor in processors)
+                {
+                    processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
+                }
+            }
+
+            ctx.Documents.Add(processedDoc);
         }
 
         logger?.LogInformation("Reading completed, loaded {DocumentCount} documents", ctx.Documents.Count);

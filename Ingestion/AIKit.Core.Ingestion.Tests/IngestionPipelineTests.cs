@@ -27,24 +27,23 @@ public class IngestionPipelineTests
         var source = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "TestData"));
         var provider = new FileSystemDocumentProvider(source, readers);
 
-        var processors = new List<IIngestionDocumentProcessor>(); // Skip AI-dependent processors for test
+        var processors = new Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>(); // Skip AI-dependent processors for test
 
         //IChatClient chatClient = new MockChatClient();
-        //processors.Add(new ImageAlternativeTextProcessor(new EnricherOptions(chatClient)));
+        //processors.Add(".jpg", new[] { new ImageAlternativeTextProcessor(new EnricherOptions(chatClient)) });
+
+        var chunkingStrategy = new SectionBasedChunkingStrategy(new ChunkingOptions
+        {
+            MaxTokensPerChunk = 100,
+            OverlapTokens = 10,
+            Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
+        });
 
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
             .Use(next => async ctx => await new ReaderMiddleware(provider, processors).InvokeAsync(ctx, next))
-            .Use(next => async ctx => await new ChunkingMiddleware(new SectionBasedChunkingStrategy(new ChunkingOptions
-            {
-                MaxTokensPerChunk = 100,
-                OverlapTokens = 10,
-                Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
-            }), new List<IChunkProcessor>()
-            {
-
-            }).InvokeAsync(ctx, next))
+            .Use(next => async ctx => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next))
             .Build();
 
         // Act
