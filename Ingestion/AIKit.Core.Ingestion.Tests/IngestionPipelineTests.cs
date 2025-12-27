@@ -14,7 +14,6 @@ public class IngestionPipelineTests
     [Fact]
     public async Task Pipeline_ProcessesDocumentsSuccessfully()
     {
-
         var readers = new Dictionary<string, IngestionDocumentReader>
         {
             { ".md", new MarkdownReader() },
