@@ -1,19 +1,23 @@
 using AIKit.Core.Ingestion.Services.Processors;
 using AIKit.Core.Ingestion.Services.Providers;
+using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion.Middleware;
 
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
-    private readonly IIngestionDocumentProvider _documentProvider;
+    private readonly IIngestionFileProvider _fileProvider;
+    private readonly Dictionary<string, IngestionDocumentReader> _readers;
     private readonly Dictionary<string, IEnumerable<IIngestionDocumentProcessor>> _processorsPerExtension;
 
     public ReaderMiddleware(
-        IIngestionDocumentProvider documentProvider,
+        IIngestionFileProvider fileProvider,
+        Dictionary<string, IngestionDocumentReader> readers,
         Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>? processorsPerExtension = null)
     {
-        _documentProvider = documentProvider;
+        _fileProvider = fileProvider;
+        _readers = readers ?? throw new ArgumentNullException(nameof(readers));
         _processorsPerExtension = processorsPerExtension ?? new Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>();
     }
 
@@ -24,22 +28,25 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         var logger = ctx.LoggerFactory?.CreateLogger("ReaderMiddleware");
         logger?.LogInformation("Starting document reading");
 
-        await foreach (var doc in _documentProvider.ReadAsync())
+        await foreach (var file in _fileProvider.ReadAsync())
         {
-            var processedDoc = doc;
-
-            string extension = Path.GetExtension(doc.Identifier).ToLowerInvariant();
-
-            // Apply processors for this extension
-            if (_processorsPerExtension.TryGetValue(extension, out var processors))
+            var extension = file.Extension.ToLowerInvariant();
+            if (_readers.TryGetValue(extension, out var reader))
             {
-                foreach (var processor in processors)
-                {
-                    processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
-                }
-            }
+                var processedDoc = await reader.ReadAsync(file, CancellationToken.None);
 
-            ctx.Documents.Add(processedDoc);
+                // Apply processors for this extension
+                if (_processorsPerExtension.TryGetValue(extension, out var processors))
+                {
+                    foreach (var processor in processors)
+                    {
+                        processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
+                    }
+                }
+
+                ctx.Documents.Add(processedDoc);
+            }
+            // Skip files with unsupported extensions
         }
 
         logger?.LogInformation("Reading completed, loaded {DocumentCount} documents", ctx.Documents.Count);

@@ -13,6 +13,7 @@ public class IngestionPipelineTests
     [Fact]
     public async Task Pipeline_ProcessesDocumentsSuccessfully()
     {
+        // Arrange
         var readers = new Dictionary<string, IngestionDocumentReader>
         {
             { ".md", new MarkdownReader() },
@@ -21,9 +22,7 @@ public class IngestionPipelineTests
             // { ".pptx", new PowerPointDocumentReader() },
         };
 
-        // Arrange
-        var source = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "TestData"));
-        var provider = new FileSystemDocumentProvider(source, readers);
+        var provider = new FileSystemFileProvider(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "TestData")));
 
         var processors = new Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>(); // Skip AI-dependent processors for test
 
@@ -41,7 +40,7 @@ public class IngestionPipelineTests
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
             .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
-            .Use(next => async ctx => await new ReaderMiddleware(provider, processors).InvokeAsync(ctx, next))
+            .Use(next => async ctx => await new ReaderMiddleware(provider, readers, processors).InvokeAsync(ctx, next))
             .Use(next => async ctx => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next))
             .Build();
 
