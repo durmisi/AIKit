@@ -23,20 +23,27 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
         var logger = ctx.LoggerFactory?.CreateLogger("ChunkingMiddleware");
         logger?.LogInformation("Starting chunking for {DocumentCount} documents", ctx.Documents.Count);
 
-        var chunks = (await Task.WhenAll(ctx.Documents.Select(d => _chunkingStrategy.Chunk(d)))).SelectMany(c => c);
+        var allChunks = new List<IngestionChunk<string>>();
 
-        foreach (var processor in _chunkProcessors)
+        foreach (var doc in ctx.Documents)
         {
-            logger?.LogInformation("Applying chunk processor: {ProcessorName}", processor.GetType().Name);
-            await foreach (var chunk in processor.ProcessAsync(chunks.ToAsyncEnumerable(), CancellationToken.None))
+            var docChunks = await _chunkingStrategy.Chunk(doc);
+            var docChunksList = new List<IngestionChunk<string>>(docChunks);
+
+            var chunksAsync = docChunksList.ToAsyncEnumerable();
+
+            foreach (var processor in _chunkProcessors)
             {
-                // Process each chunk as needed
+                logger?.LogInformation("Applying chunk processor: {ProcessorName}", processor.GetType().Name);
+                chunksAsync = processor.ProcessAsync(chunksAsync, CancellationToken.None);
             }
+
+            var processedDocChunks = await chunksAsync.ToListAsync();
+            ctx.DocumentChunks[doc.Identifier] = processedDocChunks;
+            allChunks.AddRange(processedDocChunks);
         }
 
-        ctx.Properties["chunks"] = chunks;
-
-        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", ((List<IngestionChunker<string>>)ctx.Properties["chunks"]).Count);
+        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", allChunks.Count);
 
         await next(ctx);
     }

@@ -50,8 +50,8 @@ public class IngestionPipelineTests
 
         // Assert
         Assert.NotEmpty(context.Documents);
-        Assert.True(context.Properties.ContainsKey("chunks"));
-        var chunks = (IEnumerable<IngestionChunk<string>>)context.Properties["chunks"];
+        Assert.True(context.DocumentChunks.Any());
+        var chunks = context.DocumentChunks.Values.SelectMany(c => c);
         Assert.NotEmpty(chunks);
     }
 }
