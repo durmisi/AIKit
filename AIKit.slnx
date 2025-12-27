@@ -14,6 +14,7 @@
     <Project Path="Clients/AIKit.Core.Clients/AIKit.Core.Clients.csproj" Id="6c69f866-c5cd-4805-bd61-dcf21492d3cf" />
   </Folder>
   <Folder Name="/Data Ingestion/">
+    <Project Path="Ingestion/AIKit.Core.Ingestion.Tests/AIKit.Core.Ingestion.Tests.csproj" />
     <Project Path="Ingestion/AIKit.Core.Ingestion/AIKit.Core.Ingestion.csproj" Id="0cb86e91-acdf-4b3c-a961-9768dcfd365f" />
   </Folder>
   <Folder Name="/Prompts/">
