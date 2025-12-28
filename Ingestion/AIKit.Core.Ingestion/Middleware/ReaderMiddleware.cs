@@ -23,27 +23,30 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
 
     public async Task InvokeAsync(
         DataIngestionContext ctx,
-        IngestionDelegate<DataIngestionContext> next)
+        IngestionDelegate<DataIngestionContext> next,
+        CancellationToken cancellationToken = default)
     {
         var logger = ctx.LoggerFactory?.CreateLogger("ReaderMiddleware");
         logger?.LogInformation("Starting document reading");
 
-        await foreach (var file in _fileProvider.ReadAsync())
+        await foreach (var file in _fileProvider.ReadAsync(cancellationToken))
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var extension = file.Extension.ToLowerInvariant();
             if (_readers.TryGetValue(extension, out var reader))
             {
                 // Use the stream overload of the reader
-                await using (var stream = await file.OpenReadAsync())
+                await using (var stream = await file.OpenReadAsync(cancellationToken))
                 {
-                    var processedDoc = await reader.ReadAsync(stream, file.Name, file.Extension, CancellationToken.None);
+                    var processedDoc = await reader.ReadAsync(stream, file.Name, file.Extension, cancellationToken);
 
                     // Apply processors for this extension
                     if (_processorsPerExtension.TryGetValue(extension, out var processors))
                     {
                         foreach (var processor in processors)
                         {
-                            processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
+                            processedDoc = await processor.ProcessAsync(processedDoc, cancellationToken);
                         }
                     }
 
@@ -55,6 +58,6 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
 
         logger?.LogInformation("Reading completed, loaded {DocumentCount} documents", ctx.Documents.Count);
 
-        await next(ctx);
+        await next(ctx, cancellationToken);
     }
 }

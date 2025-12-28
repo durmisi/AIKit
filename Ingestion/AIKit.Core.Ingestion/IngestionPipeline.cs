@@ -27,8 +27,9 @@ public class IngestionPipeline<T>
     /// Executes the pipeline asynchronously on the specified context.
     /// </summary>
     /// <param name="ctx">The context to process.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task ExecuteAsync(T ctx)
+    public Task ExecuteAsync(T ctx, CancellationToken cancellationToken = default)
     {
         if (ctx is DataIngestionContext dataCtx)
         {
@@ -38,10 +39,10 @@ public class IngestionPipeline<T>
         var logger = _loggerFactory?.CreateLogger("IngestionPipeline");
         logger?.LogInformation("Starting pipeline execution");
 
-        IngestionDelegate<T> app = _ => Task.CompletedTask;
+        IngestionDelegate<T> app = (c, ct) => Task.CompletedTask;
         foreach (var c in _components.Reverse()) app = c(app);
 
-        var task = app(ctx);
+        var task = app(ctx, cancellationToken);
 
         task.ContinueWith(t => 
         {

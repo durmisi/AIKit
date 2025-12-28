@@ -30,7 +30,7 @@ public class IngestionPipelineBuilder<T>
     /// <returns>The builder instance for chaining.</returns>
     public IngestionPipelineBuilder<T> UseMiddleware<TMiddleware>() where TMiddleware : IIngestionMiddleware<T>, new()
     {
-        return Use(next => async ctx => await new TMiddleware().InvokeAsync(ctx, next));
+        return Use(next => async (ctx, ct) => await new TMiddleware().InvokeAsync(ctx, next, ct));
     }
 
     /// <summary>

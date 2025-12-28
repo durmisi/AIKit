@@ -5,8 +5,9 @@ namespace AIKit.Core.Ingestion.Middleware;
 /// </summary>
 /// <typeparam name="TContext">The type of the context.</typeparam>
 /// <param name="ctx">The context.</param>
+/// <param name="cancellationToken">The cancellation token.</param>
 /// <returns>A task representing the asynchronous operation.</returns>
-public delegate Task IngestionDelegate<TContext>(TContext ctx);
+public delegate Task IngestionDelegate<TContext>(TContext ctx, CancellationToken cancellationToken = default);
 
 /// <summary>
 /// Defines the contract for middleware in the ingestion pipeline.
@@ -19,6 +20,7 @@ public interface IIngestionMiddleware<TContext>
     /// </summary>
     /// <param name="ctx">The context.</param>
     /// <param name="next">The next delegate in the pipeline.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task InvokeAsync(TContext ctx, IngestionDelegate<TContext> next);
+    Task InvokeAsync(TContext ctx, IngestionDelegate<TContext> next, CancellationToken cancellationToken = default);
 }

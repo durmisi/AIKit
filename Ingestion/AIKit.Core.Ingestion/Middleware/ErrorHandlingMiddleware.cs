@@ -13,13 +13,14 @@ public class ErrorHandlingMiddleware<T> : IIngestionMiddleware<T> where T : Inge
     /// </summary>
     /// <param name="ctx">The context.</param>
     /// <param name="next">The next delegate in the pipeline.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task InvokeAsync(T ctx, IngestionDelegate<T> next)
+    public async Task InvokeAsync(T ctx, IngestionDelegate<T> next, CancellationToken cancellationToken = default)
     {
         var logger = (ctx as DataIngestionContext)?.LoggerFactory?.CreateLogger("ErrorHandlingMiddleware");
         try
         {
-            await next(ctx);
+            await next(ctx, cancellationToken);
         }
         catch (Exception ex)
         {
