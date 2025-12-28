@@ -33,18 +33,10 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
             var extension = file.Extension.ToLowerInvariant();
             if (_readers.TryGetValue(extension, out var reader))
             {
-                // Create a temporary file for the reader
-                var tempFile = Path.GetTempFileName();
-                try
+                // Use the stream overload of the reader
+                await using (var stream = await file.OpenReadAsync())
                 {
-                    await using (var stream = await file.OpenReadAsync())
-                    await using (var tempStream = File.OpenWrite(tempFile))
-                    {
-                        await stream.CopyToAsync(tempStream);
-                    }
-
-                    var tempFileInfo = new FileInfo(tempFile);
-                    var processedDoc = await reader.ReadAsync(tempFileInfo, CancellationToken.None);
+                    var processedDoc = await reader.ReadAsync(stream, file.Name, file.Extension, CancellationToken.None);
 
                     // Apply processors for this extension
                     if (_processorsPerExtension.TryGetValue(extension, out var processors))
@@ -56,14 +48,6 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
                     }
 
                     ctx.Documents.Add(processedDoc);
-                }
-                finally
-                {
-                    // Clean up temp file
-                    if (File.Exists(tempFile))
-                    {
-                        File.Delete(tempFile);
-                    }
                 }
             }
             // Skip files with unsupported extensions
