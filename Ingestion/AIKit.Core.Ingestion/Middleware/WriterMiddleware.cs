@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace AIKit.Core.Ingestion.Middleware;
 
-
 public sealed class WriterMiddleware : IIngestionMiddleware<DataIngestionContext>
 {
     private readonly IDocumentWriter _writer;
@@ -19,10 +18,15 @@ public sealed class WriterMiddleware : IIngestionMiddleware<DataIngestionContext
         IngestionDelegate<DataIngestionContext> next)
     {
         var logger = ctx.LoggerFactory?.CreateLogger("WriterMiddleware");
-        var chunks = (IReadOnlyList<IngestionChunk<string>>)ctx.Properties["chunks"];
-        logger?.LogInformation("Writing {ChunkCount} chunks", chunks.Count);
 
-        await _writer.WriteAsync(chunks, CancellationToken.None);
+        foreach (var doc in ctx.Documents)
+        {
+            var chunks = ctx.DocumentChunks.TryGetValue(doc.Identifier, out var docChunks)
+                ? docChunks
+                : Array.Empty<IngestionChunk<string>>().ToList();
+
+            await _writer.WriteAsync(doc, chunks, CancellationToken.None);
+        }
 
         logger?.LogInformation("Writing completed");
 
