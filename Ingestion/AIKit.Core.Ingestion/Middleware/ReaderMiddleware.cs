@@ -33,18 +33,38 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
             var extension = file.Extension.ToLowerInvariant();
             if (_readers.TryGetValue(extension, out var reader))
             {
-                var processedDoc = await reader.ReadAsync(file, CancellationToken.None);
-
-                // Apply processors for this extension
-                if (_processorsPerExtension.TryGetValue(extension, out var processors))
+                // Create a temporary file for the reader
+                var tempFile = Path.GetTempFileName();
+                try
                 {
-                    foreach (var processor in processors)
+                    await using (var stream = await file.OpenReadAsync())
+                    await using (var tempStream = File.OpenWrite(tempFile))
                     {
-                        processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
+                        await stream.CopyToAsync(tempStream);
+                    }
+
+                    var tempFileInfo = new FileInfo(tempFile);
+                    var processedDoc = await reader.ReadAsync(tempFileInfo, CancellationToken.None);
+
+                    // Apply processors for this extension
+                    if (_processorsPerExtension.TryGetValue(extension, out var processors))
+                    {
+                        foreach (var processor in processors)
+                        {
+                            processedDoc = await processor.ProcessAsync(processedDoc, CancellationToken.None);
+                        }
+                    }
+
+                    ctx.Documents.Add(processedDoc);
+                }
+                finally
+                {
+                    // Clean up temp file
+                    if (File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
                     }
                 }
-
-                ctx.Documents.Add(processedDoc);
             }
             // Skip files with unsupported extensions
         }

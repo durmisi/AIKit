@@ -2,6 +2,6 @@ namespace AIKit.Core.Ingestion.Services.Providers;
 
 public interface IIngestionFileProvider
 {
-    IAsyncEnumerable<FileInfo> ReadAsync(
+    IAsyncEnumerable<IIngestionFile> ReadAsync(
         CancellationToken cancellationToken = default);
 }

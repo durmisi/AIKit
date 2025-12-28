@@ -11,14 +11,14 @@ public sealed class FileSystemFileProvider : IIngestionFileProvider
         _directory = directory;
     }
 
-    public async IAsyncEnumerable<FileInfo> ReadAsync(
+    public async IAsyncEnumerable<IIngestionFile> ReadAsync(
        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var files = _directory.EnumerateFiles("*.*", SearchOption.AllDirectories);
 
         foreach (var file in files)
         {
-            yield return file;
+            yield return new LocalFile(file);
         }
     }
 }
