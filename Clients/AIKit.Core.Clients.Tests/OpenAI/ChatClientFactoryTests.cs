@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.OpenAI;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", ModelId = "gpt-4" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("open-ai");
@@ -27,10 +27,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", ModelId = "gpt-4", ProviderName = "custom-openai" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("custom-openai");
@@ -43,7 +43,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { ApiKey = null, ModelId = "gpt-4" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -55,10 +55,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "gpt-4" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();
@@ -70,10 +70,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "gpt-4" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create("gpt-3.5-turbo");
+        var client = factory.Create("gpt-3.5-turbo");
 
         // Assert
         client.ShouldNotBeNull();

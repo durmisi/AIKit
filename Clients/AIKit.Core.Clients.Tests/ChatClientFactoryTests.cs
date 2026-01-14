@@ -12,12 +12,12 @@ public class ChatClientFactoryTests
     public void Constructor_InitializesWithProviders()
     {
         // Arrange
-        var mockProvider = new Mock<IChatClientProvider>();
+        var mockProvider = new Mock<IChatClientFactory>();
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var providers = new[] { mockProvider.Object };
 
         // Act
-        var factory = new ChatClientFactory(providers);
+        var factory = new ChatClientFactoryFactory(providers);
 
         // Assert
         factory.ShouldNotBeNull();
@@ -27,8 +27,8 @@ public class ChatClientFactoryTests
     public void AddProvider_AddsProviderSuccessfully()
     {
         // Arrange
-        var factory = new ChatClientFactory(Enumerable.Empty<IChatClientProvider>());
-        var mockProvider = new Mock<IChatClientProvider>();
+        var factory = new ChatClientFactoryFactory(Enumerable.Empty<IChatClientFactory>());
+        var mockProvider = new Mock<IChatClientFactory>();
         mockProvider.Setup(p => p.Provider).Returns("added-provider");
 
         // Act
@@ -47,11 +47,11 @@ public class ChatClientFactoryTests
     public void Create_WithValidProvider_ReturnsClient()
     {
         // Arrange
-        var mockProvider = new Mock<IChatClientProvider>();
+        var mockProvider = new Mock<IChatClientFactory>();
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var mockClient = new Mock<IChatClient>();
         mockProvider.Setup(p => p.Create(It.IsAny<string>())).Returns(mockClient.Object);
-        var factory = new ChatClientFactory(new[] { mockProvider.Object });
+        var factory = new ChatClientFactoryFactory(new[] { mockProvider.Object });
 
         // Act
         var result = factory.Create("test-provider", "model");
@@ -64,20 +64,20 @@ public class ChatClientFactoryTests
     public void Create_WithInvalidProvider_ThrowsException()
     {
         // Arrange
-        var factory = new ChatClientFactory(Enumerable.Empty<IChatClientProvider>());
+        var factory = new ChatClientFactoryFactory(Enumerable.Empty<IChatClientFactory>());
 
         // Act
         Action act = () => factory.Create("non-existent", "model");
 
         // Assert
-        act.ShouldThrow<InvalidOperationException>().Message.ShouldContain("No IChatClientProvider registered");
+        act.ShouldThrow<InvalidOperationException>().Message.ShouldContain("No IChatClientFactory registered");
     }
 
     [Fact]
     public void Create_WithNullProvider_ThrowsException()
     {
         // Arrange
-        var factory = new ChatClientFactory(Enumerable.Empty<IChatClientProvider>());
+        var factory = new ChatClientFactoryFactory(Enumerable.Empty<IChatClientFactory>());
 
         // Act
         Action act = () => factory.Create(null!, "model");
@@ -90,7 +90,7 @@ public class ChatClientFactoryTests
     public void Create_WithNullModel_ThrowsException()
     {
         // Arrange
-        var factory = new ChatClientFactory(Enumerable.Empty<IChatClientProvider>());
+        var factory = new ChatClientFactoryFactory(Enumerable.Empty<IChatClientFactory>());
 
         // Act
         Action act = () => factory.Create("provider", null!);

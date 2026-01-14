@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.Groq;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", ModelId = "llama-3.3-70b-versatile" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("groq");
@@ -29,7 +29,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { ApiKey = null, ModelId = "llama-3.3-70b-versatile" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -41,10 +41,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "llama-3.3-70b-versatile" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();

@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.AzureOpenAI;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("azure-open-ai");
@@ -29,7 +29,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -40,10 +40,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();
@@ -58,10 +58,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("azure-open-ai");
@@ -85,10 +85,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var generator = provider.Create();
+        var generator = factory.Create();
 
         // Assert
         generator.ShouldNotBeNull();

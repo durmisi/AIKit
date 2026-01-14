@@ -58,9 +58,9 @@ public sealed class AIClientSettings
     /// <example>
     /// Registering multiple OpenAI providers:
     /// <code>
-    /// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
+    /// services.AddSingleton&lt;IChatClientFactory&gt;(new OpenAI.ChatClientFactory(
     ///     new AIClientSettings { ApiKey = "key1", ProviderName = "open-ai-1" }));
-    /// services.AddSingleton&lt;IChatClientProvider&gt;(new OpenAI.ChatClientProvider(
+    /// services.AddSingleton&lt;IChatClientFactory&gt;(new OpenAI.ChatClientFactory(
     ///     new AIClientSettings { ApiKey = "key2", ProviderName = "open-ai-2" }));
     /// </code>
     /// </example>

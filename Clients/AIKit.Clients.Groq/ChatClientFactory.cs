@@ -1,21 +1,18 @@
-﻿using AIKit.Core.Clients;
+using AIKit.Core.Clients;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 
-namespace AIKit.Clients.GitHub;
+namespace AIKit.Clients.Groq;
 
-/// <summary>
-/// Requires GitHubToken, ModelId. Uses https://models.github.ai/inference
-/// </summary>
-public sealed class ChatClientProvider : IChatClientProvider
+public sealed class ChatClientFactory : IChatClientFactory
 {
     private readonly AIClientSettings _defaultSettings;
-    private readonly ILogger<ChatClientProvider>? _logger;
+    private readonly ILogger<ChatClientFactory>? _logger;
 
-    public ChatClientProvider(AIClientSettings settings, ILogger<ChatClientProvider>? logger = null)
+    public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -24,7 +21,7 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "github-models";
+    public string Provider => _defaultSettings.ProviderName ?? "groq";
 
     public IChatClient Create(string? model = null)
         => Create(_defaultSettings, model);
@@ -35,7 +32,7 @@ public sealed class ChatClientProvider : IChatClientProvider
 
         var options = new OpenAIClientOptions
         {
-            Endpoint = new Uri(Constants.GitHubModelsEndpoint)
+            Endpoint = new Uri("https://api.groq.com/openai/v1/")
         };
 
         if (settings.HttpClient != null)
@@ -43,24 +40,18 @@ public sealed class ChatClientProvider : IChatClientProvider
             options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
         }
 
-        var credential = new ApiKeyCredential(settings.GitHubToken!);
+        var credential = new ApiKeyCredential(settings.ApiKey!);
         var client = new OpenAIClient(credential, options);
 
-        var targetModel = model ?? settings.ModelId;
-        _logger?.LogInformation("Creating GitHub Models chat client for model {Model}", targetModel);
+        var targetModel = model ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Groq chat client for model {Model}", targetModel);
 
         return client.GetChatClient(targetModel).AsIChatClient();
     }
 
     private static void Validate(AIClientSettings settings)
     {
-        ArgumentNullException.ThrowIfNull(settings);
-
-        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
-            throw new ArgumentException(
-                "GitHubToken is required.",
-                nameof(AIClientSettings.GitHubToken));
-
+        AIClientSettingsValidator.RequireApiKey(settings);
         AIClientSettingsValidator.RequireModel(settings);
     }
 }

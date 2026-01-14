@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.Ollama;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "llama3.2" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("ollama");
@@ -29,7 +29,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { Endpoint = null, ModelId = "llama3.2" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -41,10 +41,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "llama3.2" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();
@@ -59,10 +59,10 @@ public class EmbeddingGeneratorTests
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
-        var provider = new EmbeddingGenerator(settings);
+        var factory = new EmbeddingGenerator(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("ollama");
@@ -87,10 +87,10 @@ public class EmbeddingGeneratorTests
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
-        var provider = new EmbeddingGenerator(settings);
+        var factory = new EmbeddingGenerator(settings);
 
         // Act
-        var generator = provider.Create();
+        var generator = factory.Create();
 
         // Assert
         generator.ShouldNotBeNull();

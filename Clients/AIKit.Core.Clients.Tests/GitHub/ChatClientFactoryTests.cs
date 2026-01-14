@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.GitHub;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test", ModelId = "gpt-4o" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("github-models");
@@ -29,7 +29,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { GitHubToken = null, ModelId = "gpt-4o" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -41,10 +41,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test-token", ModelId = "gpt-4o" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();
@@ -59,10 +59,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test", ModelId = "text-embedding-3-small" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("github-models");
@@ -87,10 +87,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test-token", ModelId = "text-embedding-3-small" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var generator = provider.Create();
+        var generator = factory.Create();
 
         // Assert
         generator.ShouldNotBeNull();

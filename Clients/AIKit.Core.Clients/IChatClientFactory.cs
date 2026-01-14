@@ -6,7 +6,7 @@ namespace AIKit.Core.Clients;
 /// Provides chat clients for AI interactions.
 /// Implementations create instances of <see cref="IChatClient"/> for specific AI providers.
 /// </summary>
-public interface IChatClientProvider
+public interface IChatClientFactory
 {
     /// <summary>
     /// Gets the name of the provider (e.g., "open-ai", "azure-open-ai").

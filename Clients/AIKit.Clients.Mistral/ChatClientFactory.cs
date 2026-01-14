@@ -7,12 +7,12 @@ using System.ClientModel.Primitives;
 
 namespace AIKit.Clients.Mistral;
 
-public sealed class ChatClientProvider : IChatClientProvider
+public sealed class ChatClientFactory : IChatClientFactory
 {
     private readonly AIClientSettings _defaultSettings;
-    private readonly ILogger<ChatClientProvider>? _logger;
+    private readonly ILogger<ChatClientFactory>? _logger;
 
-    public ChatClientProvider(AIClientSettings settings, ILogger<ChatClientProvider>? logger = null)
+    public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));

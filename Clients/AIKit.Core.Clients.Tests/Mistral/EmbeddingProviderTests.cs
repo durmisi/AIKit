@@ -13,10 +13,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", ModelId = "mistral-embed" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("mistral");
@@ -41,10 +41,10 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "mistral-embed" };
-        var provider = new EmbeddingProvider(settings);
+        var factory = new EmbeddingProvider(settings);
 
         // Act
-        var generator = provider.Create();
+        var generator = factory.Create();
 
         // Assert
         generator.ShouldNotBeNull();

@@ -6,17 +6,17 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.AzureClaude;
 
-public class ChatClientProviderTests
+public class ChatClientFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var result = provider.Provider;
+        var result = factory.Provider;
 
         // Assert
         result.ShouldBe("azure-claude");
@@ -29,7 +29,7 @@ public class ChatClientProviderTests
         var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
 
         // Act
-        Action act = () => new ChatClientProvider(settings);
+        Action act = () => new ChatClientFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -40,10 +40,10 @@ public class ChatClientProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
-        var provider = new ChatClientProvider(settings);
+        var factory = new ChatClientFactory(settings);
 
         // Act
-        var client = provider.Create();
+        var client = factory.Create();
 
         // Assert
         client.ShouldNotBeNull();
