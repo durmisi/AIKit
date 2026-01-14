@@ -27,9 +27,9 @@
     <File Path=".editorconfig" />
   </Folder>
   <Folder Name="/Storage/">
-    <Project Path="AIKit.Storage.Azure/AIKit.Storage.Azure.csproj" Id="c960b547-f766-4a6c-9486-431652a33972" />
     <Project Path="Storage/AIKit.Core.Storage.Tests/AIKit.Core.Storage.Tests.csproj" />
     <Project Path="Storage/AIKit.Core.Storage/AIKit.Core.Storage.csproj" Id="32289835-b9d5-4fc1-a329-7c604c93cc46" />
+    <Project Path="Storage/AIKit.Storage.Azure/AIKit.Storage.Azure.csproj" />
     <Project Path="Storage/AIKit.Storage.Local/AIKit.Storage.Local.csproj" Id="2801912a-fd54-401c-b832-5a364e6c23a8" />
   </Folder>
   <Folder Name="/Vector Stores/">

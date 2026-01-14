@@ -25,8 +25,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AIKit.Core.Storage\AIKit.Core.Storage.csproj" />
+    <ProjectReference Include="..\AIKit.Storage.Azure\AIKit.Storage.Azure.csproj" />
     <ProjectReference Include="..\AIKit.Storage.Local\AIKit.Storage.Local.csproj" />
-    <ProjectReference Include="..\..\AIKit.Storage.Azure\AIKit.Storage.Azure.csproj" />
   </ItemGroup>
 
 </Project>

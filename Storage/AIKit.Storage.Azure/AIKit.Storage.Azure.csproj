@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Storage\AIKit.Core.Storage\AIKit.Core.Storage.csproj" />
+	  <ProjectReference Include="..\AIKit.Core.Storage\AIKit.Core.Storage.csproj" />
 	</ItemGroup>
 
 </Project>
