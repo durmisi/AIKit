@@ -1,5 +1,6 @@
 ﻿using AIKit.Core.Clients;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Clients.Ollama;
 
@@ -9,11 +10,13 @@ namespace AIKit.Clients.Ollama;
 public sealed class ChatClientProvider : IChatClientProvider
 {
     private readonly AIClientSettings _defaultSettings;
+    private readonly ILogger<ChatClientProvider>? _logger;
 
-    public ChatClientProvider(AIClientSettings settings)
+    public ChatClientProvider(AIClientSettings settings, ILogger<ChatClientProvider>? logger = null)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
+        _logger = logger;
 
         Validate(_defaultSettings);
     }
@@ -28,7 +31,10 @@ public sealed class ChatClientProvider : IChatClientProvider
         Validate(settings);
 
         var endpoint = new Uri(settings.Endpoint!);
-        return new OllamaChatClient(endpoint, model ?? settings.ModelId!);
+        var targetModel = model ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, endpoint);
+
+        return new OllamaChatClient(endpoint, targetModel);
     }
 
     private static void Validate(AIClientSettings settings)

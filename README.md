@@ -105,6 +105,15 @@ var results = await store.SearchAsync(new float[] { 0.1f, 0.2f }, 5);
 
 ## Architecture
 
+```mermaid
+graph TD
+    A[AIKit Core] --> B[AI Clients<br/>OpenAI, Azure OpenAI,<br/>Claude, Gemini, etc.]
+    A --> C[Vector Stores<br/>CosmosDB, Elasticsearch,<br/>MongoDB, Qdrant, etc.]
+    A --> D[Storage<br/>Local & Azure Blob<br/>with Versioning]
+    A --> E[Ingestion<br/>Data Processing<br/>& Indexing]
+    A --> F[Prompts<br/>Jinja2, Handlebars,<br/>Liquid Templating]
+```
+
 - **Core**: Shared interfaces and base classes.
 - **Clients**: AI provider implementations.
 - **VectorStores**: Vector database integrations.
