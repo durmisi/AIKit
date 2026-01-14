@@ -50,10 +50,3 @@ jobs:
         name: Test Results
         path: '**/TestResults/*.trx'
         reporter: dotnet-trx
-
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./TestResults/**/coverage.cobertura.xml
-        flags: unittests
-        name: codecov-umbrella
