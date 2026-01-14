@@ -3,6 +3,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 
 namespace AIKit.Clients.OpenAI;
 
@@ -39,6 +40,11 @@ public sealed class ChatClientProvider : IChatClientProvider
         if (!string.IsNullOrWhiteSpace(settings.Organization))
         {
             options.OrganizationId = settings.Organization;
+        }
+
+        if (settings.HttpClient != null)
+        {
+            options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
         }
 
         var credential = new ApiKeyCredential(settings.ApiKey!);

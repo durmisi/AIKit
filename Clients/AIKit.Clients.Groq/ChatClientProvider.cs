@@ -1,18 +1,22 @@
 using AIKit.Core.Clients;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 
 namespace AIKit.Clients.Groq;
 
 public sealed class ChatClientProvider : IChatClientProvider
 {
     private readonly AIClientSettings _defaultSettings;
+    private readonly ILogger<ChatClientProvider>? _logger;
 
-    public ChatClientProvider(AIClientSettings settings)
+    public ChatClientProvider(AIClientSettings settings, ILogger<ChatClientProvider>? logger = null)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
+        _logger = logger;
 
         Validate(_defaultSettings);
     }
@@ -31,10 +35,16 @@ public sealed class ChatClientProvider : IChatClientProvider
             Endpoint = new Uri("https://api.groq.com/openai/v1/")
         };
 
+        if (settings.HttpClient != null)
+        {
+            options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
+        }
+
         var credential = new ApiKeyCredential(settings.ApiKey!);
         var client = new OpenAIClient(credential, options);
 
         var targetModel = model ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Groq chat client for model {Model}", targetModel);
 
         return client.GetChatClient(targetModel).AsIChatClient();
     }

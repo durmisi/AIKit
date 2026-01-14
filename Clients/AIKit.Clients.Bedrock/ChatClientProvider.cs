@@ -2,17 +2,20 @@
 using Amazon;
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Clients.Bedrock;
 
 public sealed class ChatClientProvider : IChatClientProvider
 {
     private readonly AIClientSettings _defaultSettings;
+    private readonly ILogger<ChatClientProvider>? _logger;
 
-    public ChatClientProvider(AIClientSettings settings)
+    public ChatClientProvider(AIClientSettings settings, ILogger<ChatClientProvider>? logger = null)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
+        _logger = logger;
 
         Validate(_defaultSettings);
     }
@@ -33,7 +36,8 @@ public sealed class ChatClientProvider : IChatClientProvider
             settings.AwsSecretKey!,
             regionEndpoint);
 
-        var targetModel = model ?? settings.ModelId;    
+        var targetModel = model ?? settings.ModelId;
+        _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, settings.AwsRegion);
 
         return runtime.AsIChatClient(targetModel);
     }
