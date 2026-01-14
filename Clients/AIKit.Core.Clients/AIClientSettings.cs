@@ -125,6 +125,11 @@ public static class AIClientSettingsValidator
             throw new ArgumentException(
                 "Endpoint is required.",
                 nameof(AIClientSettings.Endpoint));
+
+        if (!Uri.TryCreate(settings.Endpoint, UriKind.Absolute, out _))
+            throw new ArgumentException(
+                "Endpoint must be a valid absolute URI.",
+                nameof(AIClientSettings.Endpoint));
     }
 
     public static void RequireModel(AIClientSettings settings)
