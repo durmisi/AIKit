@@ -1,6 +1,6 @@
 using AIKit.Clients.Groq;
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class ChatClientProviderTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("groq");
+        result.ShouldBe("groq");
     }
 
     [Fact]
@@ -32,8 +32,8 @@ public class ChatClientProviderTests
         Action act = () => new ChatClientProvider(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ApiKey is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
@@ -47,7 +47,16 @@ public class ChatClientProviderTests
         var client = provider.Create();
 
         // Assert
-        client.Should().NotBeNull();
-        client.Should().BeAssignableTo<IChatClient>();
+        client.ShouldNotBeNull();
+        client.ShouldBeAssignableTo<IChatClient>();
     }
 }
+
+
+
+
+
+
+
+
+

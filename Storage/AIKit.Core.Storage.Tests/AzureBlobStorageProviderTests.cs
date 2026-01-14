@@ -1,5 +1,5 @@
 using AIKit.Storage.Azure;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AIKit.Core.Storage.Tests;
@@ -40,11 +40,12 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var result = await _provider.SaveAsync(path, new MemoryStream(content), options);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Path.Should().Be(path);
-        result.Version.Should().NotBeNullOrEmpty();
-        result.Size.Should().Be(content.Length);
-        result.Metadata.Should().ContainKey("key").WhoseValue.Should().Be("value");
+        result.ShouldNotBeNull();
+        result.Path.ShouldBe(path);
+        result.Version.ShouldNotBeNullOrEmpty();
+        result.Size.ShouldBe(content.Length);
+        result.Metadata.ShouldContainKey("key");
+        result.Metadata["key"].ShouldBe("value");
     }
 
     [Fact]
@@ -59,12 +60,12 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var result = await _provider.ReadAsync(path);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Metadata.Path.Should().Be(path);
-        result.Metadata.ContentType.Should().Be("application/octet-stream"); // Default content type
+        result.ShouldNotBeNull();
+        result!.Metadata.Path.ShouldBe(path);
+        result.Metadata.ContentType.ShouldBe("application/octet-stream"); // Default content type
         using var reader = new StreamReader(result.Content);
         var readContent = await reader.ReadToEndAsync();
-        readContent.Should().Be("Hello, World!");
+        readContent.ShouldBe("Hello, World!");
     }
 
     [Fact]
@@ -79,7 +80,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var exists = await _provider.ExistsAsync(path);
 
         // Assert
-        exists.Should().BeTrue();
+        exists.ShouldBeTrue();
     }
 
     [Fact]
@@ -89,7 +90,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var exists = await _provider.ExistsAsync("nonexistent/file.txt");
 
         // Assert
-        exists.Should().BeFalse();
+        exists.ShouldBeFalse();
     }
 
     [Fact]
@@ -104,9 +105,9 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var deleted = await _provider.DeleteAsync(path);
 
         // Assert
-        deleted.Should().BeTrue();
+        deleted.ShouldBeTrue();
         var exists = await _provider.ExistsAsync(path);
-        exists.Should().BeFalse();
+        exists.ShouldBeFalse();
     }
 
     [Fact]
@@ -126,11 +127,12 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var metadata = await _provider.GetMetadataAsync(path);
 
         // Assert
-        metadata.Should().NotBeNull();
-        metadata!.Path.Should().Be(path);
-        metadata.ContentType.Should().Be("text/plain");
-        metadata.CustomMetadata.Should().ContainKey("key").WhoseValue.Should().Be("value");
-        metadata.Size.Should().Be(content.Length);
+        metadata.ShouldNotBeNull();
+        metadata!.Path.ShouldBe(path);
+        metadata.ContentType.ShouldBe("text/plain");
+        metadata.CustomMetadata.ShouldContainKey("key");
+        metadata.CustomMetadata["key"].ShouldBe("value");
+        metadata.Size.ShouldBe(content.Length);
     }
 
     [Fact]
@@ -147,7 +149,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var versions = await _provider.ListVersionsAsync(path);
 
         // Assert
-        versions.Should().HaveCount(1); // Azurite does not support versioning
+        versions.ShouldHaveSingleItem(); // Azurite does not support versioning
     }
 
     [Fact]
@@ -165,12 +167,22 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         var restoreResult = await _provider.RestoreVersionAsync(path, versionToRestore);
 
         // Assert
-        restoreResult.Should().NotBeNull();
+        restoreResult.ShouldNotBeNull();
         var versions = await _provider.ListVersionsAsync(path);
-        versions.Should().HaveCount(1); // Azurite does not support versioning
+        versions.ShouldHaveSingleItem(); // Azurite does not support versioning
         var latest = await _provider.ReadAsync(path);
         using var reader = new StreamReader(latest!.Content);
         var readContent = await reader.ReadToEndAsync();
-        readContent.Should().Be("Version 2");
+        readContent.ShouldBe("Version 2");
     }
 }
+
+
+
+
+
+
+
+
+
+

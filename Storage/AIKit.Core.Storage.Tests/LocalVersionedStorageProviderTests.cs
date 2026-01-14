@@ -1,5 +1,5 @@
 using AIKit.Storage.Local;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AIKit.Core.Storage.Tests;
@@ -39,11 +39,12 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var result = await _provider.SaveAsync(path, new MemoryStream(content), options);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Path.Should().Be(path);
-        result.Version.Should().NotBeNullOrEmpty();
-        result.Size.Should().Be(content.Length);
-        result.Metadata.Should().ContainKey("key").WhoseValue.Should().Be("value");
+        result.ShouldNotBeNull();
+        result.Path.ShouldBe(path);
+        result.Version.ShouldNotBeNullOrEmpty();
+        result.Size.ShouldBe(content.Length);
+        result.Metadata.ShouldContainKey("key");
+        result.Metadata["key"].ShouldBe("value");
     }
 
     [Fact]
@@ -58,12 +59,12 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var result = await _provider.ReadAsync(path);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Metadata.Path.Should().Be(path);
-        result.Metadata.ContentType.Should().BeNull(); // Not set in save
+        result.ShouldNotBeNull();
+        result!.Metadata.Path.ShouldBe(path);
+        result.Metadata.ContentType.ShouldBeNull(); // Not set in save
         using var reader = new StreamReader(result.Content);
         var readContent = await reader.ReadToEndAsync();
-        readContent.Should().Be("Hello, World!");
+        readContent.ShouldBe("Hello, World!");
     }
 
     [Fact]
@@ -78,7 +79,7 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var exists = await _provider.ExistsAsync(path);
 
         // Assert
-        exists.Should().BeTrue();
+        exists.ShouldBeTrue();
     }
 
     [Fact]
@@ -88,7 +89,7 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var exists = await _provider.ExistsAsync("nonexistent/file.txt");
 
         // Assert
-        exists.Should().BeFalse();
+        exists.ShouldBeFalse();
     }
 
     [Fact]
@@ -103,9 +104,9 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var deleted = await _provider.DeleteAsync(path);
 
         // Assert
-        deleted.Should().BeTrue();
+        deleted.ShouldBeTrue();
         var exists = await _provider.ExistsAsync(path);
-        exists.Should().BeFalse();
+        exists.ShouldBeFalse();
     }
 
     [Fact]
@@ -125,11 +126,12 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var metadata = await _provider.GetMetadataAsync(path);
 
         // Assert
-        metadata.Should().NotBeNull();
-        metadata!.Path.Should().Be(path);
-        metadata.ContentType.Should().Be("text/plain");
-        metadata.CustomMetadata.Should().ContainKey("key").WhoseValue.Should().Be("value");
-        metadata.Size.Should().Be(content.Length);
+        metadata.ShouldNotBeNull();
+        metadata!.Path.ShouldBe(path);
+        metadata.ContentType.ShouldBe("text/plain");
+        metadata.CustomMetadata.ShouldContainKey("key");
+        metadata.CustomMetadata["key"].ShouldBe("value");
+        metadata.Size.ShouldBe(content.Length);
     }
 
     [Fact]
@@ -146,8 +148,8 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var versions = await _provider.ListVersionsAsync(path);
 
         // Assert
-        versions.Should().HaveCount(2);
-        versions.First().CreatedAt.Should().BeAfter(versions.Last().CreatedAt);
+        versions.Count.ShouldBe(2);
+        versions.First().CreatedAt.ShouldBeGreaterThan(versions.Last().CreatedAt);
     }
 
     [Fact]
@@ -165,12 +167,141 @@ public class LocalVersionedStorageProviderTests : IDisposable
         var restoreResult = await _provider.RestoreVersionAsync(path, versionToRestore);
 
         // Assert
-        restoreResult.Should().NotBeNull();
+        restoreResult.ShouldNotBeNull();
         var versions = await _provider.ListVersionsAsync(path);
-        versions.Should().HaveCount(3);
+        versions.Count.ShouldBe(3);
         var latest = await _provider.ReadAsync(path);
         using var reader = new StreamReader(latest!.Content);
         var readContent = await reader.ReadToEndAsync();
-        readContent.Should().Be("Version 2");
+        readContent.ShouldBe("Version 2");
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 using AIKit.Clients.Ollama;
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class ChatClientProviderTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("ollama");
+        result.ShouldBe("ollama");
     }
 
     [Fact]
@@ -32,8 +32,8 @@ public class ChatClientProviderTests
         Action act = () => new ChatClientProvider(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Endpoint is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("Endpoint is required");
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class ChatClientProviderTests
         var client = provider.Create();
 
         // Assert
-        client.Should().NotBeNull();
-        client.Should().BeAssignableTo<IChatClient>();
+        client.ShouldNotBeNull();
+        client.ShouldBeAssignableTo<IChatClient>();
     }
 }
 
@@ -65,7 +65,7 @@ public class EmbeddingGeneratorTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("ollama");
+        result.ShouldBe("ollama");
     }
 
     [Fact]
@@ -78,8 +78,8 @@ public class EmbeddingGeneratorTests
         Action act = () => new EmbeddingGenerator(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Endpoint is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("Endpoint is required");
     }
 
     [Fact]
@@ -93,7 +93,16 @@ public class EmbeddingGeneratorTests
         var generator = provider.Create();
 
         // Assert
-        generator.Should().NotBeNull();
-        generator.Should().BeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
+        generator.ShouldNotBeNull();
+        generator.ShouldBeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
     }
 }
+
+
+
+
+
+
+
+
+

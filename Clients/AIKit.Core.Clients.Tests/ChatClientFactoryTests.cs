@@ -1,5 +1,5 @@
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Moq;
 using Xunit;
@@ -20,7 +20,7 @@ public class ChatClientFactoryTests
         var factory = new ChatClientFactory(providers);
 
         // Assert
-        factory.Should().NotBeNull();
+        factory.ShouldNotBeNull();
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class ChatClientFactoryTests
         mockProvider.Setup(p => p.Create(It.IsAny<string>())).Returns(mockClient.Object);
 
         var result = factory.Create("added-provider", "model");
-        result.Should().Be(mockClient.Object);
+        result.ShouldBe(mockClient.Object);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class ChatClientFactoryTests
         var result = factory.Create("test-provider", "model");
 
         // Assert
-        result.Should().Be(mockClient.Object);
+        result.ShouldBe(mockClient.Object);
     }
 
     [Fact]
@@ -70,8 +70,7 @@ public class ChatClientFactoryTests
         Action act = () => factory.Create("non-existent", "model");
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*No IChatClientProvider registered*");
+        act.ShouldThrow<InvalidOperationException>().Message.ShouldContain("No IChatClientProvider registered");
     }
 
     [Fact]
@@ -84,8 +83,7 @@ public class ChatClientFactoryTests
         Action act = () => factory.Create(null!, "model");
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("provider");
+        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("provider");
     }
 
     [Fact]
@@ -98,7 +96,15 @@ public class ChatClientFactoryTests
         Action act = () => factory.Create("provider", null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("model");
+        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("model");
     }
 }
+
+
+
+
+
+
+
+
+

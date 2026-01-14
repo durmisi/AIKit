@@ -1,6 +1,6 @@
 using AIKit.Clients.Mistral;
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class EmbeddingProviderTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("mistral");
+        result.ShouldBe("mistral");
     }
 
     [Fact]
@@ -32,8 +32,8 @@ public class EmbeddingProviderTests
         Action act = () => new EmbeddingProvider(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ApiKey is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
@@ -47,7 +47,16 @@ public class EmbeddingProviderTests
         var generator = provider.Create();
 
         // Assert
-        generator.Should().NotBeNull();
-        generator.Should().BeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
+        generator.ShouldNotBeNull();
+        generator.ShouldBeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
     }
 }
+
+
+
+
+
+
+
+
+

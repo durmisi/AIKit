@@ -1,5 +1,5 @@
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AIKit.Core.Clients.Tests;
@@ -16,8 +16,8 @@ public class AIClientSettingsValidatorTests
         Action act = () => AIClientSettingsValidator.RequireApiKey(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ApiKey is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class AIClientSettingsValidatorTests
         Action act = () => AIClientSettingsValidator.RequireApiKey(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ApiKey is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class AIClientSettingsValidatorTests
         Action act = () => AIClientSettingsValidator.RequireApiKey(settings);
 
         // Assert
-        act.Should().NotThrow();
+        act.ShouldNotThrow();
     }
 
     [Fact]
@@ -57,8 +57,8 @@ public class AIClientSettingsValidatorTests
         Action act = () => AIClientSettingsValidator.RequireEndpoint(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Endpoint is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("Endpoint is required");
     }
 
     [Fact]
@@ -71,7 +71,16 @@ public class AIClientSettingsValidatorTests
         Action act = () => AIClientSettingsValidator.RequireModel(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ModelId is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ModelId is required");
     }
 }
+
+
+
+
+
+
+
+
+

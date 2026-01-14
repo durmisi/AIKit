@@ -1,6 +1,6 @@
 using AIKit.Clients.OpenAI;
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class ChatClientProviderTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("open-ai");
+        result.ShouldBe("open-ai");
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class ChatClientProviderTests
         var result = provider.Provider;
 
         // Assert
-        result.Should().Be("custom-openai");
+        result.ShouldBe("custom-openai");
     }
 
     [Fact]
@@ -46,8 +46,8 @@ public class ChatClientProviderTests
         Action act = () => new ChatClientProvider(settings);
 
         // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*ApiKey is required*");
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
@@ -61,8 +61,8 @@ public class ChatClientProviderTests
         var client = provider.Create();
 
         // Assert
-        client.Should().NotBeNull();
-        client.Should().BeAssignableTo<IChatClient>();
+        client.ShouldNotBeNull();
+        client.ShouldBeAssignableTo<IChatClient>();
     }
 
     [Fact]
@@ -76,7 +76,16 @@ public class ChatClientProviderTests
         var client = provider.Create("gpt-3.5-turbo");
 
         // Assert
-        client.Should().NotBeNull();
-        client.Should().BeAssignableTo<IChatClient>();
+        client.ShouldNotBeNull();
+        client.ShouldBeAssignableTo<IChatClient>();
     }
 }
+
+
+
+
+
+
+
+
+

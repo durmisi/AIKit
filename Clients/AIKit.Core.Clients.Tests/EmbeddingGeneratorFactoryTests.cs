@@ -1,5 +1,5 @@
 using AIKit.Core.Clients;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.AI;
 using Moq;
 using Xunit;
@@ -20,7 +20,7 @@ public class EmbeddingGeneratorFactoryTests
         var factory = new EmbeddingGeneratorFactory(providers);
 
         // Assert
-        factory.Should().NotBeNull();
+        factory.ShouldNotBeNull();
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class EmbeddingGeneratorFactoryTests
         mockProvider.Setup(p => p.Create()).Returns(mockGenerator.Object);
 
         var result = factory.Create("added-provider");
-        result.Should().Be(mockGenerator.Object);
+        result.ShouldBe(mockGenerator.Object);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class EmbeddingGeneratorFactoryTests
         var result = factory.Create("test-provider");
 
         // Assert
-        result.Should().Be(mockGenerator.Object);
+        result.ShouldBe(mockGenerator.Object);
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class EmbeddingGeneratorFactoryTests
         var result = factory.Create("test-provider", settings);
 
         // Assert
-        result.Should().Be(mockGenerator.Object);
+        result.ShouldBe(mockGenerator.Object);
         mockProvider.Verify(p => p.Create(settings), Times.Once);
     }
 
@@ -89,8 +89,8 @@ public class EmbeddingGeneratorFactoryTests
         Action act = () => factory.Create("non-existent");
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*No IEmbeddingProvider registered*");
+        act.ShouldThrow<InvalidOperationException>()
+            .Message.ShouldContain("No IEmbeddingProvider registered");
     }
 
     [Fact]
@@ -103,7 +103,16 @@ public class EmbeddingGeneratorFactoryTests
         Action act = () => factory.Create(null!);
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("provider");
+        act.ShouldThrow<ArgumentNullException>()
+            .ParamName.ShouldBe("provider");
     }
 }
+
+
+
+
+
+
+
+
+
