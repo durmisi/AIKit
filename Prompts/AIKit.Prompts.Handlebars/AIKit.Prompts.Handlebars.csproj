@@ -15,7 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\AIKit.Core.Prompts\AIKit.Core.Prompts.csproj" />
+	  <ProjectReference Include="..\AIKit.Prompts\AIKit.Prompts.csproj" />
 	</ItemGroup>
 
 </Project>

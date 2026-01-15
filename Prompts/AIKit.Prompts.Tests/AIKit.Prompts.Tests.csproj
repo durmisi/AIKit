@@ -21,10 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.Core.Prompts\AIKit.Core.Prompts.csproj" />
     <ProjectReference Include="..\AIKit.Prompts.Liquid\AIKit.Prompts.Liquid.csproj" />
     <ProjectReference Include="..\AIKit.Prompts.Handlebars\AIKit.Prompts.Handlebars.csproj" />
     <ProjectReference Include="..\AIKit.Prompts.Jinja2\AIKit.Prompts.Jinja2.csproj" />
+    <ProjectReference Include="..\AIKit.Prompts\AIKit.Prompts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

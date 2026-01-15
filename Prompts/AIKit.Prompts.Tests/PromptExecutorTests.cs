@@ -1,3 +1,4 @@
+using AIKit.Prompts;
 using AIKit.Prompts.Handlebars;
 using AIKit.Prompts.Liquid;
 using Microsoft.Extensions.AI;
@@ -7,7 +8,7 @@ using Microsoft.SemanticKernel.PromptTemplates.Liquid;
 using Moq;
 using Shouldly;
 
-namespace AIKit.Core.Prompts.Tests;
+namespace AIKit.Prompts.Tests;
 
 public class PromptExecutorTests
 {

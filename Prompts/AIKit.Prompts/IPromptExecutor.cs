@@ -1,6 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 
-namespace AIKit.Core.Prompts;
+namespace AIKit.Prompts;
 
 /// <summary>
 /// Executes prompt templates of various types.
