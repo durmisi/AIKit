@@ -5,19 +5,19 @@ namespace AIKit.Core.Clients;
 
 public sealed class EmbeddingGeneratorFactoryFactory
 {
-    private readonly ConcurrentDictionary<string, IEmbeddingGeneratorFactory> _providers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, IEmbeddingGeneratorFactory> _factories = new(StringComparer.OrdinalIgnoreCase);
 
-    public EmbeddingGeneratorFactoryFactory(IEnumerable<IEmbeddingGeneratorFactory> providers)
+    public EmbeddingGeneratorFactoryFactory(IEnumerable<IEmbeddingGeneratorFactory> factories)
     {
-        foreach (var provider in providers)
+        foreach (var factory in factories)
         {
-            _providers[provider.Provider] = provider;
+            _factories[factory.Provider] = factory;
         }
     }
 
-    public void AddProvider(IEmbeddingGeneratorFactory provider)
+    public void AddProvider(IEmbeddingGeneratorFactory factory)
     {
-        _providers[provider.Provider] = provider;
+        _factories[factory.Provider] = factory;
     }
 
     public IEmbeddingGenerator<string, Embedding<float>> Create(string provider, AIClientSettings? settings = null)
@@ -25,11 +25,11 @@ public sealed class EmbeddingGeneratorFactoryFactory
         if (string.IsNullOrWhiteSpace(provider))
             throw new ArgumentNullException(nameof(provider));
 
-        if (!_providers.TryGetValue(provider, out var EmbeddingGeneratorFactory))
+        if (!_factories.TryGetValue(provider, out var EmbeddingGeneratorFactory))
         {
             throw new InvalidOperationException(
                 $"No IEmbeddingGeneratorFactory registered for provider '{provider}'. " +
-                $"Available providers: {string.Join(", ", _providers.Keys)}"
+                $"Available providers: {string.Join(", ", _factories.Keys)}"
             );
         }
 
