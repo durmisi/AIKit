@@ -37,16 +37,19 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
 
     public Task<string> RenderAsync(
         Kernel kernel,
-        KernelArguments arguments,
+        KernelArguments? arguments,
         CancellationToken cancellationToken = default)
     {
         // Jinja context
-        var context = new Dictionary<string, object?>();
+        var context = new Dictionary<string, object>();
 
         // Expose KernelArguments
-        foreach (var kv in arguments)
+        if (arguments != null)
         {
-            context[kv.Key] = kv.Value;
+            foreach (var kv in arguments)
+            {
+                context[kv.Key] = kv.Value ?? new object(); // or handle nulls appropriately
+            }
         }
 
         // Optional: expose kernel metadata
