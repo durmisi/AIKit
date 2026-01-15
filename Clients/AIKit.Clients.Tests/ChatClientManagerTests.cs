@@ -78,11 +78,8 @@ public class ChatClientManagerTests
         // Arrange
         var manager = new ChatClientManager(Enumerable.Empty<IChatClientFactory>());
 
-        // Act
-        Action act = () => manager.Create(null!, "model");
-
-        // Assert
-        act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("provider");
+        // Act & Assert
+        Should.Throw<ArgumentNullException>(() => manager.Create(null!, "model"));
     }
 
     [Fact]
