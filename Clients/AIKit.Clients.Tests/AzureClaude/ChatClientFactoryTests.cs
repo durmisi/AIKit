@@ -35,6 +35,32 @@ public class ChatClientFactoryTests
     }
 
     [Fact]
+    public void Create_Throws_WhenEndpointInvalid()
+    {
+        // Arrange
+        var settings = new AIClientSettings { ApiKey = "test", Endpoint = "invalid-url", ModelId = "claude-sonnet-4-5" };
+
+        // Act
+        Action act = () => new ChatClientFactory(settings);
+
+        // Assert
+        act.ShouldThrow<ArgumentException>().Message.ShouldContain("Endpoint must be a valid absolute URI");
+    }
+
+    [Fact]
+    public void Create_Throws_WhenModelInvalid()
+    {
+        // Arrange
+        var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.claude.azure.com", ModelId = null };
+
+        // Act
+        Action act = () => new ChatClientFactory(settings);
+
+        // Assert
+        act.ShouldThrow<ArgumentException>().Message.ShouldContain("ModelId is required");
+    }
+
+    [Fact]
     public void Create_ReturnsChatClient()
     {
         // Arrange
