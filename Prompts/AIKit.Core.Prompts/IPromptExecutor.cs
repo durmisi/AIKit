@@ -2,6 +2,9 @@
 
 namespace AIKit.Core.Prompts;
 
+/// <summary>
+/// Executes prompt templates of various types.
+/// </summary>
 public interface IPromptExecutor
 {
     /// <summary>
@@ -27,10 +30,18 @@ public interface IPromptExecutor
         PromptExecutionSettings? executionSettings = null,
         CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Manages prompt executors for different template types.
+/// </summary>
 public sealed class PromptExecutor
 {
     private readonly IReadOnlyDictionary<string, IPromptExecutor> _executors;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PromptExecutor"/> class.
+    /// </summary>
+    /// <param name="executors">The collection of prompt executors.</param>
     public PromptExecutor(IEnumerable<IPromptExecutor> executors)
     {
         ArgumentNullException.ThrowIfNull(executors);

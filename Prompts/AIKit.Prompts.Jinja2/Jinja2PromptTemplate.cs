@@ -1,4 +1,5 @@
 ﻿using global::Jinja2.NET;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Environment = Jinja2.NET.Environment;
 
@@ -9,10 +10,12 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
 {
     private readonly PromptTemplateConfig _config;
     private readonly Template _template;
+    private readonly ILogger<Jinja2PromptTemplate>? _logger;
 
-    public Jinja2PromptTemplate(PromptTemplateConfig config)
+    public Jinja2PromptTemplate(PromptTemplateConfig config, ILogger<Jinja2PromptTemplate>? logger = null)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
+        _logger = logger;
 
         // Create an isolated Jinja environment
         var environment = new Environment
@@ -21,6 +24,7 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
 
         // Parse template (real Jinja2 syntax)
         _template = environment.FromString(_config.Template);
+        _logger?.LogInformation("Initialized Jinja2 prompt template");
     }
 
     public Task<string> RenderAsync(
@@ -41,6 +45,7 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
         context["kernel"] = kernel;
 
         var result = _template.Render(context);
+        _logger?.LogDebug("Rendered Jinja2 template with {ArgumentCount} arguments", arguments.Count);
         return Task.FromResult(result);
     }
 }
