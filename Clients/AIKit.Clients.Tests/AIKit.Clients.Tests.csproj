@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.Core.Clients\AIKit.Core.Clients.csproj" />
     <ProjectReference Include="..\AIKit.Clients.OpenAI\AIKit.Clients.OpenAI.csproj" />
     <ProjectReference Include="..\AIKit.Clients.Gemini\AIKit.Clients.Gemini.csproj" />
     <ProjectReference Include="..\AIKit.Clients.Mistral\AIKit.Clients.Mistral.csproj" />

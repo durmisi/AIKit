@@ -3,9 +3,9 @@ using Elastic.Clients.Elasticsearch;
 using Elastic.SemanticKernel.Connectors.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.VectorData;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.VectorData;
 
 namespace AIKit.VectorStores.Elasticsearch;
 
@@ -46,7 +46,7 @@ public sealed class ElasticsearchVectorStoreFactory : IVectorStoreFactory
         {
             settingsBuilder = settingsBuilder.Authentication(new BasicAuthentication(_config.Username, _config.Password));
         }
-        if (!string.IsNullOrEmpty(_config.ApiKey) )
+        if (!string.IsNullOrEmpty(_config.ApiKey))
         {
             settingsBuilder = settingsBuilder.Authentication(new ApiKey(_config.ApiKey));
         }

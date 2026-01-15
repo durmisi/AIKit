@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using GeminiDotnet;
+﻿using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
 

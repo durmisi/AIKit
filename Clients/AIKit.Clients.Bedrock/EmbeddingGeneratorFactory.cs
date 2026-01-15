@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using Amazon;
+﻿using Amazon;
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
 

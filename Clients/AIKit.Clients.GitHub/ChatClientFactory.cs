@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using OpenAI;
 using System.ClientModel;

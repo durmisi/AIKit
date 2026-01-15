@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using Azure;
+﻿using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
 using Microsoft.Extensions.AI;

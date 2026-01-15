@@ -6,4 +6,3 @@ public interface IChunkingStrategy
 {
     Task<IReadOnlyList<IngestionChunk<string>>> Chunk(IngestionDocument document);
 }
-    

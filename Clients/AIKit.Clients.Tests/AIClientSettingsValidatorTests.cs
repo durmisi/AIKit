@@ -1,8 +1,7 @@
-using AIKit.Core.Clients;
 using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests;
+namespace AIKit.Clients.Tests;
 
 public class AIClientSettingsValidatorTests
 {

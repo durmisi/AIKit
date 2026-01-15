@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Ollama;
 

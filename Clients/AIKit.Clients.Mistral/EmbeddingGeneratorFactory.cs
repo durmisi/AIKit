@@ -1,4 +1,3 @@
-using AIKit.Core.Clients;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;

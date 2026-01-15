@@ -1,4 +1,4 @@
-namespace AIKit.Core.Clients;
+namespace AIKit.Clients;
 
 
 /// <summary>

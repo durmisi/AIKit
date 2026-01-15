@@ -1,10 +1,9 @@
 using AIKit.Clients.GitHub;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.GitHub;
+namespace AIKit.Clients.Tests.GitHub;
 
 public class ChatClientFactoryTests
 {

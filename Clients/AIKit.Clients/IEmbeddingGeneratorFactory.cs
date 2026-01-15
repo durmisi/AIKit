@@ -1,6 +1,6 @@
 using Microsoft.Extensions.AI;
 
-namespace AIKit.Core.Clients;
+namespace AIKit.Clients;
 
 public interface IEmbeddingGeneratorFactory
 {

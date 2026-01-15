@@ -1,7 +1,7 @@
 using AIKit.Core.VectorStores;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.InMemory;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AIKit.VectorStores.InMemory;
 

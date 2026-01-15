@@ -1,10 +1,9 @@
 using AIKit.Clients.AzureOpenAI;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.AzureOpenAI;
+namespace AIKit.Clients.Tests.AzureOpenAI;
 
 public class ChatClientFactoryTests
 {

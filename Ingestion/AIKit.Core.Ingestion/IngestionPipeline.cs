@@ -44,7 +44,7 @@ public class IngestionPipeline<T>
 
         var task = app(ctx, cancellationToken);
 
-        task.ContinueWith(t => 
+        task.ContinueWith(t =>
         {
             if (t.IsCompletedSuccessfully)
             {

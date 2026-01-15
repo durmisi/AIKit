@@ -1,10 +1,9 @@
 using AIKit.Clients.Ollama;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.Ollama;
+namespace AIKit.Clients.Tests.Ollama;
 
 public class ChatClientFactoryTests
 {

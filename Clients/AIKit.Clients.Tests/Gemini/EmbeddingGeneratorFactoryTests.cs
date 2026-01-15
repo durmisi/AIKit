@@ -1,10 +1,9 @@
 using AIKit.Clients.Gemini;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.Gemini;
+namespace AIKit.Clients.Tests.Gemini;
 
 public class EmbeddingGeneratorFactoryTests
 {

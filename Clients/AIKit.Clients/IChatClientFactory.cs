@@ -1,6 +1,6 @@
 using Microsoft.Extensions.AI;
 
-namespace AIKit.Core.Clients;
+namespace AIKit.Clients;
 
 /// <summary>
 /// Provides chat clients for AI interactions.

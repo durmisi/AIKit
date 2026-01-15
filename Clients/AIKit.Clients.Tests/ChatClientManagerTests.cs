@@ -1,9 +1,9 @@
-using Shouldly;
 using Microsoft.Extensions.AI;
 using Moq;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests;
+namespace AIKit.Clients.Tests;
 
 public class ChatClientManagerTests
 {

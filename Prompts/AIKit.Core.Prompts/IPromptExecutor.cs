@@ -1,6 +1,7 @@
 ﻿using Microsoft.SemanticKernel;
 
 namespace AIKit.Core.Prompts;
+
 public interface IPromptExecutor
 {
     /// <summary>

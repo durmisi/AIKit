@@ -1,10 +1,9 @@
-using AIKit.Clients.Groq;
-using AIKit.Core.Clients;
-using Shouldly;
+using AIKit.Clients.AzureClaude;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.Groq;
+namespace AIKit.Clients.Tests.AzureClaude;
 
 public class ChatClientFactoryTests
 {
@@ -12,35 +11,34 @@ public class ChatClientFactoryTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test", ModelId = "llama-3.3-70b-versatile" };
+        var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
         var factory = new ChatClientFactory(settings);
 
         // Act
         var result = factory.Provider;
 
         // Assert
-        result.ShouldBe("groq");
+        result.ShouldBe("azure-claude");
     }
 
     [Fact]
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = null, ModelId = "llama-3.3-70b-versatile" };
+        var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
 
         // Act
         Action act = () => new ChatClientFactory(settings);
 
         // Assert
-        act.ShouldThrow<ArgumentException>()
-            .Message.ShouldContain("ApiKey is required");
+        act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
     }
 
     [Fact]
     public void Create_ReturnsChatClient()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "llama-3.3-70b-versatile" };
+        var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.claude.azure.com", ModelId = "claude-sonnet-4-5" };
         var factory = new ChatClientFactory(settings);
 
         // Act

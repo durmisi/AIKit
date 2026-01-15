@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.AI;
 using System.Collections.Concurrent;
 
-namespace AIKit.Core.Clients;
+namespace AIKit.Clients;
 
 public sealed class ChatClientManager
 {

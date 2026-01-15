@@ -1,10 +1,9 @@
 using AIKit.Clients.Mistral;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.Mistral;
+namespace AIKit.Clients.Tests.Mistral;
 
 public class EmbeddingGeneratorFactoryTests
 {

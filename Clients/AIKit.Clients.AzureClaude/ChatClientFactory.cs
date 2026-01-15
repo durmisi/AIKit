@@ -1,5 +1,4 @@
-﻿using AIKit.Core.Clients;
-using Azure.Identity;
+﻿using Azure.Identity;
 using elbruno.Extensions.AI.Claude;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -34,9 +33,9 @@ public sealed class ChatClientFactory : IChatClientFactory
 
         var endpoint = new Uri(settings.Endpoint!);
 
-        var targetModelId = modelName ?? settings.ModelId;  
+        var targetModelId = modelName ?? settings.ModelId;
 
-        if(string.IsNullOrWhiteSpace(targetModelId))
+        if (string.IsNullOrWhiteSpace(targetModelId))
         {
             throw new ArgumentException("ModelId must be provided either in settings or as modelName parameter.");
         }

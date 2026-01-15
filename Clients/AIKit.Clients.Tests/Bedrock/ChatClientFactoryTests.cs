@@ -1,10 +1,9 @@
 using AIKit.Clients.Bedrock;
-using AIKit.Core.Clients;
-using Shouldly;
 using Microsoft.Extensions.AI;
+using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Clients.Tests.Bedrock;
+namespace AIKit.Clients.Tests.Bedrock;
 
 public class ChatClientFactoryTests
 {
