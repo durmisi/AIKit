@@ -1,5 +1,6 @@
 using AIKit.Core.VectorStores;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.InMemory;
 
@@ -7,11 +8,13 @@ namespace AIKit.VectorStores.InMemory;
 
 public sealed class InMemoryVectorStoreFactory : IVectorStoreFactory
 {
+    private readonly ILogger<InMemoryVectorStoreFactory>? _logger;
+
     public string Provider => "in-memory";
 
-
-    public InMemoryVectorStoreFactory()
+    public InMemoryVectorStoreFactory(ILogger<InMemoryVectorStoreFactory>? logger = null)
     {
+        _logger = logger;
     }
 
     /// <summary>
@@ -19,6 +22,7 @@ public sealed class InMemoryVectorStoreFactory : IVectorStoreFactory
     /// </summary>
     public VectorStore Create()
     {
+        _logger?.LogInformation("Creating in-memory vector store");
         return new InMemoryVectorStore();
     }
 }

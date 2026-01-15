@@ -3,42 +3,123 @@ using System.Linq.Expressions;
 
 namespace AIKit.Core.VectorStores;
 
+/// <summary>
+/// Provides search capabilities for vector stores.
+/// </summary>
+/// <typeparam name="TRecord">The type of records stored in the vector store.</typeparam>
 public interface IVectorStoreSearch<TRecord>
 {
+    /// <summary>
+    /// Performs a vector similarity search.
+    /// </summary>
+    /// <param name="vector">The query vector.</param>
+    /// <param name="request">The search request parameters.</param>
+    /// <returns>An asynchronous enumerable of search results.</returns>
     IAsyncEnumerable<VectorSearchResult<TRecord>> VectorSearchAsync(
         ReadOnlyMemory<float> vector,
         VectorSearchRequest<TRecord> request);
 
+    /// <summary>
+    /// Performs a hybrid search combining vector and keyword search.
+    /// </summary>
+    /// <param name="vector">The query vector.</param>
+    /// <param name="keywords">The keywords for text search.</param>
+    /// <param name="request">The hybrid search request parameters.</param>
+    /// <returns>An asynchronous enumerable of search results.</returns>
     IAsyncEnumerable<VectorSearchResult<TRecord>> HybridSearchAsync(
         ReadOnlyMemory<float> vector,
         IEnumerable<string> keywords,
         HybridSearchRequest<TRecord> request);
 }
 
+/// <summary>
+/// Represents a result from a vector search.
+/// </summary>
+/// <typeparam name="TRecord">The type of the record.</typeparam>
 public sealed class VectorSearchResult<TRecord>
 {
+    /// <summary>
+    /// The matching record.
+    /// </summary>
     public required TRecord Record { get; init; }
+
+    /// <summary>
+    /// The similarity score.
+    /// </summary>
     public required double Score { get; init; }
+
+    /// <summary>
+    /// Optional metadata associated with the result.
+    /// </summary>
     public IReadOnlyDictionary<string, object?>? Metadata { get; init; }
 }
 
-
+/// <summary>
+/// Request parameters for vector search.
+/// </summary>
+/// <typeparam name="TRecord">The type of records to search.</typeparam>
 public sealed class VectorSearchRequest<TRecord>
 {
+    /// <summary>
+    /// The maximum number of results to return.
+    /// </summary>
     public int? Top { get; init; }
+
+    /// <summary>
+    /// Whether to include vectors in the results.
+    /// </summary>
     public bool IncludeVectors { get; init; }
+
+    /// <summary>
+    /// Function to select the vector property from the record.
+    /// </summary>
     public Func<TRecord, bool>? VectorProperty { get; init; }
+
+    /// <summary>
+    /// Filter function to apply to records.
+    /// </summary>
     public Func<TRecord, bool>? Filter { get; init; }
+
+    /// <summary>
+    /// Number of results to skip.
+    /// </summary>
     public int Skip { get; internal set; }
 }
 
+/// <summary>
+/// Request parameters for hybrid search.
+/// </summary>
+/// <typeparam name="TRecord">The type of records to search.</typeparam>
 public sealed class HybridSearchRequest<TRecord>
 {
+    /// <summary>
+    /// The maximum number of results to return.
+    /// </summary>
     public int? Top { get; init; }
+
+    /// <summary>
+    /// Number of results to skip.
+    /// </summary>
     public int Skip { get; internal set; }
+
+    /// <summary>
+    /// Function to select the text property from the record.
+    /// </summary>
     public Func<TRecord, string>? TextProperty { get; init; }
+
+    /// <summary>
+    /// Function to select the vector property from the record.
+    /// </summary>
     public Func<TRecord, string>? VectorProperty { get; init; }
+
+    /// <summary>
+    /// Filter expression to apply to records.
+    /// </summary>
     public Expression<Func<TRecord, bool>>? Filter { get; init; }
+
+    /// <summary>
+    /// Whether to include vectors in the results.
+    /// </summary>
     public bool IncludeVectors { get; internal set; }
 }
 
