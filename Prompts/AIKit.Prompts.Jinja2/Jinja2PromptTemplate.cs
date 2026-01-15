@@ -22,9 +22,17 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
         {
         };
 
-        // Parse template (real Jinja2 syntax)
-        _template = environment.FromString(_config.Template);
-        _logger?.LogInformation("Initialized Jinja2 prompt template");
+        try
+        {
+            // Parse template (real Jinja2 syntax)
+            _template = environment.FromString(_config.Template);
+            _logger?.LogInformation("Initialized Jinja2 prompt template");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to parse Jinja2 template");
+            throw new ArgumentException("Invalid Jinja2 template syntax.", nameof(config.Template), ex);
+        }
     }
 
     public Task<string> RenderAsync(
@@ -44,8 +52,16 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
         // Optional: expose kernel metadata
         context["kernel"] = kernel;
 
-        var result = _template.Render(context);
-        _logger?.LogDebug("Rendered Jinja2 template with {ArgumentCount} arguments", arguments.Count);
-        return Task.FromResult(result);
+        try
+        {
+            var result = _template.Render(context);
+            _logger?.LogDebug("Rendered Jinja2 template with {ArgumentCount} arguments", arguments.Count);
+            return Task.FromResult(result);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to render Jinja2 template");
+            throw new InvalidOperationException("Template rendering failed due to variable substitution error or invalid syntax.", ex);
+        }
     }
 }
