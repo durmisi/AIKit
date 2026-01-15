@@ -15,8 +15,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="GeminiDotnet" Version="0.18.1" />
-		<PackageReference Include="GeminiDotnet.Extensions.AI" Version="0.18.1" />
+		<PackageReference Include="GeminiDotnet" Version="0.20.0" />
+		<PackageReference Include="GeminiDotnet.Extensions.AI" Version="0.20.0" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.1.1-preview.1.25612.2" />
 	</ItemGroup>
 
