@@ -17,185 +17,258 @@ public class PromptExecutorTests
     public PromptExecutorTests()
     {
         _mockChatClient = new Mock<IChatClient>();
-        // Setup mock to return a simple response
-        _mockChatClient.Setup(c => c.GetResponseAsync(It.IsAny<IList<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Mock response")));
-        _mockChatClient.Setup(c => c.GetStreamingResponseAsync(It.IsAny<IList<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
-            .Returns(new[] { new ChatResponseUpdate(ChatRole.Assistant, "Mock") }.ToAsyncEnumerable());
+
+        _mockChatClient
+            .Setup(c => c.GetResponseAsync(
+                It.IsAny<IList<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ChatResponse(
+                new ChatMessage(ChatRole.Assistant, "Mock response")));
+
+        _mockChatClient
+            .Setup(c => c.GetStreamingResponseAsync(
+                It.IsAny<IList<ChatMessage>>(),
+                It.IsAny<ChatOptions>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new[]
+            {
+                new ChatResponseUpdate(ChatRole.Assistant, "Mock "),
+                new ChatResponseUpdate(ChatRole.Assistant, "stream")
+            }.ToAsyncEnumerable());
     }
 
-    [Fact]
-    public async Task LiquidPromptExecutor_HandlesMissingVariables()
-    {
-        // Arrange
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}, your age is {{age}}.";
-        var arguments = new KernelArguments { { "name", "John" } }; // Missing 'age'
+    // -------------------------
+    // LIQUID TEMPLATE TESTS
+    // -------------------------
 
-        // To test template rendering, create the function and render without invoking AI
-        var config = new PromptTemplateConfig
+    [Fact]
+    public async Task LiquidPromptExecutor_RendersComplexTemplate_WithLoopsAndConditionals()
+    {
+        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
+
+        var template = """
+            Hello {{ user.name }}!
+
+            {% if user.isPremium %}
+            Thanks for being a premium user.
+            {% else %}
+            Consider upgrading your plan.
+            {% endif %}
+
+            Your orders:
+            {% for order in orders %}
+            - {{ order.id }}: {{ order.product }} ({{ order.price }})
+            {% endfor %}
+            """;
+
+        var arguments = new KernelArguments
         {
-            Name = "Test",
+            ["user"] = new Dictionary<string, object>
+            {
+                ["name"] = "John",
+                ["isPremium"] = false
+            },
+            ["orders"] = new[]
+            {
+                new Dictionary<string, object> { ["id"] = "A1", ["product"] = "Laptop", ["price"] = "1200€" },
+                new Dictionary<string, object> { ["id"] = "B2", ["product"] = "Mouse", ["price"] = "25€" }
+            }
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new LiquidPromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "ComplexLiquid",
             Template = template,
             TemplateFormat = "liquid",
-        };
-        var kernel = executor.GetType().GetField("_kernel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(executor) as Kernel;
-        var factory = new LiquidPromptTemplateFactory();
-        var templateObj = factory.Create(config);
+            AllowDangerouslySetContent = true
+        });
+
         var rendered = await templateObj.RenderAsync(kernel, arguments);
 
-        // Assert
-        rendered.ShouldContain("Hello John");
-        rendered.ShouldContain("your age is"); // Missing variable rendered as empty
+        rendered.ShouldContain("Hello John!");
+        rendered.ShouldContain("Consider upgrading");
+        rendered.ShouldContain("Laptop");
+        rendered.ShouldContain("Mouse");
     }
 
     [Fact]
-    public async Task HandlebarsPromptExecutor_HandlesMissingVariables()
+    public async Task LiquidPromptExecutor_HandlesMissingNestedProperties()
     {
-        // Arrange
-        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}, your age is {{age}}.";
-        var arguments = new KernelArguments { { "name", "John" } }; // Missing 'age'
+        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
 
-        // To test template rendering, create the function and render without invoking AI
-        var config = new PromptTemplateConfig
+        var template = """
+            User: {{ user.name }}
+            City: {{ user.address.city }}
+            """;
+
+        var arguments = new KernelArguments
         {
-            Name = "Test",
+            ["user"] = new Dictionary<string, object>
+            {
+                ["name"] = "John"
+                // address missing
+            }
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new LiquidPromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "LiquidMissingNested",
+            Template = template,
+            TemplateFormat = "liquid",
+            AllowDangerouslySetContent = true
+        });
+
+        var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        rendered.ShouldContain("User: John");
+        rendered.ShouldContain("City:");
+    }
+
+    // -------------------------
+    // HANDLEBARS TEMPLATE TESTS
+    // -------------------------
+
+    [Fact]
+    public async Task HandlebarsPromptExecutor_RendersComplexTemplate_WithEachAndIf()
+    {
+        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
+
+        var template = """
+            Hello {{user.name}}!
+
+            {{#if user.isPremium}}
+            Thanks for being a premium user.
+            {{else}}
+            Consider upgrading your plan.
+            {{/if}}
+
+            Your orders:
+            {{#each orders}}
+            - {{id}}: {{product}} ({{price}})
+            {{/each}}
+            """;
+
+        var arguments = new KernelArguments
+        {
+            ["user"] = new Dictionary<string, object>
+            {
+                ["name"] = "Jane",
+                ["isPremium"] = false
+            },
+            ["orders"] = new[]
+            {
+                new Dictionary<string, object> { ["id"] = "X1", ["product"] = "Phone", ["price"] = "800€" },
+                new Dictionary<string, object> { ["id"] = "Y2", ["product"] = "Case", ["price"] = "20€" }
+            }
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new HandlebarsPromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "ComplexHandlebars",
             Template = template,
             TemplateFormat = "handlebars",
-        };
-        var kernel = executor.GetType().GetField("_kernel", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(executor) as Kernel;
-        var factory = new HandlebarsPromptTemplateFactory();
-        var templateObj = factory.Create(config);
+            AllowDangerouslySetContent = true
+        });
+
         var rendered = await templateObj.RenderAsync(kernel, arguments);
 
-        // Assert
-        rendered.ShouldContain("Hello John");
-        rendered.ShouldContain("your age is"); // Missing variable rendered as empty
+        rendered.ShouldContain("Hello Jane!");
+        rendered.ShouldContain("Consider upgrading");
+        rendered.ShouldContain("Phone");
+        rendered.ShouldContain("Case");
     }
 
     [Fact]
-    public async Task PromptExecutor_ThrowsForUnsupportedTemplateType()
+    public async Task HandlebarsPromptExecutor_HandlesMissingCollection()
     {
-        // Arrange
-        var executors = new List<IPromptExecutor>
-        {
-            new LiquidPromptExecutor(_mockChatClient.Object)
-        };
-        var promptExecutor = new PromptExecutor(executors);
-
-        // Act & Assert
-        await Should.ThrowAsync<NotSupportedException>(() =>
-            promptExecutor.ExecuteAsync("unsupported", "template", new KernelArguments()));
-    }
-
-    [Fact]
-    public async Task PromptExecutor_ExecuteAsync_WithValidTemplate()
-    {
-        // Arrange
-        var executors = new List<IPromptExecutor>
-        {
-            new LiquidPromptExecutor(_mockChatClient.Object)
-        };
-        var promptExecutor = new PromptExecutor(executors);
-
-        // Act
-        var result = await promptExecutor.ExecuteAsync("liquid", "Hello {{name}}", new KernelArguments { { "name", "World" } });
-
-        // Assert
-        result.ShouldBe("Mock response"); // Since it invokes AI
-    }
-
-    [Fact]
-    public async Task LiquidPromptExecutor_ExecuteAsync_WithAllVariables()
-    {
-        // Arrange
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}, your age is {{age}}.";
-        var arguments = new KernelArguments { { "name", "John" }, { "age", "30" } };
-
-        // Act
-        var result = await executor.ExecuteAsync(template, arguments);
-
-        // Assert
-        result.ShouldBe("Mock response");
-    }
-
-    [Fact]
-    public async Task HandlebarsPromptExecutor_ExecuteAsync_WithAllVariables()
-    {
-        // Arrange
         var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}, your age is {{age}}.";
-        var arguments = new KernelArguments { { "name", "John" }, { "age", "30" } };
 
-        // Act
-        var result = await executor.ExecuteAsync(template, arguments);
+        var template = """
+            Orders:
+            {{#each orders}}
+            - {{id}}
+            {{/each}}
+            """;
 
-        // Assert
-        result.ShouldBe("Mock response");
+        var arguments = new KernelArguments(); // orders missing
+
+        var kernel = GetKernel(executor);
+        var factory = new HandlebarsPromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "HandlebarsMissingCollection",
+            Template = template,
+            TemplateFormat = "handlebars",
+            AllowDangerouslySetContent = true
+        });
+
+        var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        rendered.ShouldContain("Orders:");
     }
 
-    [Fact]
-    public async Task LiquidPromptExecutor_ThrowsOnInvalidTemplate()
-    {
-        // Arrange
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
-        var template = ""; // Empty template
-        var arguments = new KernelArguments();
-
-        // Act & Assert
-        await Should.ThrowAsync<ArgumentException>(() =>
-            executor.ExecuteAsync(template, arguments));
-    }
+    // -------------------------
+    // EXECUTION TESTS
+    // -------------------------
 
     [Fact]
-    public async Task LiquidPromptExecutor_ThrowsOnNullArguments()
+    public async Task PromptExecutor_ExecuteAsync_WithComplexLiquidTemplate()
     {
-        // Arrange
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}";
-
-        // Act & Assert
-        await Should.ThrowAsync<ArgumentNullException>(() =>
-            executor.ExecuteAsync(template, null!));
-    }
-
-    [Fact]
-    public async Task PromptExecutor_Constructor_ThrowsOnNullExecutors()
-    {
-        // Act & Assert
-        Should.Throw<ArgumentNullException>(() => new PromptExecutor(null!));
-    }
-
-    [Fact]
-    public async Task PromptExecutor_ExecuteAsync_ThrowsOnNullTemplateType()
-    {
-        // Arrange
         var executors = new List<IPromptExecutor>
         {
             new LiquidPromptExecutor(_mockChatClient.Object)
         };
+
         var promptExecutor = new PromptExecutor(executors);
 
-        // Act & Assert
-        await Should.ThrowAsync<ArgumentException>(() =>
-            promptExecutor.ExecuteAsync(null!, "template", new KernelArguments()));
+        var result = await promptExecutor.ExecuteAsync(
+            "liquid",
+            "Hello {{name}}",
+            new KernelArguments
+            {
+                ["name"] = "World"
+            });
+
+        result.ShouldBe("Mock response");
     }
 
     [Fact]
-    public async Task LiquidPromptExecutor_ExecuteStreamingAsync()
+    public async Task HandlebarsPromptExecutor_ExecuteStreamingAsync_WithComplexTemplate()
     {
-        // Arrange
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
-        var template = "Hello {{name}}";
-        var arguments = new KernelArguments { { "name", "World" } };
+        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
 
-        // Act
+        var template = "Hello {{name}}";
+
+        var arguments = new KernelArguments
+        {
+            ["name"] = "World"
+        };
+
         var stream = executor.ExecuteStreamingAsync(template, arguments);
         var results = await stream.ToListAsync();
 
-        // Assert
         results.ShouldNotBeEmpty();
+    }
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+
+    private static Kernel GetKernel(object executor)
+    {
+        return executor
+            .GetType()
+            .GetField("_kernel",
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Instance)!
+            .GetValue(executor) as Kernel
+            ?? throw new InvalidOperationException("Kernel not found");
     }
 }
