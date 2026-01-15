@@ -52,14 +52,14 @@ public class ChatClientFactoryTests
     }
 }
 
-public class EmbeddingProviderTests
+public class EmbeddingGeneratorFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test", ModelId = "text-embedding-3-small" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var result = factory.Provider;
@@ -75,7 +75,7 @@ public class EmbeddingProviderTests
         var settings = new AIClientSettings { GitHubToken = null, ModelId = "text-embedding-3-small" };
 
         // Act
-        Action act = () => new EmbeddingProvider(settings);
+        Action act = () => new EmbeddingGeneratorFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -87,7 +87,7 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { GitHubToken = "test-token", ModelId = "text-embedding-3-small" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var generator = factory.Create();

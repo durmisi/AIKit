@@ -1,15 +1,15 @@
-using AIKit.Core.Clients;
+﻿using AIKit.Core.Clients;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
 
-namespace AIKit.Clients.Mistral;
+namespace AIKit.Clients.OpenAI;
 
-public sealed class EmbeddingProvider : IEmbeddingProvider
+public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
     private readonly AIClientSettings _defaultSettings;
 
-    public EmbeddingProvider(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(AIClientSettings settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -17,7 +17,7 @@ public sealed class EmbeddingProvider : IEmbeddingProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "mistral";
+    public string Provider => "open-ai";
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
@@ -25,17 +25,15 @@ public sealed class EmbeddingProvider : IEmbeddingProvider
     {
         Validate(settings);
 
-        var options = new OpenAIClientOptions
+        var options = new OpenAIClientOptions();
+        if (!string.IsNullOrWhiteSpace(settings.Organization))
         {
-            Endpoint = new Uri("https://api.mistral.ai/v1/")
-        };
+            options.OrganizationId = settings.Organization;
+        }
 
         var credential = new ApiKeyCredential(settings.ApiKey!);
         var client = new OpenAIClient(credential, options);
-
-        var targetModel = settings.ModelId!;
-
-        return client.GetEmbeddingClient(targetModel).AsIEmbeddingGenerator();
+        return client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
     }
 
     private static void Validate(AIClientSettings settings)

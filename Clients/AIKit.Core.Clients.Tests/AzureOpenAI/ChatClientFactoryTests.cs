@@ -51,14 +51,14 @@ public class ChatClientFactoryTests
     }
 }
 
-public class EmbeddingProviderTests
+public class EmbeddingGeneratorFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var result = factory.Provider;
@@ -74,7 +74,7 @@ public class EmbeddingProviderTests
         var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
 
         // Act
-        Action act = () => new EmbeddingProvider(settings);
+        Action act = () => new EmbeddingGeneratorFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -85,7 +85,7 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var generator = factory.Create();

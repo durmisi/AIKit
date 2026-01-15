@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 
 namespace AIKit.Core.Clients;
 
-public sealed class EmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactoryFactory
 {
-    private readonly ConcurrentDictionary<string, IEmbeddingProvider> _providers = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, IEmbeddingGeneratorFactory> _providers = new(StringComparer.OrdinalIgnoreCase);
 
-    public EmbeddingGeneratorFactory(IEnumerable<IEmbeddingProvider> providers)
+    public EmbeddingGeneratorFactoryFactory(IEnumerable<IEmbeddingGeneratorFactory> providers)
     {
         foreach (var provider in providers)
         {
@@ -15,7 +15,7 @@ public sealed class EmbeddingGeneratorFactory
         }
     }
 
-    public void AddProvider(IEmbeddingProvider provider)
+    public void AddProvider(IEmbeddingGeneratorFactory provider)
     {
         _providers[provider.Provider] = provider;
     }
@@ -25,19 +25,19 @@ public sealed class EmbeddingGeneratorFactory
         if (string.IsNullOrWhiteSpace(provider))
             throw new ArgumentNullException(nameof(provider));
 
-        if (!_providers.TryGetValue(provider, out var embeddingProvider))
+        if (!_providers.TryGetValue(provider, out var EmbeddingGeneratorFactory))
         {
             throw new InvalidOperationException(
-                $"No IEmbeddingProvider registered for provider '{provider}'. " +
+                $"No IEmbeddingGeneratorFactory registered for provider '{provider}'. " +
                 $"Available providers: {string.Join(", ", _providers.Keys)}"
             );
         }
 
         if (settings is not null)
         {
-            return embeddingProvider.Create(settings);
+            return EmbeddingGeneratorFactory.Create(settings);
         }
 
-        return embeddingProvider.Create();
+        return EmbeddingGeneratorFactory.Create();
     }
 }

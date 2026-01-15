@@ -6,14 +6,14 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests.Mistral;
 
-public class EmbeddingProviderTests
+public class EmbeddingGeneratorFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test", ModelId = "mistral-embed" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var result = factory.Provider;
@@ -29,7 +29,7 @@ public class EmbeddingProviderTests
         var settings = new AIClientSettings { ApiKey = null, ModelId = "mistral-embed" };
 
         // Act
-        Action act = () => new EmbeddingProvider(settings);
+        Action act = () => new EmbeddingGeneratorFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -41,7 +41,7 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "mistral-embed" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var generator = factory.Create();

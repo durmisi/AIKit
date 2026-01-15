@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 
 namespace AIKit.Core.Clients;
 
-public interface IEmbeddingProvider
+public interface IEmbeddingGeneratorFactory
 {
     string Provider { get; }
     IEmbeddingGenerator<string, Embedding<float>> Create();

@@ -59,7 +59,7 @@ public class EmbeddingGeneratorTests
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
-        var factory = new EmbeddingGenerator(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var result = factory.Provider;
@@ -75,7 +75,7 @@ public class EmbeddingGeneratorTests
         var settings = new AIClientSettings { Endpoint = null, ModelId = "nomic-embed-text" };
 
         // Act
-        Action act = () => new EmbeddingGenerator(settings);
+        Action act = () => new EmbeddingGeneratorFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -87,7 +87,7 @@ public class EmbeddingGeneratorTests
     {
         // Arrange
         var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
-        var factory = new EmbeddingGenerator(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var generator = factory.Create();

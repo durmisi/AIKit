@@ -1,15 +1,15 @@
 ﻿using AIKit.Core.Clients;
+using GeminiDotnet;
+using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
-using OpenAI;
-using System.ClientModel;
 
-namespace AIKit.Clients.OpenAI;
+namespace AIKit.Clients.Gemini;
 
-public sealed class EmbeddingProvider : IEmbeddingProvider
+public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
     private readonly AIClientSettings _defaultSettings;
 
-    public EmbeddingProvider(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(AIClientSettings settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -17,7 +17,7 @@ public sealed class EmbeddingProvider : IEmbeddingProvider
         Validate(_defaultSettings);
     }
 
-    public string Provider => "open-ai";
+    public string Provider => "gemini";
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
@@ -25,15 +25,13 @@ public sealed class EmbeddingProvider : IEmbeddingProvider
     {
         Validate(settings);
 
-        var options = new OpenAIClientOptions();
-        if (!string.IsNullOrWhiteSpace(settings.Organization))
+        var options = new GeminiClientOptions
         {
-            options.OrganizationId = settings.Organization;
-        }
+            ApiKey = settings.ApiKey!,
+            ModelId = settings.ModelId!
+        };
 
-        var credential = new ApiKeyCredential(settings.ApiKey!);
-        var client = new OpenAIClient(credential, options);
-        return client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
+        return new GeminiEmbeddingGenerator(options);
     }
 
     private static void Validate(AIClientSettings settings)

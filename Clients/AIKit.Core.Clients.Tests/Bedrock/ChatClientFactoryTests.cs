@@ -52,14 +52,14 @@ public class ChatClientFactoryTests
     }
 }
 
-public class EmbeddingProviderTests
+public class EmbeddingGeneratorFactoryTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
         var settings = new AIClientSettings { AwsAccessKey = "test", AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var result = factory.Provider;
@@ -75,7 +75,7 @@ public class EmbeddingProviderTests
         var settings = new AIClientSettings { AwsAccessKey = null, AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
 
         // Act
-        Action act = () => new EmbeddingProvider(settings);
+        Action act = () => new EmbeddingGeneratorFactory(settings);
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -87,7 +87,7 @@ public class EmbeddingProviderTests
     {
         // Arrange
         var settings = new AIClientSettings { AwsAccessKey = "test-key", AwsSecretKey = "test-secret", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
-        var factory = new EmbeddingProvider(settings);
+        var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
         var generator = factory.Create();

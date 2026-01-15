@@ -5,11 +5,11 @@ using System.ClientModel;
 
 namespace AIKit.Clients.GitHub;
 
-public sealed class EmbeddingProvider : IEmbeddingProvider
+public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
     private readonly AIClientSettings _defaultSettings;
 
-    public EmbeddingProvider(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(AIClientSettings settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
