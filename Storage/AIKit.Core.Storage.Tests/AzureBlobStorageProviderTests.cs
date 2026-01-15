@@ -55,6 +55,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         result.Path.ShouldBe(path);
         result.Version.ShouldNotBeNullOrEmpty();
         result.Size.ShouldBe(content.Length);
+        result.Metadata.ShouldNotBeNull();
         result.Metadata.ShouldContainKey("key");
         result.Metadata["key"].ShouldBe("value");
     }
@@ -151,6 +152,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         metadata.ShouldNotBeNull();
         metadata!.Path.ShouldBe(path);
         metadata.ContentType.ShouldBe("text/plain");
+        metadata.CustomMetadata.ShouldNotBeNull();
         metadata.CustomMetadata.ShouldContainKey("key");
         metadata.CustomMetadata["key"].ShouldBe("value");
         metadata.Size.ShouldBe(content.Length);
