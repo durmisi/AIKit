@@ -105,4 +105,31 @@ public class EmbeddingGeneratorManagerTests
         act.ShouldThrow<ArgumentNullException>()
             .ParamName.ShouldBe("provider");
     }
+
+    [Fact]
+    public async Task CreateAndUseGenerator_IntegrationTest()
+    {
+        // Arrange
+        var mockProvider = new Mock<IEmbeddingGeneratorFactory>();
+        mockProvider.Setup(p => p.Provider).Returns("test-provider");
+
+        var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
+        mockGenerator.Setup(g => g.GenerateAsync(
+            It.IsAny<IEnumerable<string>>(),
+            It.IsAny<EmbeddingGenerationOptions>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GeneratedEmbeddings<Embedding<float>>(new[] { new Embedding<float>(new float[] { 0.1f, 0.2f }) }));
+
+        mockProvider.Setup(p => p.Create()).Returns(mockGenerator.Object);
+
+        var manager = new EmbeddingGeneratorManager(new[] { mockProvider.Object });
+
+        // Act
+        var generator = manager.Create("test-provider");
+        var embeddings = await generator.GenerateAsync(new[] { "test text" });
+
+        // Assert
+        generator.ShouldNotBeNull();
+        embeddings.ShouldNotBeNull();
+    }
 }

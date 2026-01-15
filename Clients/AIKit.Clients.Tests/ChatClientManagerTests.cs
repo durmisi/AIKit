@@ -97,4 +97,34 @@ public class ChatClientManagerTests
         // Assert
         act.ShouldThrow<ArgumentNullException>().ParamName.ShouldBe("model");
     }
+
+    [Fact]
+    public async Task CreateAndUseClient_IntegrationTest()
+    {
+        // Arrange
+        var mockProvider = new Mock<IChatClientFactory>();
+        mockProvider.Setup(p => p.Provider).Returns("test-provider");
+
+        var mockClient = new Mock<IChatClient>();
+        mockClient.Setup(c => c.GetResponseAsync(
+            It.IsAny<IList<ChatMessage>>(),
+            It.IsAny<ChatOptions>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ChatResponse(new ChatMessage(ChatRole.Assistant, "Test response")));
+
+        mockProvider.Setup(p => p.Create(It.IsAny<string>())).Returns(mockClient.Object);
+
+        var manager = new ChatClientManager(new[] { mockProvider.Object });
+
+        // Act
+        var client = manager.Create("test-provider", "model");
+        var response = await client.GetResponseAsync(
+            new[] { new ChatMessage(ChatRole.User, "Hello") },
+            new ChatOptions(),
+            CancellationToken.None);
+
+        // Assert
+        client.ShouldNotBeNull();
+        response.ShouldNotBeNull();
+    }
 }
