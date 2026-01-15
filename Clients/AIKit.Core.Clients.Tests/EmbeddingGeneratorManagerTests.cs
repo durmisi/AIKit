@@ -5,7 +5,7 @@ using Xunit;
 
 namespace AIKit.Core.Clients.Tests;
 
-public class EmbeddingGeneratorFactoryTests
+public class EmbeddingGeneratorManagerTests
 {
     [Fact]
     public void Constructor_InitializesWithProviders()
@@ -16,29 +16,29 @@ public class EmbeddingGeneratorFactoryTests
         var providers = new[] { mockProvider.Object };
 
         // Act
-        var factory = new EmbeddingGeneratorFactoryFactory(providers);
+        var manager = new EmbeddingGeneratorManager(providers);
 
         // Assert
-        factory.ShouldNotBeNull();
+        manager.ShouldNotBeNull();
     }
 
     [Fact]
     public void AddProvider_AddsProviderSuccessfully()
     {
         // Arrange
-        var factory = new EmbeddingGeneratorFactoryFactory(Enumerable.Empty<IEmbeddingGeneratorFactory>());
+        var manager = new EmbeddingGeneratorManager(Enumerable.Empty<IEmbeddingGeneratorFactory>());
         var mockProvider = new Mock<IEmbeddingGeneratorFactory>();
         mockProvider.Setup(p => p.Provider).Returns("added-provider");
 
         // Act
-        factory.AddProvider(mockProvider.Object);
+        manager.AddProvider(mockProvider.Object);
 
         // Assert
         // Test by trying to create, which should succeed
         var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
         mockProvider.Setup(p => p.Create()).Returns(mockGenerator.Object);
 
-        var result = factory.Create("added-provider");
+        var result = manager.Create("added-provider");
         result.ShouldBe(mockGenerator.Object);
     }
 
@@ -50,10 +50,10 @@ public class EmbeddingGeneratorFactoryTests
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
         mockProvider.Setup(p => p.Create()).Returns(mockGenerator.Object);
-        var factory = new EmbeddingGeneratorFactoryFactory(new[] { mockProvider.Object });
+        var manager = new EmbeddingGeneratorManager(new[] { mockProvider.Object });
 
         // Act
-        var result = factory.Create("test-provider");
+        var result = manager.Create("test-provider");
 
         // Assert
         result.ShouldBe(mockGenerator.Object);
@@ -68,10 +68,10 @@ public class EmbeddingGeneratorFactoryTests
         var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
         var settings = new AIClientSettings { ModelId = "custom-model" };
         mockProvider.Setup(p => p.Create(settings)).Returns(mockGenerator.Object);
-        var factory = new EmbeddingGeneratorFactoryFactory(new[] { mockProvider.Object });
+        var manager = new EmbeddingGeneratorManager(new[] { mockProvider.Object });
 
         // Act
-        var result = factory.Create("test-provider", settings);
+        var result = manager.Create("test-provider", settings);
 
         // Assert
         result.ShouldBe(mockGenerator.Object);
@@ -82,10 +82,10 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_WithInvalidProvider_ThrowsException()
     {
         // Arrange
-        var factory = new EmbeddingGeneratorFactoryFactory(Enumerable.Empty<IEmbeddingGeneratorFactory>());
+        var manager = new EmbeddingGeneratorManager(Enumerable.Empty<IEmbeddingGeneratorFactory>());
 
         // Act
-        Action act = () => factory.Create("non-existent");
+        Action act = () => manager.Create("non-existent");
 
         // Assert
         act.ShouldThrow<InvalidOperationException>()
@@ -96,22 +96,13 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_WithNullProvider_ThrowsException()
     {
         // Arrange
-        var factory = new EmbeddingGeneratorFactoryFactory(Enumerable.Empty<IEmbeddingGeneratorFactory>());
+        var manager = new EmbeddingGeneratorManager(Enumerable.Empty<IEmbeddingGeneratorFactory>());
 
         // Act
-        Action act = () => factory.Create(null!);
+        Action act = () => manager.Create(null!);
 
         // Assert
         act.ShouldThrow<ArgumentNullException>()
             .ParamName.ShouldBe("provider");
     }
 }
-
-
-
-
-
-
-
-
-

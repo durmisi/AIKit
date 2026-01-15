@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 
 namespace AIKit.Core.Clients;
 
-public sealed class EmbeddingGeneratorFactoryFactory
+public sealed class EmbeddingGeneratorManager
 {
     private readonly ConcurrentDictionary<string, IEmbeddingGeneratorFactory> _factories = new(StringComparer.OrdinalIgnoreCase);
 
-    public EmbeddingGeneratorFactoryFactory(IEnumerable<IEmbeddingGeneratorFactory> factories)
+    public EmbeddingGeneratorManager(IEnumerable<IEmbeddingGeneratorFactory> factories)
     {
         foreach (var factory in factories)
         {
@@ -17,6 +17,7 @@ public sealed class EmbeddingGeneratorFactoryFactory
 
     public void AddProvider(IEmbeddingGeneratorFactory factory)
     {
+        ArgumentNullException.ThrowIfNull(factory);
         _factories[factory.Provider] = factory;
     }
 

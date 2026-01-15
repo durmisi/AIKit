@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 
 namespace AIKit.Core.Clients;
 
-public sealed class ChatClientFactoryFactory
+public sealed class ChatClientManager
 {
     private readonly ConcurrentDictionary<string, IChatClientFactory> _factories = new(StringComparer.OrdinalIgnoreCase);
 
-    public ChatClientFactoryFactory(IEnumerable<IChatClientFactory> factories)
+    public ChatClientManager(IEnumerable<IChatClientFactory> factories)
     {
         foreach (var factory in factories)
         {
@@ -17,6 +17,7 @@ public sealed class ChatClientFactoryFactory
 
     public void AddProvider(IChatClientFactory factory)
     {
+        ArgumentNullException.ThrowIfNull(factory);
         _factories[factory.Provider] = factory;
     }
 
