@@ -18,6 +18,7 @@
     <Project Path="Ingestion/AIKit.Core.Ingestion/AIKit.Core.Ingestion.csproj" Id="0cb86e91-acdf-4b3c-a961-9768dcfd365f" />
   </Folder>
   <Folder Name="/Prompts/">
+    <Project Path="Prompts/AIKit.Core.Prompts.Tests/AIKit.Core.Prompts.Tests.csproj" />
     <Project Path="Prompts/AIKit.Core.Prompts/AIKit.Core.Prompts.csproj" Id="0ce01590-109c-48e8-99b5-5a5409b6374b" />
     <Project Path="Prompts/AIKit.Prompts.Handlebars/AIKit.Prompts.Handlebars.csproj" Id="14fcccc2-57a3-4d67-8b11-4978f0774fed" />
     <Project Path="Prompts/AIKit.Prompts.Jinja2/AIKit.Prompts.Jinja2.csproj" />
