@@ -1,7 +1,7 @@
 using Microsoft.Extensions.VectorData;
 using System.Linq.Expressions;
 
-namespace AIKit.Core.VectorStores;
+namespace AIKit.VectorStores;
 
 /// <summary>
 /// Provides search capabilities for vector stores.

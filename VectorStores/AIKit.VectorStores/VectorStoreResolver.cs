@@ -1,6 +1,6 @@
 using Microsoft.Extensions.VectorData;
 
-namespace AIKit.Core.VectorStores;
+namespace AIKit.VectorStores;
 
 public sealed class VectorStoreResolver
 {

@@ -1,4 +1,3 @@
-using AIKit.Core.VectorStores;
 using Elastic.Clients.Elasticsearch;
 using Elastic.SemanticKernel.Connectors.Elasticsearch;
 using Elastic.Transport;

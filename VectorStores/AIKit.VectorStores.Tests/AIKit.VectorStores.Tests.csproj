@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AIKit.VectorStores.AzureAISearch\AIKit.VectorStores.AzureAISearch.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.CosmosMongoDB\AIKit.VectorStores.CosmosMongoDB.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.CosmosNoSQL\AIKit.VectorStores.CosmosNoSQL.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.Elasticsearch\AIKit.VectorStores.Elasticsearch.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.InMemory\AIKit.VectorStores.InMemory.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.MongoDB\AIKit.VectorStores.MongoDB.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.PgVector\AIKit.VectorStores.PgVector.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.Qdrant\AIKit.VectorStores.Qdrant.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.Redis\AIKit.VectorStores.Redis.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.SqliteVec\AIKit.VectorStores.SqliteVec.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.SqlServer\AIKit.VectorStores.SqlServer.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores.Weaviate\AIKit.VectorStores.Weaviate.csproj" />
+    <ProjectReference Include="..\AIKit.VectorStores\AIKit.VectorStores.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

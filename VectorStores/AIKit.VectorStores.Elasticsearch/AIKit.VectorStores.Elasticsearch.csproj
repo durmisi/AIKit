@@ -22,7 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AIKit.Core.VectorStores\AIKit.Core.VectorStores.csproj" />
+	  <ProjectReference Include="..\AIKit.VectorStores\AIKit.VectorStores.csproj" />
 	</ItemGroup>
 
 </Project>

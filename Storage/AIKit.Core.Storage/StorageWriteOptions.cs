@@ -1,4 +1,4 @@
-namespace AIKit.Core.Storage;
+namespace AIKit.Storage;
 
 public sealed class StorageWriteOptions
 {

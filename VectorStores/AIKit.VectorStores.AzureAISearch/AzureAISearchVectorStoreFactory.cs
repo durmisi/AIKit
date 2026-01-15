@@ -1,4 +1,3 @@
-using AIKit.Core.VectorStores;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Search.Documents.Indexes;

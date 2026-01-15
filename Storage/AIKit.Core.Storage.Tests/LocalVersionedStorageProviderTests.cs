@@ -2,7 +2,7 @@ using AIKit.Storage.Local;
 using Shouldly;
 using Xunit;
 
-namespace AIKit.Core.Storage.Tests;
+namespace AIKit.Storage.Tests;
 
 public class LocalVersionedStorageProviderTests : IDisposable
 {
