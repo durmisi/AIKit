@@ -54,7 +54,11 @@ public class IngestionPipeline<T>
             {
                 logger?.LogError(t.Exception, "Pipeline execution failed");
             }
-        });
+            else if (t.IsCanceled)
+            {
+                logger?.LogWarning("Pipeline execution was canceled");
+            }
+        }, cancellationToken);
 
         return task;
     }

@@ -1,4 +1,5 @@
 using AIKit.Core.Storage;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace AIKit.Storage.Local;
@@ -14,16 +15,18 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     private const string MetadataFileName = "metadata.json";
 
     private readonly string _basePath;
+    private readonly ILogger<LocalVersionedStorageProvider>? _logger;
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public LocalVersionedStorageProvider(string basePath)
+    public LocalVersionedStorageProvider(string basePath, ILogger<LocalVersionedStorageProvider>? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(basePath);
         _basePath = Path.GetFullPath(basePath);
+        _logger = logger;
         Directory.CreateDirectory(_basePath);
     }
 
@@ -56,31 +59,52 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         Directory.CreateDirectory(versionFolderPath);
 
         var contentFilePath = Path.Combine(versionFolderPath, ContentFileName);
+        var tempContentFilePath = contentFilePath + ".tmp";
         var metadataFilePath = Path.Combine(versionFolderPath, MetadataFileName);
+        var tempMetadataFilePath = metadataFilePath + ".tmp";
 
-        // Write content
-        await using (var fileStream = new FileStream(contentFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+        _logger?.LogInformation("Saving file {Path} version {Version}", path, version);
+
+        try
         {
-            await content.CopyToAsync(fileStream, cancellationToken);
+            // Write content to temp file
+            await using (var fileStream = new FileStream(tempContentFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+            {
+                await content.CopyToAsync(fileStream, cancellationToken);
+            }
+
+            var fileInfo = new FileInfo(tempContentFilePath);
+
+            // Write metadata to temp file
+            var metadata = new LocalStorageMetadata
+            {
+                Path = path,
+                Version = version,
+                Size = fileInfo.Length,
+                ContentType = options.ContentType,
+                CustomMetadata = options.Metadata?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            var metadataJson = JsonSerializer.Serialize(metadata, _jsonOptions);
+            await File.WriteAllTextAsync(tempMetadataFilePath, metadataJson, cancellationToken);
+
+            // Atomic move
+            File.Move(tempContentFilePath, contentFilePath, overwrite: true);
+            File.Move(tempMetadataFilePath, metadataFilePath, overwrite: true);
+
+            _logger?.LogInformation("Successfully saved file {Path} version {Version} with size {Size}", path, version, fileInfo.Length);
+
+            return new StorageWriteResult(path, version, fileInfo.Length, options.Metadata);
         }
-
-        var fileInfo = new FileInfo(contentFilePath);
-
-        // Write metadata
-        var metadata = new LocalStorageMetadata
+        catch (Exception ex)
         {
-            Path = path,
-            Version = version,
-            Size = fileInfo.Length,
-            ContentType = options.ContentType,
-            CustomMetadata = options.Metadata?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-            CreatedAt = DateTimeOffset.UtcNow
-        };
-
-        var metadataJson = JsonSerializer.Serialize(metadata, _jsonOptions);
-        await File.WriteAllTextAsync(metadataFilePath, metadataJson, cancellationToken);
-
-        return new StorageWriteResult(path, version, fileInfo.Length, options.Metadata);
+            _logger?.LogError(ex, "Failed to save file {Path} version {Version}", path, version);
+            // Clean up temp files
+            try { File.Delete(tempContentFilePath); } catch { }
+            try { File.Delete(tempMetadataFilePath); } catch { }
+            throw;
+        }
     }
 
     public async Task<StorageReadResult?> ReadAsync(
