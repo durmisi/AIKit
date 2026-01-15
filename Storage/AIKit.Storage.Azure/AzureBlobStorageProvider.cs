@@ -380,10 +380,10 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         return new string(key.Select(c => char.IsLetterOrDigit(c) || c == '_' ? c : '_').ToArray());
     }
 
-    private static IDictionary<string, string>? ExtractCustomMetadata(IDictionary<string, string>? metadata)
+    private static IDictionary<string, string> ExtractCustomMetadata(IDictionary<string, string>? metadata)
     {
         if (metadata is null || metadata.Count == 0)
-            return null;
+            return new Dictionary<string, string>();
 
         var customMetadata = new Dictionary<string, string>();
 
@@ -395,7 +395,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
             }
         }
 
-        return customMetadata.Count > 0 ? customMetadata : null;
+        return customMetadata;
     }
 }
 

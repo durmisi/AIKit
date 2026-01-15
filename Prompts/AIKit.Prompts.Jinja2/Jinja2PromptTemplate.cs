@@ -58,7 +58,7 @@ internal sealed class Jinja2PromptTemplate : IPromptTemplate
         try
         {
             var result = _template.Render(context);
-            _logger?.LogDebug("Rendered Jinja2 template with {ArgumentCount} arguments", arguments.Count);
+            _logger?.LogDebug("Rendered Jinja2 template with {ArgumentCount} arguments", arguments?.Count ?? 0);
             return Task.FromResult(result);
         }
         catch (Exception ex)

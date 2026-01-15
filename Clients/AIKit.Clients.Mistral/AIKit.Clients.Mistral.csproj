@@ -11,6 +11,7 @@
 		<PackageTags>AI, Mistral, Chat</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<NoWarn>NU5104</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
