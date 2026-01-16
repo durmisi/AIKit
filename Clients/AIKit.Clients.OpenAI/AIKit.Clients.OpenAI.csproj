@@ -6,11 +6,10 @@
 		<Nullable>enable</Nullable>
 		<PackageId>AIKit.Clients.OpenAI</PackageId>
 		<Authors>Admir Durmishi</Authors>
-		<Description>OpenAI client provider for AIKit, supporting chat and embeddings.</Description>
-		<PackageTags>AI, OpenAI, Chat, Embeddings</PackageTags>
-		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageTags>AI, OpenAI, Chat, Embeddings</PackageTags>
+		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
 		<NoWarn>NU5104</NoWarn>
 	</PropertyGroup>
 
