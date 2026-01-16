@@ -51,58 +51,75 @@ public sealed class AIClientSettings
     public string? ModelId { get; init; }
 
     /// <summary>
-    /// Optional name to uniquely identify this provider instance.
-    /// If not set, a default provider name will be used.
-    /// Useful for registering multiple instances of the same provider type with different settings.
+    /// Retry policy settings for handling transient failures.
     /// </summary>
-    /// <example>
-    /// Registering multiple OpenAI providers:
-    /// <code>
-    /// services.AddSingleton&lt;IChatClientFactory&gt;(new OpenAI.ChatClientFactory(
-    ///     new AIClientSettings { ApiKey = "key1", ProviderName = "open-ai-1" }));
-    /// services.AddSingleton&lt;IChatClientFactory&gt;(new OpenAI.ChatClientFactory(
-    ///     new AIClientSettings { ApiKey = "key2", ProviderName = "open-ai-2" }));
-    /// </code>
-    /// </example>
+    public RetryPolicySettings? RetryPolicy { get; init; }
+
+    /// <summary>
+    /// The name of the provider (e.g., "open-ai", "azure-open-ai").
+    /// </summary>
     public string? ProviderName { get; init; }
 
     /// <summary>
-    /// The organization ID (optional, used by OpenAI only).
+    /// Organization ID for OpenAI.
     /// </summary>
     public string? Organization { get; init; }
 
     /// <summary>
-    /// AWS Access Key ID (required for Bedrock).
+    /// Custom HttpClient for requests.
+    /// </summary>
+    public HttpClient? HttpClient { get; init; }
+
+    /// <summary>
+    /// AWS access key for Bedrock.
     /// </summary>
     public string? AwsAccessKey { get; init; }
 
     /// <summary>
-    /// AWS Secret Access Key (required for Bedrock).
+    /// AWS secret key for Bedrock.
     /// </summary>
     public string? AwsSecretKey { get; init; }
 
     /// <summary>
-    /// AWS Region (required for Bedrock, e.g., "us-east-1").
+    /// AWS region for Bedrock.
     /// </summary>
     public string? AwsRegion { get; init; }
 
     /// <summary>
-    /// GitHub Personal Access Token (required for GitHub Models).
-    /// Create a token at https://github.com/settings/tokens with appropriate permissions.
+    /// GitHub token for GitHub Models.
     /// </summary>
     public string? GitHubToken { get; init; }
 
     /// <summary>
-    /// When true, uses DefaultAzureCredential for authentication (for Azure Claude).
-    /// This enables managed identity, Azure CLI, environment variables, etc.
+    /// Whether to use default Azure credential for Azure OpenAI.
     /// </summary>
     public bool UseDefaultAzureCredential { get; init; }
+}
+
+/// <summary>
+/// Settings for retry policy.
+/// </summary>
+public sealed class RetryPolicySettings
+{
+    /// <summary>
+    /// Maximum number of retry attempts. Default is 3.
+    /// </summary>
+    public int MaxRetries { get; init; } = 3;
 
     /// <summary>
-    /// Optional HTTP client for custom network configurations.
-    /// Currently not used - reserved for future extensibility.
+    /// Initial delay between retries in seconds. Default is 1.
     /// </summary>
-    public HttpClient? HttpClient { get; init; }
+    public double InitialDelaySeconds { get; init; } = 1.0;
+
+    /// <summary>
+    /// Maximum delay between retries in seconds. Default is 60.
+    /// </summary>
+    public double MaxDelaySeconds { get; init; } = 60.0;
+
+    /// <summary>
+    /// Backoff multiplier for exponential backoff. Default is 2.0.
+    /// </summary>
+    public double BackoffMultiplier { get; init; } = 2.0;
 }
 
 public static class AIClientSettingsValidator

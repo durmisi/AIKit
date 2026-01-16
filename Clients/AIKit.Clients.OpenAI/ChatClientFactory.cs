@@ -52,9 +52,17 @@ public sealed class ChatClientFactory : IChatClientFactory
         var targetModel = model ?? settings.ModelId!;
         _logger?.LogInformation("Creating OpenAI chat client for model {Model}", targetModel);
 
-        return client
+        var chatClient = client
             .GetChatClient(targetModel)
             .AsIChatClient();
+
+        if (settings.RetryPolicy != null)
+        {
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
+            return new RetryChatClient(chatClient, settings.RetryPolicy);
+        }
+
+        return chatClient;
     }
 
     private static void Validate(AIClientSettings settings)

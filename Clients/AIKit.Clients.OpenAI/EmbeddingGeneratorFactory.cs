@@ -32,7 +32,14 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 
         var credential = new ApiKeyCredential(settings.ApiKey!);
         var client = new OpenAIClient(credential, options);
-        return client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
+        var generator = client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
+
+        if (settings.RetryPolicy != null)
+        {
+            return new RetryEmbeddingGenerator(generator, settings.RetryPolicy);
+        }
+
+        return generator;
     }
 
     private static void Validate(AIClientSettings settings)
