@@ -1,5 +1,9 @@
 # AIKit
 
+[![Build Status](https://github.com/durmisi/AIKit/actions/workflows/publish-nuget.yml/badge.svg)](https://github.com/durmisi/AIKit/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![.NET Version](https://img.shields.io/badge/.NET-10-blue.svg)](https://dotnet.microsoft.com/)
+
 AIKit is a comprehensive .NET library designed to simplify integrations with various AI services, vector databases, and storage solutions. Built for .NET 10, it provides a unified API for interacting with popular AI providers and managing data efficiently.
 
 ## Features
@@ -49,6 +53,16 @@ AIKit is a comprehensive .NET library designed to simplify integrations with var
   ```
 
 - **Extensible**: Easy to add new providers and customize behavior.
+
+## NuGet Packages
+
+| Package | Version | Downloads |
+|---------|---------|-----------|
+| [AIKit.VectorStores](https://www.nuget.org/packages/AIKit.VectorStores/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.VectorStores.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.VectorStores.svg) |
+| [AIKit.VectorStores.InMemory](https://www.nuget.org/packages/AIKit.VectorStores.InMemory/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.VectorStores.InMemory.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.VectorStores.InMemory.svg) |
+| [AIKit.Clients.OpenAI](https://www.nuget.org/packages/AIKit.Clients.OpenAI/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Clients.OpenAI.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Clients.OpenAI.svg) |
+| [AIKit.Storage](https://www.nuget.org/packages/AIKit.Storage/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Storage.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Storage.svg) |
+<!-- Add more packages as needed -->
 
 ## Installation
 
