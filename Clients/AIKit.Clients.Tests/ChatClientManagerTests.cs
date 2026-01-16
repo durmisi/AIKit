@@ -26,7 +26,7 @@ public class ChatClientManagerTests
     public void AddProvider_AddsProviderSuccessfully()
     {
         // Arrange
-        var manager = new ChatClientManager(Enumerable.Empty<IChatClientFactory>());
+        var manager = new ChatClientManager([]);
         var mockProvider = new Mock<IChatClientFactory>();
         mockProvider.Setup(p => p.Provider).Returns("added-provider");
 
@@ -50,7 +50,7 @@ public class ChatClientManagerTests
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var mockClient = new Mock<IChatClient>();
         mockProvider.Setup(p => p.Create(It.IsAny<string>())).Returns(mockClient.Object);
-        var manager = new ChatClientManager(new[] { mockProvider.Object });
+        var manager = new ChatClientManager([mockProvider.Object]);
 
         // Act
         var result = manager.Create("test-provider", "model");
@@ -63,7 +63,7 @@ public class ChatClientManagerTests
     public void Create_WithInvalidProvider_ThrowsException()
     {
         // Arrange
-        var manager = new ChatClientManager(Enumerable.Empty<IChatClientFactory>());
+        var manager = new ChatClientManager([]);
 
         // Act
         Action act = () => manager.Create("non-existent", "model");
@@ -76,7 +76,7 @@ public class ChatClientManagerTests
     public void Create_WithNullProvider_ThrowsException()
     {
         // Arrange
-        var manager = new ChatClientManager(Enumerable.Empty<IChatClientFactory>());
+        var manager = new ChatClientManager([]);
 
         // Act & Assert
         Should.Throw<ArgumentNullException>(() => manager.Create(null!, "model"));
@@ -111,7 +111,7 @@ public class ChatClientManagerTests
 
         mockProvider.Setup(p => p.Create(It.IsAny<string>())).Returns(mockClient.Object);
 
-        var manager = new ChatClientManager(new[] { mockProvider.Object });
+        var manager = new ChatClientManager([mockProvider.Object]);
 
         // Act
         var client = manager.Create("test-provider", "model");
