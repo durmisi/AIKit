@@ -1,0 +1,39 @@
+name: Publish NuGet Packages
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          VERSION=${TAG#v}  # Remove 'v' prefix (e.g., v1.0.0 -> 1.0.0)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests (optional)
+        run: dotnet test --configuration Release --no-build
+
+      - name: Pack NuGet packages
+        run: dotnet pack --configuration Release --no-build --output ./nupkgs --version ${{ steps.version.outputs.version }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

@@ -4,7 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>AIKit.Core.Ingestion</PackageId>
+    <Description>Data ingestion abstractions for AIKit.</Description>
+    <Authors>Admir Durmishi</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>AI;Ingestion</PackageTags>
     <NoWarn>NU5104</NoWarn>
   </PropertyGroup>
 

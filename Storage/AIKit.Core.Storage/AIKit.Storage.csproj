@@ -4,6 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>AIKit.Storage</PackageId>
+    <Description>Storage abstractions for AIKit.</Description>
+    <Authors>Admir Durmishi</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>AI;Storage</PackageTags>
   </PropertyGroup>
 
 </Project>

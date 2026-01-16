@@ -5,11 +5,12 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>AIKit.Core.Clients</PackageId>
-		<Version>1.0.0</Version>
-		<Authors>AIKit Team</Authors>
+		<Authors>Admir Durmishi</Authors>
 		<Description>Core interfaces and settings for AIKit AI client providers.</Description>
 		<PackageTags>AI, Chat, Embeddings, Providers</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
