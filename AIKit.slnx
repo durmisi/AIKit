@@ -49,6 +49,4 @@
     <Project Path="VectorStores/AIKit.VectorStores.Weaviate/AIKit.VectorStores.Weaviate.csproj" />
     <Project Path="VectorStores/AIKit.VectorStores/AIKit.VectorStores.csproj" />
   </Folder>
-  <Project Path="AIKit.AppHost/AIKit.AppHost.csproj" />
-  <Project Path="AIKit.ServiceDefaults/AIKit.ServiceDefaults.csproj" />
 </Solution>
