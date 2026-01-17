@@ -10,6 +10,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>AI;Ingestion</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>NU5104</NoWarn>
   </PropertyGroup>
 

@@ -11,12 +11,27 @@ public sealed class RetryChatClient : IChatClient
     private readonly IChatClient _innerClient;
     private readonly RetryPolicySettings _retrySettings;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RetryChatClient"/> class.
+    /// </summary>
+    /// <param name="innerClient">The inner chat client to wrap.</param>
+    /// <param name="retrySettings">The retry policy settings.</param>
     public RetryChatClient(IChatClient innerClient, RetryPolicySettings retrySettings)
     {
         _innerClient = innerClient ?? throw new ArgumentNullException(nameof(innerClient));
         _retrySettings = retrySettings ?? throw new ArgumentNullException(nameof(retrySettings));
     }
 
+    /// <inheritdoc />
+    /// <summary>
+    /// Sends a request for a response from the chat server with the specified messages and options, using retry logic
+    /// in case of transient failures.
+    /// </summary>
+    /// <param name="messages">The collection of chat messages to send.</param>
+    /// <param name="options">Optional. Additional options for the chat request.</param>
+    /// <param name="cancellationToken">Optional. A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation, with a <see cref="ChatResponse"/> as its result.
+    /// The response contains the chat server's reply to the provided messages.</returns>
     public async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
         var exceptions = new List<Exception>();
@@ -42,6 +57,16 @@ public sealed class RetryChatClient : IChatClient
         throw new AggregateException($"Failed after {_retrySettings.MaxRetries + 1} attempts. See inner exceptions for details.", exceptions);
     }
 
+    /// <inheritdoc />
+    /// <summary>
+    /// Sends a request for a streaming response from the chat server with the specified messages and options, using
+    /// retry logic in case of transient failures.
+    /// </summary>
+    /// <param name="messages">The collection of chat messages to send.</param>
+    /// <param name="options">Optional. Additional options for the chat request.</param>
+    /// <param name="cancellationToken">Optional. A token to monitor for cancellation requests.</param>
+    /// <returns>A stream of <see cref="ChatResponseUpdate"/> representing the incremental updates of the chat server's reply
+    /// to the provided messages.</returns>
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
         await foreach (var response in _innerClient.GetStreamingResponseAsync(messages, options, cancellationToken))
@@ -50,6 +75,11 @@ public sealed class RetryChatClient : IChatClient
         }
     }
 
+    /// <summary>
+    /// Determines if an exception is transient and should be retried.
+    /// </summary>
+    /// <param name="ex">The exception to check.</param>
+    /// <returns>True if the exception is transient; otherwise, false.</returns>
     private static bool IsTransientException(Exception ex)
     {
         // Consider network, timeout, rate limit, and server errors as transient
@@ -62,7 +92,9 @@ public sealed class RetryChatClient : IChatClient
                (ex is InvalidOperationException && ex.Message.Contains("504"));
     }
 
+    /// <inheritdoc />
     public object? GetService(Type serviceType, object? serviceKey = null) => _innerClient.GetService(serviceType, serviceKey);
 
+    /// <inheritdoc />
     public void Dispose() => _innerClient.Dispose();
 }

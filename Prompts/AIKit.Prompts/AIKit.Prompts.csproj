@@ -5,11 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>AIKit.Prompts</PackageId>
-    <Description>Prompt management abstractions for AIKit.</Description>
     <Authors>Admir Durmishi</Authors>
+    <Description>Prompt management abstractions for AIKit.</Description>
+    <PackageTags>AI;Prompts</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageTags>AI;Prompts</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

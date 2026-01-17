@@ -6,10 +6,12 @@
 		<Nullable>enable</Nullable>
 		<PackageId>AIKit.VectorStores.InMemory</PackageId>
 		<Authors>Admir Durmishi</Authors>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<Description>In-memory vector store provider for AIKit.</Description>
 		<PackageTags>AI, VectorStore, InMemory</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>NU5104</NoWarn>
 	</PropertyGroup>
 

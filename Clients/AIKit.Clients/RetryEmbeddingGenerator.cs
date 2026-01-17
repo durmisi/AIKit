@@ -10,12 +10,18 @@ public sealed class RetryEmbeddingGenerator : IEmbeddingGenerator<string, Embedd
     private readonly IEmbeddingGenerator<string, Embedding<float>> _innerGenerator;
     private readonly RetryPolicySettings _retrySettings;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RetryEmbeddingGenerator"/> class.
+    /// </summary>
+    /// <param name="innerGenerator">The inner embedding generator to wrap.</param>
+    /// <param name="retrySettings">The retry policy settings.</param>
     public RetryEmbeddingGenerator(IEmbeddingGenerator<string, Embedding<float>> innerGenerator, RetryPolicySettings retrySettings)
     {
         _innerGenerator = innerGenerator ?? throw new ArgumentNullException(nameof(innerGenerator));
         _retrySettings = retrySettings ?? throw new ArgumentNullException(nameof(retrySettings));
     }
 
+    /// <inheritdoc />
     public async Task<GeneratedEmbeddings<Embedding<float>>> GenerateAsync(IEnumerable<string> values, EmbeddingGenerationOptions? options = null, CancellationToken cancellationToken = default)
     {
         var exceptions = new List<Exception>();
@@ -41,6 +47,11 @@ public sealed class RetryEmbeddingGenerator : IEmbeddingGenerator<string, Embedd
         throw new AggregateException($"Embedding generation failed after {_retrySettings.MaxRetries + 1} attempts. See inner exceptions for details.", exceptions);
     }
 
+    /// <summary>
+    /// Determines if an exception is transient and should be retried.
+    /// </summary>
+    /// <param name="ex">The exception to check.</param>
+    /// <returns>True if the exception is transient; otherwise, false.</returns>
     private static bool IsTransientException(Exception ex)
     {
         // Consider network, timeout, rate limit, and server errors as transient
@@ -53,12 +64,9 @@ public sealed class RetryEmbeddingGenerator : IEmbeddingGenerator<string, Embedd
                (ex is InvalidOperationException && ex.Message.Contains("504"));
     }
 
-    public object? GetService(Type serviceType) => _innerGenerator.GetService(serviceType);
+    /// <inheritdoc />
+    public object? GetService(Type serviceType, object? serviceKey = null) => _innerGenerator.GetService(serviceType, serviceKey);
 
+    /// <inheritdoc />
     public void Dispose() => _innerGenerator.Dispose();
-
-    public object? GetService(Type serviceType, object? serviceKey = null)
-    {
-        throw new NotImplementedException();
-    }
 }
