@@ -38,6 +38,13 @@ public interface IStorageProvider
 
     // -------- EXISTS --------
 
+    /// <summary>
+    /// Checks if a file or a specific version exists.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">Optional version to check. If null, checks the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>True if the file exists; otherwise, false.</returns>
     Task<bool> ExistsAsync(
         string path,
         string? version = null,
@@ -46,6 +53,13 @@ public interface IStorageProvider
 
     // -------- METADATA --------
 
+    /// <summary>
+    /// Gets metadata for a file or a specific version.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">Optional version to get metadata for. If null, gets for the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The metadata if available; otherwise, null.</returns>
     Task<StorageMetadata?> GetMetadataAsync(
         string path,
         string? version = null,

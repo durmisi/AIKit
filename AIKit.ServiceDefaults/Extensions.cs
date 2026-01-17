@@ -10,14 +10,22 @@ using OpenTelemetry.Trace;
 
 namespace AIKit.ServiceDefaults;
 
-// Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-// This project should be referenced by each service project in your solution.
-// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
+/// <summary>
+/// Provides extension methods for configuring common Aspire services including service discovery, resilience, health checks, and OpenTelemetry.
+/// This project should be referenced by each service project in your solution.
+/// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
+/// </summary>
 public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
 
+    /// <summary>
+    /// Adds common Aspire services to the host application builder, including OpenTelemetry configuration, default health checks, service discovery, and resilient HTTP client defaults.
+    /// </summary>
+    /// <typeparam name="TBuilder">The type of the host application builder.</typeparam>
+    /// <param name="builder">The host application builder to configure.</param>
+    /// <returns>The configured host application builder.</returns>
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
@@ -44,6 +52,12 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Configures OpenTelemetry for logging, metrics, and tracing in the host application builder.
+    /// </summary>
+    /// <typeparam name="TBuilder">The type of the host application builder.</typeparam>
+    /// <param name="builder">The host application builder to configure.</param>
+    /// <returns>The configured host application builder.</returns>
     public static TBuilder ConfigureOpenTelemetry<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Logging.AddOpenTelemetry(logging =>
@@ -78,6 +92,12 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds OpenTelemetry exporters based on configuration, such as OTLP exporter if endpoint is configured.
+    /// </summary>
+    /// <typeparam name="TBuilder">The type of the host application builder.</typeparam>
+    /// <param name="builder">The host application builder to configure.</param>
+    /// <returns>The configured host application builder.</returns>
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
@@ -97,7 +117,14 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds default health checks to the service collection, including a self-check for liveness.
+    /// </summary>
+    /// <typeparam name="TBuilder">The type of the host application builder.</typeparam>
+    /// <param name="builder">The host application builder to configure.</param>
+    /// <returns>The configured host application builder.</returns>
     public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+
     {
         builder.Services.AddHealthChecks()
             // Add a default liveness check to ensure app is responsive
@@ -106,6 +133,11 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Maps default endpoints for health checks in the web application, only in development environment for security reasons.
+    /// </summary>
+    /// <param name="app">The web application to configure.</param>
+    /// <returns>The configured web application.</returns>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // Adding health checks endpoints to applications in non-development environments has security implications.

@@ -2,6 +2,9 @@ namespace AIKit.Storage;
 
 public sealed class StorageWriteOptions
 {
+    /// <summary>
+    /// Gets or sets the content type of the file.
+    /// </summary>
     public string? ContentType { get; set; }
 
     /// <summary>

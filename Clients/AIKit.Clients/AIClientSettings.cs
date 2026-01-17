@@ -124,6 +124,12 @@ public sealed class RetryPolicySettings
 
 public static class AIClientSettingsValidator
 {
+    /// <summary>
+    /// Validates that the API key is provided in the settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings to validate.</param>
+    /// <exception cref="ArgumentNullException">Thrown if settings is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if ApiKey is null or whitespace.</exception>
     public static void RequireApiKey(AIClientSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -134,6 +140,12 @@ public static class AIClientSettingsValidator
                 nameof(AIClientSettings.ApiKey));
     }
 
+    /// <summary>
+    /// Validates that the endpoint is provided and is a valid absolute URI in the settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings to validate.</param>
+    /// <exception cref="ArgumentNullException">Thrown if settings is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if Endpoint is null, whitespace, or not a valid URI.</exception>
     public static void RequireEndpoint(AIClientSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -149,6 +161,12 @@ public static class AIClientSettingsValidator
                 nameof(AIClientSettings.Endpoint));
     }
 
+    /// <summary>
+    /// Validates that the model ID is provided in the settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings to validate.</param>
+    /// <exception cref="ArgumentNullException">Thrown if settings is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if ModelId is null or whitespace.</exception>
     public static void RequireModel(AIClientSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
