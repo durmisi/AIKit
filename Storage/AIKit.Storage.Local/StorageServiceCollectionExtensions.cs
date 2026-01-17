@@ -8,7 +8,6 @@ namespace AIKit.Storage.Local;
 /// </summary>
 public static class StorageServiceCollectionExtensions
 {
-
     /// <summary>
     /// Adds the local versioned storage provider to the service collection.
     /// </summary>
@@ -52,9 +51,7 @@ public static class StorageServiceCollectionExtensions
 
         return services;
     }
-
 }
-
 
 /// <summary>
 /// Configuration options for local storage provider.
@@ -66,4 +63,3 @@ public sealed class LocalStorageOptions
     /// </summary>
     public string BasePath { get; set; } = default!;
 }
-

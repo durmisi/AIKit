@@ -42,7 +42,6 @@ public sealed class ChatClientFactory : IChatClientFactory
             client = new ChatCompletionsClient(
                 new Uri(settings.Endpoint!),
                 new AzureKeyCredential(settings.ApiKey!));
-
         }
 
         var targetModel = model ?? settings.ModelId;

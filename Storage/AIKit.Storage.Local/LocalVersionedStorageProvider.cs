@@ -15,6 +15,7 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
 
     private readonly string _basePath;
     private readonly ILogger<LocalVersionedStorageProvider>? _logger;
+
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,

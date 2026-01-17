@@ -95,7 +95,6 @@ public static class StorageServiceCollectionExtensions
         return services;
     }
 
-
     /// <summary>
     /// Adds a keyed Azure Blob storage provider to the service collection.
     /// </summary>
@@ -124,7 +123,6 @@ public static class StorageServiceCollectionExtensions
 
         return services;
     }
-
 }
 
 /// <summary>
@@ -147,4 +145,3 @@ public sealed class AzureBlobStorageConnectionOptions
     /// </summary>
     public AzureBlobStorageOptions Options { get; set; } = new();
 }
-

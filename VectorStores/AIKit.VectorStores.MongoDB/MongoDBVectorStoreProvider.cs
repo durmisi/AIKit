@@ -9,7 +9,7 @@ namespace AIKit.VectorStores.MongoDB;
 
 public sealed class MongoDBVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
+    public string ConnectionString { get; init; }
     public string? DatabaseName { get; init; }
 }
 

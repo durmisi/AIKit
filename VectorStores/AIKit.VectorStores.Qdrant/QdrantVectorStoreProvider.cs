@@ -8,7 +8,7 @@ namespace AIKit.VectorStores.Qdrant;
 
 public sealed class QdrantVectorStoreOptionsConfig
 {
-    public required Uri Endpoint { get; init; }
+    public Uri Endpoint { get; init; }
 }
 
 public sealed class QdrantVectorStoreFactory : IVectorStoreFactory

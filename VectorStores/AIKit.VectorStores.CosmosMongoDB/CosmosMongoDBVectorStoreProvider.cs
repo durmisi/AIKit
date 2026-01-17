@@ -9,8 +9,8 @@ namespace AIKit.VectorStores.CosmosMongoDB;
 
 public sealed class CosmosMongoDBVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
-    public required string DatabaseName { get; init; }
+    public string ConnectionString { get; init; }
+    public string DatabaseName { get; init; }
     public int? MongoConnectionTimeoutSeconds { get; init; }
     public int? MongoMaxConnectionPoolSize { get; init; }
     public bool? MongoUseSsl { get; init; }

@@ -1,6 +1,5 @@
 namespace AIKit.Clients;
 
-
 /// <summary>
 /// Settings for configuring AI client connections.
 /// </summary>

@@ -9,7 +9,7 @@ namespace AIKit.VectorStores.Redis;
 
 public sealed class RedisVectorStoreOptionsConfig
 {
-    public required string Endpoint { get; init; }
+    public string Endpoint { get; init; }
     public string? Password { get; init; }
     public int? Database { get; init; }
     public int? ConnectTimeout { get; init; }

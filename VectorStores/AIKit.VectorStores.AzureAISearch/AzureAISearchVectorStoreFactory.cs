@@ -12,7 +12,7 @@ namespace AIKit.VectorStores.AzureAISearch;
 
 public sealed class AzureAISearchVectorStoreOptionsConfig
 {
-    public required Uri Endpoint { get; init; }
+    public Uri Endpoint { get; init; }
 }
 
 public sealed class AzureAISearchVectorStoreFactory : IVectorStoreFactory
@@ -123,7 +123,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-
     public static IServiceCollection AddAzureAISearchVectorStore(
            this IServiceCollection services,
            AzureAISearchVectorStore store)
@@ -154,4 +153,3 @@ public static class ServiceCollectionExtensions
         }
     }
 }
-

@@ -5,7 +5,6 @@ using Environment = Jinja2.NET.Environment;
 
 namespace AIKit.Prompts.Jinja2;
 
-
 internal sealed class Jinja2PromptTemplate : IPromptTemplate
 {
     private readonly PromptTemplateConfig _config;

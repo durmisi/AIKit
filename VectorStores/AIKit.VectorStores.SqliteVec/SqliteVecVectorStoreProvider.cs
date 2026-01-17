@@ -8,7 +8,7 @@ namespace AIKit.VectorStores.SqliteVec;
 
 public sealed class SqliteVecVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
+    public string ConnectionString { get; init; }
     public string? TableName { get; init; }
 }
 

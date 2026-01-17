@@ -10,7 +10,7 @@ namespace AIKit.VectorStores.Elasticsearch;
 
 public sealed class ElasticsearchVectorStoreOptionsConfig
 {
-    public required Uri Endpoint { get; init; }
+    public Uri Endpoint { get; init; }
     public string? Username { get; init; }
     public string? Password { get; init; }
     public string? ApiKey { get; init; }
@@ -63,6 +63,7 @@ public sealed class ElasticsearchVectorStoreFactory : IVectorStoreFactory
 internal static class ElasticsearchVectorStoreOptionsFactory
 {
 #pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     public static ElasticsearchVectorStoreOptions Create(IEmbeddingGenerator embeddingGenerator)
     {
         return new ElasticsearchVectorStoreOptions
@@ -70,6 +71,7 @@ internal static class ElasticsearchVectorStoreOptionsFactory
             EmbeddingGenerator = embeddingGenerator,
         };
     }
+
 #pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed
 }
 
@@ -104,11 +106,13 @@ public sealed class ElasticsearchVectorStoreBuilder
     }
 
 #pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     public ElasticsearchVectorStoreBuilder WithOptions(ElasticsearchVectorStoreOptions options)
     {
         _options = options;
         return this;
     }
+
 #pragma warning restore SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed
 
     public VectorStore Build()

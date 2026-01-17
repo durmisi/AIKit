@@ -15,6 +15,7 @@ public sealed class LiquidPromptExecutor : IPromptExecutor
 
     // Security limits
     private const int MaxTemplateLength = 50000;
+
     private const int MaxArgumentsCount = 100;
     private const int MaxArgumentKeyLength = 100;
     private const int MaxArgumentValueLength = 10000;

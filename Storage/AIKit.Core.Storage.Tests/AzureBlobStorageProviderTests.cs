@@ -66,7 +66,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
     [SkippableFact]
     public async Task ReadAsync_ShouldReturnStoredFile()
     {
-       Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
 
         try
         {

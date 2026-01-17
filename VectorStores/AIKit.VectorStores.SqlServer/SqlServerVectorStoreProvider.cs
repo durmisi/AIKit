@@ -8,7 +8,7 @@ namespace AIKit.VectorStores.SqlServer;
 
 public sealed class SqlServerVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
+    public string ConnectionString { get; init; }
     public string? Schema { get; init; }
 }
 

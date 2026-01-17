@@ -96,12 +96,3 @@ public class EmbeddingGeneratorFactoryTests
         generator.ShouldBeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
     }
 }
-
-
-
-
-
-
-
-
-

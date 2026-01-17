@@ -8,8 +8,8 @@ namespace AIKit.VectorStores.CosmosNoSQL;
 
 public sealed class CosmosNoSQLVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
-    public required string DatabaseName { get; init; }
+    public string ConnectionString { get; init; }
+    public string DatabaseName { get; init; }
 }
 
 public sealed class CosmosNoSQLVectorStoreFactory : IVectorStoreFactory

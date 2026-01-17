@@ -13,7 +13,6 @@ public interface IStorageProvider
         StorageWriteOptions? options = null,
         CancellationToken cancellationToken = default);
 
-
     // -------- READ --------
 
     /// <summary>
@@ -24,7 +23,6 @@ public interface IStorageProvider
         string? version = null,
         CancellationToken cancellationToken = default);
 
-
     // -------- DELETE --------
 
     /// <summary>
@@ -34,7 +32,6 @@ public interface IStorageProvider
         string path,
         string? version = null,
         CancellationToken cancellationToken = default);
-
 
     // -------- EXISTS --------
 
@@ -50,7 +47,6 @@ public interface IStorageProvider
         string? version = null,
         CancellationToken cancellationToken = default);
 
-
     // -------- METADATA --------
 
     /// <summary>
@@ -65,7 +61,6 @@ public interface IStorageProvider
         string? version = null,
         CancellationToken cancellationToken = default);
 
-
     // -------- VERSIONING --------
 
     /// <summary>
@@ -75,7 +70,6 @@ public interface IStorageProvider
         string path,
         CancellationToken cancellationToken = default);
 
-
     /// <summary>
     /// Restores a previous version as the new latest version.
     /// </summary>
@@ -84,6 +78,3 @@ public interface IStorageProvider
         string version,
         CancellationToken cancellationToken = default);
 }
-
-
-

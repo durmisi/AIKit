@@ -59,11 +59,11 @@ public class VectorStoreIntegrationTests
 public class TestRecord
 {
     [VectorStoreKey]
-    public required string Key { get; init; }
+    public string Key { get; init; }
 
     [VectorStoreData]
-    public required string Text { get; init; }
+    public string Text { get; init; }
 
     [VectorStoreVector(Dimensions: 3)]
-    public required ReadOnlyMemory<float> Vector { get; init; }
+    public ReadOnlyMemory<float> Vector { get; init; }
 }

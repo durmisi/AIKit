@@ -41,12 +41,12 @@ public sealed class VectorSearchResult<TRecord>
     /// <summary>
     /// The matching record.
     /// </summary>
-    public required TRecord Record { get; init; }
+    public TRecord Record { get; init; }
 
     /// <summary>
     /// The similarity score.
     /// </summary>
-    public required double Score { get; init; }
+    public double Score { get; init; }
 
     /// <summary>
     /// Optional metadata associated with the result.
@@ -123,7 +123,6 @@ public sealed class HybridSearchRequest<TRecord>
     public bool IncludeVectors { get; internal set; }
 }
 
-
 internal sealed class SemanticKernelVectorStoreSearch<TRecord>
     : IVectorStoreSearch<TRecord>
 {
@@ -157,7 +156,6 @@ internal sealed class SemanticKernelVectorStoreSearch<TRecord>
                 Metadata = null,
             });
     }
-
 
     public IAsyncEnumerable<VectorSearchResult<TRecord>> HybridSearchAsync(ReadOnlyMemory<float> vector, IEnumerable<string> keywords, HybridSearchRequest<TRecord> request)
     {

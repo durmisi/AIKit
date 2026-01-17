@@ -8,7 +8,7 @@ namespace AIKit.VectorStores.Weaviate;
 
 public sealed class WeaviateVectorStoreOptionsConfig
 {
-    public required Uri Endpoint { get; init; }
+    public Uri Endpoint { get; init; }
     public string? ApiKey { get; init; }
     public int? TimeoutSeconds { get; init; }
 }

@@ -1,13 +1,11 @@
 using AIKit.VectorStores.PgVector;
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.VectorData;
 using Shouldly;
-using Xunit;
 
 namespace AIKit.VectorStores.Tests;
 
@@ -130,5 +128,6 @@ public class FakeEmbeddingGenerator : IEmbeddingGenerator
 
     public object? GetService(Type serviceType, object? serviceKey = null) => null;
 
-    public void Dispose() { }
+    public void Dispose()
+    { }
 }

@@ -8,7 +8,7 @@ namespace AIKit.VectorStores.PgVector;
 
 public sealed class PostgresVectorStoreOptionsConfig
 {
-    public required string ConnectionString { get; init; }
+    public string ConnectionString { get; init; }
     public string? Schema { get; init; }
 }
 

@@ -18,4 +18,3 @@ public interface IVectorStoreFactory
     /// <returns>A <see cref="VectorStore"/> instance.</returns>
     VectorStore Create();
 }
-
