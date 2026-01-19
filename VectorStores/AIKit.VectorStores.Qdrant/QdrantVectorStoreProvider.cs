@@ -8,7 +8,9 @@ namespace AIKit.VectorStores.Qdrant;
 
 public sealed class QdrantVectorStoreOptionsConfig
 {
-    public Uri Endpoint { get; init; }
+    public string Host { get; init; } = "localhost";
+    public int Port { get; init; } = 6334;
+    public string? ApiKey { get; init; }
 }
 
 public sealed class QdrantVectorStoreFactory : IVectorStoreFactory
@@ -24,12 +26,12 @@ public sealed class QdrantVectorStoreFactory : IVectorStoreFactory
 
     public VectorStore Create()
     {
-        if (_config.Endpoint is null)
+        if (string.IsNullOrWhiteSpace(_config.Host))
         {
-            throw new InvalidOperationException("Qdrant endpoint is not configured.");
+            throw new InvalidOperationException("Qdrant host is not configured.");
         }
 
-        var client = new QdrantClient(_config.Endpoint.ToString());
+        var client = new QdrantClient(_config.Host, _config.Port, apiKey: _config.ApiKey);
 
         return new QdrantVectorStore(client, ownsClient: true);
     }
@@ -37,12 +39,26 @@ public sealed class QdrantVectorStoreFactory : IVectorStoreFactory
 
 public sealed class QdrantVectorStoreBuilder
 {
-    private Uri? _endpoint;
+    private string? _host;
+    private int _port = 6334;
+    private string? _apiKey;
     private QdrantClient? _client;
 
-    public QdrantVectorStoreBuilder WithEndpoint(Uri endpoint)
+    public QdrantVectorStoreBuilder WithHost(string host)
     {
-        _endpoint = endpoint;
+        _host = host;
+        return this;
+    }
+
+    public QdrantVectorStoreBuilder WithPort(int port)
+    {
+        _port = port;
+        return this;
+    }
+
+    public QdrantVectorStoreBuilder WithApiKey(string apiKey)
+    {
+        _apiKey = apiKey;
         return this;
     }
 
@@ -59,10 +75,10 @@ public sealed class QdrantVectorStoreBuilder
             return new QdrantVectorStore(_client, ownsClient: true);
         }
 
-        if (_endpoint is null)
-            throw new InvalidOperationException("Endpoint must be set if no client is provided.");
+        if (string.IsNullOrWhiteSpace(_host))
+            throw new InvalidOperationException("Host must be set if no client is provided.");
 
-        var client = new QdrantClient(_endpoint.ToString());
+        var client = new QdrantClient(_host, _port, apiKey: _apiKey);
         return new QdrantVectorStore(client, ownsClient: true);
     }
 }
