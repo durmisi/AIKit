@@ -49,5 +49,12 @@ To publish packages to NuGet.org:
 1. Obtain an API key from https://www.nuget.org/account/apikeys
 2. For each package: `dotnet nuget push <path-to-nupkg> --api-key <your-key> --source https://api.nuget.org/v3/index.json`
 
-For private feeds, adjust the source URL accordingly.</content>
+For private feeds, adjust the source URL accordingly.
+
+---
+
+## Deprecated types ⚠️
+
+- **`BaseEmbeddingGeneratorFactory`**: Deprecated — this base class will be removed in a future release. Implement `IEmbeddingGeneratorFactory` directly in your provider factory and move constructor validation, `Provider`, `Create()`/`Create(settings)`, and any `RetryPolicy` handling into the concrete implementation.
+</content>
 <parameter name="filePath">README_PACKAGES.md

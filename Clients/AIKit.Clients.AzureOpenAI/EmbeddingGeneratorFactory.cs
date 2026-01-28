@@ -1,4 +1,6 @@
-﻿using AIKit.Clients.Base;
+﻿using AIKit.Clients.Resilience;
+using AIKit.Clients.Settings;
+using AIKit.Clients.Interfaces;
 using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
@@ -9,15 +11,45 @@ namespace AIKit.Clients.AzureOpenAI;
 /// <summary>
 /// Factory for creating Azure OpenAI embedding generators.
 /// </summary>
-public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
+    private readonly Dictionary<string, object> _defaultSettings;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorFactory"/> class.
     /// </summary>
     /// <param name="settings">The settings as key-value pairs.</param>
     public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
-        : base(settings)
     {
+        _defaultSettings = settings ?? throw new ArgumentNullException(nameof(settings));
+        Validate(_defaultSettings);
+    }
+
+    /// <summary>
+    /// Gets the provider name for this factory using the default settings.
+    /// </summary>
+    public string Provider => GetProviderName(_defaultSettings);
+
+    /// <summary>
+    /// Creates an embedding generator using the default settings.
+    /// </summary>
+    public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
+
+    /// <summary>
+    /// Creates an embedding generator with the specified settings.
+    /// </summary>
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
+    {
+        Validate(settings);
+
+        var generator = CreateGenerator(settings);
+
+        if (settings.TryGetValue("RetryPolicy", out var retryObj) && retryObj is RetryPolicySettings retryPolicy)
+        {
+            return new RetryEmbeddingGenerator(generator, retryPolicy);
+        }
+
+        return generator;
     }
 
     /// <summary>
@@ -25,14 +57,14 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
     /// </summary>
     /// <param name="settings">The settings dictionary.</param>
     /// <returns>The provider name.</returns>
-    protected override string GetProviderName(Dictionary<string, object> settings)
+    private string GetProviderName(Dictionary<string, object> settings)
         => settings.TryGetValue("ProviderName", out var provider) && provider is string s ? s : "azure-open-ai";
 
     /// <summary>
     /// Validates the settings for this provider.
     /// </summary>
     /// <param name="settings">The settings to validate.</param>
-    protected override void Validate(Dictionary<string, object> settings)
+    private void Validate(Dictionary<string, object> settings)
     {
         if (!settings.TryGetValue("Endpoint", out var endpoint) || string.IsNullOrWhiteSpace(endpoint as string))
             throw new ArgumentException("Endpoint is required.", "Endpoint");
@@ -56,7 +88,7 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
     /// </summary>
     /// <param name="settings">The settings as key-value pairs.</param>
     /// <returns>The created embedding generator.</returns>
-    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(Dictionary<string, object> settings)
+    private IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(Dictionary<string, object> settings)
     {
         EmbeddingsClient client;
 
