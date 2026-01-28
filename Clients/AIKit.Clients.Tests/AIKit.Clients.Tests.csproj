@@ -37,6 +37,7 @@
     <ProjectReference Include="..\AIKit.Clients.GitHub\AIKit.Clients.GitHub.csproj" />
     <ProjectReference Include="..\AIKit.Clients.AzureClaude\AIKit.Clients.AzureClaude.csproj" />
     <ProjectReference Include="..\AIKit.Clients.Ollama\AIKit.Clients.Ollama.csproj" />
+    <ProjectReference Include="..\AIKit.Clients.Claude\AIKit.Clients.Claude.csproj" />
   </ItemGroup>
 
 </Project>
