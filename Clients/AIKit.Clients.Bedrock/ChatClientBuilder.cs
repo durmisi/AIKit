@@ -1,12 +1,9 @@
-using AIKit.Clients.Bedrock;
-using AIKit.Clients.Base;
-using AIKit.Clients.Interfaces;
+using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using AIKit.Clients.Resilience;
 
 namespace AIKit.Clients.Bedrock;
 

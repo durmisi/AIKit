@@ -1,4 +1,3 @@
-using AIKit.Clients.AzureOpenAI;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;

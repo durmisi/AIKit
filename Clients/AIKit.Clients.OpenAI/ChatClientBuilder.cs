@@ -1,5 +1,3 @@
-using AIKit.Clients.Interfaces;
-using AIKit.Clients.OpenAI;
 using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;

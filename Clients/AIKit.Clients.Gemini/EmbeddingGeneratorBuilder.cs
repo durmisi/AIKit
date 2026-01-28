@@ -1,4 +1,3 @@
-using AIKit.Clients.Gemini;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Gemini;

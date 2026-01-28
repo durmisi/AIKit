@@ -1,4 +1,3 @@
-using AIKit.Clients.AzureOpenAI;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 

@@ -1,4 +1,3 @@
-using AIKit.Clients.GitHub;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.GitHub;

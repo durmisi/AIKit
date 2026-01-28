@@ -1,4 +1,3 @@
-using AIKit.Clients.Mistral;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Mistral;

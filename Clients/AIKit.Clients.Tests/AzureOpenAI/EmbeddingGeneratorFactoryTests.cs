@@ -1,5 +1,4 @@
 using AIKit.Clients.AzureOpenAI;
-using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Shouldly;

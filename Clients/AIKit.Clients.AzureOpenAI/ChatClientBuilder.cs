@@ -1,6 +1,3 @@
-using AIKit.Clients.AzureOpenAI;
-using AIKit.Clients.Base;
-using AIKit.Clients.Interfaces;
 using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Azure;

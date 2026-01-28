@@ -1,6 +1,6 @@
-﻿using AIKit.Clients.Resilience;
+﻿using AIKit.Clients.Interfaces;
+using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
-using AIKit.Clients.Interfaces;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
