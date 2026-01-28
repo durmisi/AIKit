@@ -70,6 +70,11 @@ public sealed class AIClientSettings
     public HttpClient? HttpClient { get; init; }
 
     /// <summary>
+    /// Request timeout in seconds. Default is 30.
+    /// </summary>
+    public int TimeoutSeconds { get; init; } = 30;
+
+    /// <summary>
     /// AWS access key for Bedrock.
     /// </summary>
     public string? AwsAccessKey { get; init; }
@@ -161,6 +166,22 @@ public static class AIClientSettingsValidator
             throw new ArgumentException(
                 "Endpoint must be a valid absolute URI.",
                 nameof(AIClientSettings.Endpoint));
+    }
+
+    /// <summary>
+    /// Validates that the GitHub token is provided in the settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings to validate.</param>
+    /// <exception cref="ArgumentNullException">Thrown if settings is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if GitHubToken is null or whitespace.</exception>
+    public static void RequireGitHubToken(AIClientSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
+            throw new ArgumentException(
+                "GitHubToken is required.",
+                nameof(AIClientSettings.GitHubToken));
     }
 
     /// <summary>

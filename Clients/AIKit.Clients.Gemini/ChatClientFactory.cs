@@ -1,4 +1,4 @@
-﻿using AIKit.Clients.Interfaces;
+﻿using AIKit.Clients.Base;
 using AIKit.Clients.Settings;
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
@@ -7,44 +7,32 @@ using Microsoft.Extensions.Logging;
 
 namespace AIKit.Clients.Gemini;
 
-public sealed class ChatClientFactory : IChatClientFactory
+public sealed class ChatClientFactory : BaseChatClientFactory
 {
-    private readonly AIClientSettings _defaultSettings;
-    private readonly ILogger<ChatClientFactory>? _logger;
-
     public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
+        : base(settings, logger)
     {
-        _defaultSettings = settings
-            ?? throw new ArgumentNullException(nameof(settings));
-        _logger = logger;
-
-        Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "gemini";
+    protected override string GetDefaultProviderName() => "gemini";
 
-    public IChatClient Create(string? model = null)
-        => Create(_defaultSettings, model);
-
-    public IChatClient Create(AIClientSettings settings, string? model = null)
-    {
-        Validate(settings);
-
-        var options = new GeminiClientOptions
-        {
-            ApiKey = settings.ApiKey!,
-            ModelId = model ?? settings.ModelId!
-        };
-
-        var targetModel = model ?? settings.ModelId!;
-        _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
-
-        return new GeminiChatClient(options);
-    }
-
-    private static void Validate(AIClientSettings settings)
+    protected override void Validate(AIClientSettings settings)
     {
         AIClientSettingsValidator.RequireApiKey(settings);
         AIClientSettingsValidator.RequireModel(settings);
+    }
+
+    protected override IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    {
+        var options = new GeminiClientOptions
+        {
+            ApiKey = settings.ApiKey!,
+            ModelId = modelName ?? settings.ModelId!
+        };
+
+        var targetModel = modelName ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
+
+        return new GeminiChatClient(options);
     }
 }

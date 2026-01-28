@@ -49,6 +49,7 @@ public sealed class ChatClientFactory : BaseChatClientFactory
         AnthropicClient client = new(new Anthropic.Core.ClientOptions()
         {
             ApiKey = settings.ApiKey,
+            Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds),
         });
 
         IChatClient chatClient = client.AsIChatClient(modelName)

@@ -64,6 +64,10 @@ public sealed class ChatClientFactory : BaseChatClientFactory
         {
             options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
         }
+        else
+        {
+            options.NetworkTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        }
 
         var credential = new ApiKeyCredential(settings.ApiKey!);
         var client = new OpenAIClient(credential, options);

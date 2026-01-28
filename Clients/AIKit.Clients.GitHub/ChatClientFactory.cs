@@ -1,4 +1,4 @@
-﻿using AIKit.Clients.Interfaces;
+﻿using AIKit.Clients.Base;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -11,29 +11,23 @@ namespace AIKit.Clients.GitHub;
 /// <summary>
 /// Requires GitHubToken, ModelId. Uses https://models.github.ai/inference
 /// </summary>
-public sealed class ChatClientFactory : IChatClientFactory
+public sealed class ChatClientFactory : BaseChatClientFactory
 {
-    private readonly AIClientSettings _defaultSettings;
-    private readonly ILogger<ChatClientFactory>? _logger;
-
     public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
+        : base(settings, logger)
     {
-        _defaultSettings = settings
-            ?? throw new ArgumentNullException(nameof(settings));
-        _logger = logger;
-
-        Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "github-models";
+    protected override string GetDefaultProviderName() => "github-models";
 
-    public IChatClient Create(string? model = null)
-        => Create(_defaultSettings, model);
-
-    public IChatClient Create(AIClientSettings settings, string? model = null)
+    protected override void Validate(AIClientSettings settings)
     {
-        Validate(settings);
+        AIClientSettingsValidator.RequireGitHubToken(settings);
+        AIClientSettingsValidator.RequireModel(settings);
+    }
 
+    protected override IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    {
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(Constants.GitHubModelsEndpoint)
@@ -43,25 +37,17 @@ public sealed class ChatClientFactory : IChatClientFactory
         {
             options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
         }
+        else
+        {
+            options.NetworkTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        }
 
         var credential = new ApiKeyCredential(settings.GitHubToken!);
         var client = new OpenAIClient(credential, options);
 
-        var targetModel = model ?? settings.ModelId;
+        var targetModel = modelName ?? settings.ModelId;
         _logger?.LogInformation("Creating GitHub Models chat client for model {Model}", targetModel);
 
         return client.GetChatClient(targetModel).AsIChatClient();
-    }
-
-    private static void Validate(AIClientSettings settings)
-    {
-        ArgumentNullException.ThrowIfNull(settings);
-
-        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
-            throw new ArgumentException(
-                "GitHubToken is required.",
-                nameof(AIClientSettings.GitHubToken));
-
-        AIClientSettingsValidator.RequireModel(settings);
     }
 }
