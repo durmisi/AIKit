@@ -5,15 +5,15 @@ using Xunit;
 
 namespace AIKit.Clients.Tests.Ollama;
 
-public class ChatClientBuilderTests
+public class EmbeddingGeneratorBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var builder = new AIKit.Clients.Ollama.ChatClientBuilder()
+        var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("http://localhost:11434")
-            .WithModel("llama3.2");
+            .WithModelId("nomic-embed-text");
 
         // Act
         var result = builder.Provider;
@@ -26,30 +26,30 @@ public class ChatClientBuilderTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var builder = new AIKit.Clients.Ollama.ChatClientBuilder()
-            .WithModel("llama3.2");
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithModelId("nomic-embed-text");
 
         // Act
         Action act = () => builder.Build();
 
         // Assert
-        act.ShouldThrow<ArgumentException>()
+        act.ShouldThrow<InvalidOperationException>()
             .Message.ShouldContain("Endpoint is required");
     }
 
     [Fact]
-    public void Create_ReturnsChatClient()
+    public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var builder = new AIKit.Clients.Ollama.ChatClientBuilder()
+        var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("http://localhost:11434")
-            .WithModel("llama3.2");
+            .WithModelId("nomic-embed-text");
 
         // Act
-        var client = builder.Build();
+        var generator = builder.Build();
 
         // Assert
-        client.ShouldNotBeNull();
-        client.ShouldBeAssignableTo<IChatClient>();
+        generator.ShouldNotBeNull();
+        generator.ShouldBeAssignableTo<IEmbeddingGenerator<string, Embedding<float>>>();
     }
 }
