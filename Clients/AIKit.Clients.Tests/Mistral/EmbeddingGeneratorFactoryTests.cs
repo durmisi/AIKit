@@ -1,5 +1,4 @@
 using AIKit.Clients.Mistral;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;
@@ -12,7 +11,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test", ModelId = "mistral-embed" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = "test", ["ModelId"] = "mistral-embed" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
@@ -26,7 +25,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = null, ModelId = "mistral-embed" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = null, ["ModelId"] = "mistral-embed" };
 
         // Act
         Action act = () => new EmbeddingGeneratorFactory(settings);
@@ -40,7 +39,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "mistral-embed" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = "test-key", ["ModelId"] = "mistral-embed" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act

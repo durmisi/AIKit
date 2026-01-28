@@ -11,15 +11,15 @@ namespace AIKit.Clients.Base;
 public abstract class BaseEmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
     /// <summary>
-    /// The default AI client settings.
+    /// The default settings.
     /// </summary>
-    protected readonly AIClientSettings _defaultSettings;
+    protected readonly Dictionary<string, object> _defaultSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseEmbeddingGeneratorFactory"/> class.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    protected BaseEmbeddingGeneratorFactory(AIClientSettings settings)
+    /// <param name="settings">The settings as key-value pairs.</param>
+    protected BaseEmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings ?? throw new ArgumentNullException(nameof(settings));
         Validate(_defaultSettings);
@@ -28,7 +28,7 @@ public abstract class BaseEmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
     /// <summary>
     /// Gets the provider name.
     /// </summary>
-    public string Provider => _defaultSettings.ProviderName ?? GetDefaultProviderName();
+    public string Provider => GetProviderName(_defaultSettings);
 
     /// <summary>
     /// Creates an embedding generator using the default settings.
@@ -40,34 +40,34 @@ public abstract class BaseEmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
     /// <summary>
     /// Creates an embedding generator with the specified settings.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
+    /// <param name="settings">The settings as key-value pairs.</param>
     /// <returns>The created embedding generator.</returns>
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
         var generator = CreateGenerator(settings);
 
-        if (settings.RetryPolicy != null)
+        if (settings.TryGetValue("RetryPolicy", out var retryObj) && retryObj is RetryPolicySettings retryPolicy)
         {
-            return new RetryEmbeddingGenerator(generator, settings.RetryPolicy);
+            return new RetryEmbeddingGenerator(generator, retryPolicy);
         }
 
         return generator;
     }
 
     /// <summary>
-    /// Gets the default provider name if not specified in settings.
+    /// Gets the provider name from settings.
     /// </summary>
-    protected abstract string GetDefaultProviderName();
+    protected abstract string GetProviderName(Dictionary<string, object> settings);
 
     /// <summary>
     /// Validates the settings for this provider.
     /// </summary>
-    protected abstract void Validate(AIClientSettings settings);
+    protected abstract void Validate(Dictionary<string, object> settings);
 
     /// <summary>
     /// Creates the actual embedding generator instance.
     /// </summary>
-    protected abstract IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(AIClientSettings settings);
+    protected abstract IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(Dictionary<string, object> settings);
 }

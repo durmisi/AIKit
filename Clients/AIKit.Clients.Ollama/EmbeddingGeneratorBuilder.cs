@@ -1,5 +1,4 @@
 using AIKit.Clients.Ollama;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Ollama;
@@ -11,7 +10,6 @@ public class EmbeddingGeneratorBuilder
 {
     private string? _endpoint;
     private string? _modelId;
-    private RetryPolicySettings? _retryPolicy;
 
     /// <summary>
     /// Sets the Ollama endpoint.
@@ -36,27 +34,21 @@ public class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
-    /// Sets the retry policy.
-    /// </summary>
-    /// <param name="retryPolicy">The retry policy settings.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
-    {
-        _retryPolicy = retryPolicy;
-        return this;
-    }
-
-    /// <summary>
     /// Builds the IEmbeddingGenerator instance.
     /// </summary>
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new AIClientSettings
+        if (string.IsNullOrWhiteSpace(_endpoint))
+            throw new ArgumentException("Endpoint is required.", nameof(_endpoint));
+
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+
+        var settings = new Dictionary<string, object>
         {
-            Endpoint = _endpoint,
-            ModelId = _modelId,
-            RetryPolicy = _retryPolicy
+            ["Endpoint"] = _endpoint,
+            ["ModelId"] = _modelId
         };
 
         var factory = new EmbeddingGeneratorFactory(settings);

@@ -85,24 +85,15 @@ public class ChatClientBuilder
     /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
     public IChatClient Create(string? modelName = null)
-        => Create(BuildSettings(), modelName);
-
-    /// <summary>
-    /// Creates a chat client with the specified settings.
-    /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    /// <param name="modelName">Optional model name to use for the client.</param>
-    /// <returns>The created chat client.</returns>
-    public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
-        Validate(settings);
+        Validate();
 
-        var client = CreateClient(settings, modelName);
+        var client = CreateClient(modelName);
 
-        if (settings.RetryPolicy != null)
+        if (_retryPolicy != null)
         {
-            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
-            return new RetryChatClient(client, settings.RetryPolicy);
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
+            return new RetryChatClient(client, _retryPolicy);
         }
 
         return client;
@@ -117,29 +108,24 @@ public class ChatClientBuilder
         return Create();
     }
 
-    private AIClientSettings BuildSettings()
-    {
-        return new AIClientSettings
-        {
-            Endpoint = _endpoint,
-            ModelId = _modelId,
-            RetryPolicy = _retryPolicy,
-            TimeoutSeconds = _timeoutSeconds
-        };
-    }
-
     private string GetDefaultProviderName() => "ollama";
 
-    private void Validate(AIClientSettings settings)
+    private void Validate()
     {
-        AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (string.IsNullOrWhiteSpace(_endpoint))
+            throw new ArgumentException("Endpoint is required.", nameof(_endpoint));
+
+        if (!Uri.TryCreate(_endpoint, UriKind.Absolute, out _))
+            throw new ArgumentException("Endpoint must be a valid absolute URI.", nameof(_endpoint));
+
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    private IChatClient CreateClient(string? modelName)
     {
-        var endpoint = new Uri(settings.Endpoint!);
-        var targetModel = modelName ?? settings.ModelId!;
+        var endpoint = new Uri(_endpoint!);
+        var targetModel = modelName ?? _modelId!;
         _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, endpoint);
 
         return new OllamaChatClient(endpoint, targetModel);

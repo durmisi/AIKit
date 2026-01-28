@@ -18,6 +18,7 @@ public class ChatClientBuilder
 {
     private string? _apiKey;
     private string? _modelId;
+    private HttpClient? _httpClient;
     private RetryPolicySettings? _retryPolicy;
     private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
@@ -41,6 +42,17 @@ public class ChatClientBuilder
     public ChatClientBuilder WithModel(string modelId)
     {
         _modelId = modelId;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the HTTP client.
+    /// </summary>
+    /// <param name="httpClient">The HTTP client.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithHttpClient(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
         return this;
     }
 
@@ -88,24 +100,15 @@ public class ChatClientBuilder
     /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
     public IChatClient Create(string? modelName = null)
-        => Create(BuildSettings(), modelName);
-
-    /// <summary>
-    /// Creates a chat client with the specified settings.
-    /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    /// <param name="modelName">Optional model name to use for the client.</param>
-    /// <returns>The created chat client.</returns>
-    public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
-        Validate(settings);
+        Validate();
 
-        var client = CreateClient(settings, modelName);
+        var client = CreateClient(modelName);
 
-        if (settings.RetryPolicy != null)
+        if (_retryPolicy != null)
         {
-            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
-            return new RetryChatClient(client, settings.RetryPolicy);
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
+            return new RetryChatClient(client, _retryPolicy);
         }
 
         return client;
@@ -120,45 +123,37 @@ public class ChatClientBuilder
         return Create();
     }
 
-    private AIClientSettings BuildSettings()
-    {
-        return new AIClientSettings
-        {
-            ApiKey = _apiKey,
-            ModelId = _modelId,
-            RetryPolicy = _retryPolicy,
-            TimeoutSeconds = _timeoutSeconds
-        };
-    }
-
     private string GetDefaultProviderName() => "groq";
 
-    private void Validate(AIClientSettings settings)
+    private void Validate()
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new ArgumentException("ApiKey is required.", nameof(_apiKey));
+
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    private IChatClient CreateClient(string? modelName)
     {
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri("https://api.groq.com/openai/v1/")
         };
 
-        if (settings.HttpClient != null)
+        if (_httpClient != null)
         {
-            options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
+            options.Transport = new HttpClientPipelineTransport(_httpClient);
         }
         else
         {
-            options.NetworkTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+            options.NetworkTimeout = TimeSpan.FromSeconds(_timeoutSeconds);
         }
 
-        var credential = new ApiKeyCredential(settings.ApiKey!);
+        var credential = new ApiKeyCredential(_apiKey!);
         var client = new OpenAIClient(credential, options);
 
-        var targetModel = modelName ?? settings.ModelId!;
+        var targetModel = modelName ?? _modelId!;
         _logger?.LogInformation("Creating Groq chat client for model {Model}", targetModel);
 
         return client.GetChatClient(targetModel).AsIChatClient();

@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Base;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
@@ -14,44 +13,51 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorFactory"/> class.
     /// </summary>
-    /// <param name="settings">The default settings for creating generators.</param>
+    /// <param name="settings">The default settings for creating generators as key-value pairs.</param>
     /// <exception cref="ArgumentNullException">Thrown if settings is null.</exception>
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
         : base(settings)
     {
     }
 
     /// <summary>
-    /// Gets the default provider name.
+    /// Gets the provider name from settings.
     /// </summary>
-    /// <returns>The default provider name.</returns>
-    protected override string GetDefaultProviderName() => "open-ai";
+    /// <param name="settings">The settings dictionary.</param>
+    /// <returns>The provider name.</returns>
+    protected override string GetProviderName(Dictionary<string, object> settings)
+        => settings.TryGetValue("ProviderName", out var provider) && provider is string s ? s : "open-ai";
 
     /// <summary>
     /// Validates the provided settings for OpenAI embedding generator creation.
     /// </summary>
     /// <param name="settings">The settings to validate.</param>
-    protected override void Validate(AIClientSettings settings)
+    protected override void Validate(Dictionary<string, object> settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("ApiKey", out var apiKey) || string.IsNullOrWhiteSpace(apiKey as string))
+            throw new ArgumentException("ApiKey is required.", "ApiKey");
+
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 
     /// <summary>
     /// Creates the actual embedding generator instance.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
+    /// <param name="settings">The settings as key-value pairs.</param>
     /// <returns>The created embedding generator.</returns>
-    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(AIClientSettings settings)
+    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(Dictionary<string, object> settings)
     {
         var options = new OpenAIClientOptions();
-        if (!string.IsNullOrWhiteSpace(settings.Organization))
+        if (settings.TryGetValue("Organization", out var org) && org is string organization && !string.IsNullOrWhiteSpace(organization))
         {
-            options.OrganizationId = settings.Organization;
+            options.OrganizationId = organization;
         }
 
-        var credential = new ApiKeyCredential(settings.ApiKey!);
+        var apiKey = (string)settings["ApiKey"];
+        var credential = new ApiKeyCredential(apiKey);
         var client = new OpenAIClient(credential, options);
-        return client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
+        var modelId = (string)settings["ModelId"];
+        return client.GetEmbeddingClient(modelId).AsIEmbeddingGenerator();
     }
 }

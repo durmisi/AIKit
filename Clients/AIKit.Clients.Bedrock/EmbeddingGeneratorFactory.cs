@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
@@ -11,13 +10,13 @@ namespace AIKit.Clients.Bedrock;
 /// </summary>
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
+    private readonly Dictionary<string, object> _defaultSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorFactory"/> class.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    /// <param name="settings">The settings as key-value pairs.</param>
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -39,41 +38,40 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
     /// <summary>
     /// Creates an embedding generator with the specified settings.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
+    /// <param name="settings">The settings as key-value pairs.</param>
     /// <returns>The created embedding generator.</returns>
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
-        var regionEndpoint = RegionEndpoint.GetBySystemName(settings.AwsRegion!);
+        var region = (string)settings["AwsRegion"];
+        var regionEndpoint = RegionEndpoint.GetBySystemName(region);
 
+        var accessKey = (string)settings["AwsAccessKey"];
+        var secretKey = (string)settings["AwsSecretKey"];
         IAmazonBedrockRuntime runtime = new AmazonBedrockRuntimeClient(
-            settings.AwsAccessKey!,
-            settings.AwsSecretKey!,
+            accessKey,
+            secretKey,
             regionEndpoint);
 
-        return runtime.AsIEmbeddingGenerator(settings.ModelId!);
+        var modelId = (string)settings["ModelId"];
+        return runtime.AsIEmbeddingGenerator(modelId);
     }
 
-    private static void Validate(AIClientSettings settings)
+    private static void Validate(Dictionary<string, object> settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (string.IsNullOrWhiteSpace(settings.AwsAccessKey))
-            throw new ArgumentException(
-                "AwsAccessKey is required.",
-                nameof(AIClientSettings.AwsAccessKey));
+        if (!settings.TryGetValue("AwsAccessKey", out var accessKey) || string.IsNullOrWhiteSpace(accessKey as string))
+            throw new ArgumentException("AwsAccessKey is required.", "AwsAccessKey");
 
-        if (string.IsNullOrWhiteSpace(settings.AwsSecretKey))
-            throw new ArgumentException(
-                "AwsSecretKey is required.",
-                nameof(AIClientSettings.AwsSecretKey));
+        if (!settings.TryGetValue("AwsSecretKey", out var secretKey) || string.IsNullOrWhiteSpace(secretKey as string))
+            throw new ArgumentException("AwsSecretKey is required.", "AwsSecretKey");
 
-        if (string.IsNullOrWhiteSpace(settings.AwsRegion))
-            throw new ArgumentException(
-                "AwsRegion is required.",
-                nameof(AIClientSettings.AwsRegion));
+        if (!settings.TryGetValue("AwsRegion", out var region) || string.IsNullOrWhiteSpace(region as string))
+            throw new ArgumentException("AwsRegion is required.", "AwsRegion");
 
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 }

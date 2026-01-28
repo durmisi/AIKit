@@ -67,7 +67,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = "test", AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
+        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = "test", ["AwsSecretKey"] = "test", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
@@ -81,7 +81,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = null, AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
+        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = null, ["AwsSecretKey"] = "test", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
 
         // Act
         Action act = () => new EmbeddingGeneratorFactory(settings);
@@ -95,7 +95,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = "test-key", AwsSecretKey = "test-secret", AwsRegion = "us-east-1", ModelId = "amazon.titan-embed-text-v1" };
+        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = "test-key", ["AwsSecretKey"] = "test-secret", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act

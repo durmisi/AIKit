@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
@@ -8,9 +7,9 @@ namespace AIKit.Clients.Gemini;
 
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
+    private readonly Dictionary<string, object> _defaultSettings;
 
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -22,22 +21,25 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
         var options = new GeminiClientOptions
         {
-            ApiKey = settings.ApiKey!,
-            ModelId = settings.ModelId!
+            ApiKey = (string)settings["ApiKey"],
+            ModelId = (string)settings["ModelId"]
         };
 
         return new GeminiEmbeddingGenerator(options);
     }
 
-    private static void Validate(AIClientSettings settings)
+    private static void Validate(Dictionary<string, object> settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("ApiKey", out var apiKey) || string.IsNullOrWhiteSpace(apiKey as string))
+            throw new ArgumentException("ApiKey is required.", "ApiKey");
+
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 }

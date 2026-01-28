@@ -123,24 +123,15 @@ public class ChatClientBuilder
     /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
     public IChatClient Create(string? modelName = null)
-        => Create(BuildSettings(), modelName);
-
-    /// <summary>
-    /// Creates a chat client with the specified settings.
-    /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    /// <param name="modelName">Optional model name to use for the client.</param>
-    /// <returns>The created chat client.</returns>
-    public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
-        Validate(settings);
+        Validate();
 
-        var client = CreateClient(settings, modelName);
+        var client = CreateClient(modelName);
 
-        if (settings.RetryPolicy != null)
+        if (_retryPolicy != null)
         {
-            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
-            return new RetryChatClient(client, settings.RetryPolicy);
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
+            return new RetryChatClient(client, _retryPolicy);
         }
 
         return client;
@@ -155,55 +146,34 @@ public class ChatClientBuilder
         return Create();
     }
 
-    private AIClientSettings BuildSettings()
-    {
-        return new AIClientSettings
-        {
-            ApiKey = _apiKey,
-            ModelId = _modelId,
-            AwsAccessKey = _awsAccessKey,
-            AwsSecretKey = _awsSecretKey,
-            AwsRegion = _awsRegion,
-            RetryPolicy = _retryPolicy,
-            TimeoutSeconds = _timeoutSeconds
-        };
-    }
-
     private string GetDefaultProviderName() => "aws-bedrock";
 
-    private void Validate(AIClientSettings settings)
+    private void Validate()
     {
-        ArgumentNullException.ThrowIfNull(settings);
+        if (string.IsNullOrWhiteSpace(_awsAccessKey))
+            throw new ArgumentException("AwsAccessKey is required.", nameof(_awsAccessKey));
 
-        if (string.IsNullOrWhiteSpace(settings.AwsAccessKey))
-            throw new ArgumentException(
-                "AwsAccessKey is required.",
-                nameof(AIClientSettings.AwsAccessKey));
+        if (string.IsNullOrWhiteSpace(_awsSecretKey))
+            throw new ArgumentException("AwsSecretKey is required.", nameof(_awsSecretKey));
 
-        if (string.IsNullOrWhiteSpace(settings.AwsSecretKey))
-            throw new ArgumentException(
-                "AwsSecretKey is required.",
-                nameof(AIClientSettings.AwsSecretKey));
+        if (string.IsNullOrWhiteSpace(_awsRegion))
+            throw new ArgumentException("AwsRegion is required.", nameof(_awsRegion));
 
-        if (string.IsNullOrWhiteSpace(settings.AwsRegion))
-            throw new ArgumentException(
-                "AwsRegion is required.",
-                nameof(AIClientSettings.AwsRegion));
-
-        AIClientSettingsValidator.RequireModel(settings);
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    private IChatClient CreateClient(string? modelName)
     {
-        var regionEndpoint = RegionEndpoint.GetBySystemName(settings.AwsRegion!);
+        var regionEndpoint = RegionEndpoint.GetBySystemName(_awsRegion!);
 
         IAmazonBedrockRuntime runtime = new AmazonBedrockRuntimeClient(
-            settings.AwsAccessKey!,
-            settings.AwsSecretKey!,
+            _awsAccessKey!,
+            _awsSecretKey!,
             regionEndpoint);
 
-        var targetModel = modelName ?? settings.ModelId;
-        _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, settings.AwsRegion);
+        var targetModel = modelName ?? _modelId;
+        _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, _awsRegion);
 
         return runtime.AsIChatClient(targetModel);
     }

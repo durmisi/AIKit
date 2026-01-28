@@ -12,7 +12,7 @@ AIKit is a comprehensive .NET library designed to simplify integrations with var
 
   ```mermaid
   flowchart TD
-      A[Configure AIClientSettings] --> B[Create Provider e.g., ChatClientProvider]
+      A[Configure settings dictionary] --> B[Create Provider e.g., ChatClientProvider]
       B --> C["Get Client via provider.Create()"]
       C --> D[Use Client for AI Interactions]
   ```
@@ -56,12 +56,13 @@ AIKit is a comprehensive .NET library designed to simplify integrations with var
 
 ## NuGet Packages
 
-| Package | Version | Downloads |
-|---------|---------|-----------|
-| [AIKit.VectorStores](https://www.nuget.org/packages/AIKit.VectorStores/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.VectorStores.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.VectorStores.svg) |
+| Package                                                                                    | Version                                                                          | Downloads                                                                           |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [AIKit.VectorStores](https://www.nuget.org/packages/AIKit.VectorStores/)                   | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.VectorStores.svg)          | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.VectorStores.svg)          |
 | [AIKit.VectorStores.InMemory](https://www.nuget.org/packages/AIKit.VectorStores.InMemory/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.VectorStores.InMemory.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.VectorStores.InMemory.svg) |
-| [AIKit.Clients.OpenAI](https://www.nuget.org/packages/AIKit.Clients.OpenAI/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Clients.OpenAI.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Clients.OpenAI.svg) |
-| [AIKit.Storage](https://www.nuget.org/packages/AIKit.Storage/) | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Storage.svg) | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Storage.svg) |
+| [AIKit.Clients.OpenAI](https://www.nuget.org/packages/AIKit.Clients.OpenAI/)               | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Clients.OpenAI.svg)        | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Clients.OpenAI.svg)        |
+| [AIKit.Storage](https://www.nuget.org/packages/AIKit.Storage/)                             | ![NuGet Version](https://img.shields.io/nuget/v/AIKit.Storage.svg)               | ![NuGet Downloads](https://img.shields.io/nuget/dt/AIKit.Storage.svg)               |
+
 <!-- Add more packages as needed -->
 
 ## Installation
@@ -89,11 +90,11 @@ using AIKit.Core.Clients;
 using AIKit.Clients.OpenAI;
 
 // Configure settings
-var settings = new AIClientSettings
+var settings = new Dictionary<string, object>
 {
-    ApiKey = "your-api-key",
-    Endpoint = "https://api.openai.com/v1",
-    ModelId = "gpt-4"
+    ["ApiKey"] = "your-api-key",
+    ["Endpoint"] = "https://api.openai.com/v1",
+    ["ModelId"] = "gpt-4"
 };
 
 // Create provider

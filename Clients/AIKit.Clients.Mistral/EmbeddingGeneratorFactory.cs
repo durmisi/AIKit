@@ -1,5 +1,4 @@
 using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
@@ -8,9 +7,9 @@ namespace AIKit.Clients.Mistral;
 
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
+    private readonly Dictionary<string, object> _defaultSettings;
 
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -18,11 +17,11 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
         Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "mistral";
+    public string Provider => "mistral";
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
@@ -31,17 +30,20 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
             Endpoint = new Uri("https://api.mistral.ai/v1/")
         };
 
-        var credential = new ApiKeyCredential(settings.ApiKey!);
+        var credential = new ApiKeyCredential((string)settings["ApiKey"]);
         var client = new OpenAIClient(credential, options);
 
-        var targetModel = settings.ModelId!;
+        var targetModel = (string)settings["ModelId"];
 
         return client.GetEmbeddingClient(targetModel).AsIEmbeddingGenerator();
     }
 
-    private static void Validate(AIClientSettings settings)
+    private static void Validate(Dictionary<string, object> settings)
     {
-        AIClientSettingsValidator.RequireApiKey(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("ApiKey", out var apiKey) || string.IsNullOrWhiteSpace(apiKey as string))
+            throw new ArgumentException("ApiKey is required.", "ApiKey");
+
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 }

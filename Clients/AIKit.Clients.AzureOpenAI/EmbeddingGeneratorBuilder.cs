@@ -77,13 +77,13 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new AIClientSettings
+        var settings = new Dictionary<string, object>
         {
-            Endpoint = _endpoint,
-            ModelId = _modelId,
-            ApiKey = _apiKey,
-            UseDefaultAzureCredential = _useDefaultAzureCredential,
-            RetryPolicy = _retryPolicy
+            ["Endpoint"] = _endpoint!,
+            ["ModelId"] = _modelId!,
+            ["ApiKey"] = _apiKey,
+            ["UseDefaultAzureCredential"] = _useDefaultAzureCredential,
+            ["RetryPolicy"] = _retryPolicy
         };
 
         var factory = new EmbeddingGeneratorFactory(settings);

@@ -1,14 +1,13 @@
 ﻿using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Ollama;
 
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
+    private readonly Dictionary<string, object> _defaultSettings;
 
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -20,17 +19,25 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
-        var endpoint = new Uri(settings.Endpoint!);
-        return new OllamaEmbeddingGenerator(endpoint, settings.ModelId!);
+        var endpoint = (string)settings["Endpoint"];
+        var uri = new Uri(endpoint);
+        var modelId = (string)settings["ModelId"];
+        return new OllamaEmbeddingGenerator(uri, modelId);
     }
 
-    private static void Validate(AIClientSettings settings)
+    private static void Validate(Dictionary<string, object> settings)
     {
-        AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("Endpoint", out var endpoint) || string.IsNullOrWhiteSpace(endpoint as string))
+            throw new ArgumentException("Endpoint is required.", "Endpoint");
+
+        if (!Uri.TryCreate(endpoint as string, UriKind.Absolute, out _))
+            throw new ArgumentException("Endpoint must be a valid absolute URI.", "Endpoint");
+
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 }

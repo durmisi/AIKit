@@ -61,7 +61,7 @@ public class EmbeddingGeneratorTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
+        var settings = new Dictionary<string, object> { ["Endpoint"] = "http://localhost:11434", ["ModelId"] = "nomic-embed-text" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
@@ -75,7 +75,7 @@ public class EmbeddingGeneratorTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { Endpoint = null, ModelId = "nomic-embed-text" };
+        var settings = new Dictionary<string, object> { ["Endpoint"] = null, ["ModelId"] = "nomic-embed-text" };
 
         // Act
         Action act = () => new EmbeddingGeneratorFactory(settings);
@@ -89,7 +89,7 @@ public class EmbeddingGeneratorTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new AIClientSettings { Endpoint = "http://localhost:11434", ModelId = "nomic-embed-text" };
+        var settings = new Dictionary<string, object> { ["Endpoint"] = "http://localhost:11434", ["ModelId"] = "nomic-embed-text" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act

@@ -64,12 +64,12 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new AIClientSettings
+        var settings = new Dictionary<string, object>
         {
-            ApiKey = _apiKey,
-            ModelId = _modelId,
-            Organization = _organization,
-            RetryPolicy = _retryPolicy
+            ["ApiKey"] = _apiKey!,
+            ["ModelId"] = _modelId!,
+            ["Organization"] = _organization,
+            ["RetryPolicy"] = _retryPolicy
         };
 
         var factory = new EmbeddingGeneratorFactory(settings);

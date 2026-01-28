@@ -1,4 +1,3 @@
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Interfaces;
@@ -21,12 +20,4 @@ public interface IChatClientFactory
     /// <param name="modelName">Optional model name to override the default.</param>
     /// <returns>An <see cref="IChatClient"/> instance.</returns>
     IChatClient Create(string? modelName = null);
-
-    /// <summary>
-    /// Creates a chat client with custom settings.
-    /// </summary>
-    /// <param name="settings">The settings to use for the client.</param>
-    /// <param name="modelName">Optional model name to override the settings.</param>
-    /// <returns>An <see cref="IChatClient"/> instance.</returns>
-    IChatClient Create(AIClientSettings settings, string? modelName = null);
 }

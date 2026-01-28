@@ -1,4 +1,3 @@
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Interfaces;
@@ -24,7 +23,7 @@ public interface IEmbeddingGeneratorFactory
     /// <summary>
     /// Creates an embedding generator with custom settings.
     /// </summary>
-    /// <param name="settings">The settings to use for the generator.</param>
+    /// <param name="settings">The settings to use for the generator as key-value pairs.</param>
     /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
-    IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings);
+    IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings);
 }

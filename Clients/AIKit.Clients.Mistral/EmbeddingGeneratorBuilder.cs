@@ -1,5 +1,4 @@
 using AIKit.Clients.Mistral;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Mistral;
@@ -12,7 +11,6 @@ public class EmbeddingGeneratorBuilder
     private string? _apiKey;
     private string? _modelId;
     private string? _gitHubToken;
-    private RetryPolicySettings? _retryPolicy;
 
     /// <summary>
     /// Sets the API key.
@@ -48,29 +46,27 @@ public class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
-    /// Sets the retry policy.
-    /// </summary>
-    /// <param name="retryPolicy">The retry policy settings.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
-    {
-        _retryPolicy = retryPolicy;
-        return this;
-    }
-
-    /// <summary>
     /// Builds the IEmbeddingGenerator instance.
     /// </summary>
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new AIClientSettings
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new ArgumentException("ApiKey is required.", nameof(_apiKey));
+
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+
+        var settings = new Dictionary<string, object>
         {
-            ApiKey = _apiKey,
-            ModelId = _modelId,
-            GitHubToken = _gitHubToken,
-            RetryPolicy = _retryPolicy
+            ["ApiKey"] = _apiKey,
+            ["ModelId"] = _modelId
         };
+
+        if (!string.IsNullOrWhiteSpace(_gitHubToken))
+        {
+            settings["GitHubToken"] = _gitHubToken;
+        }
 
         var factory = new EmbeddingGeneratorFactory(settings);
         return factory.Create();

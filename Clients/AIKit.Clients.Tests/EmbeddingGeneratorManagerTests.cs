@@ -69,7 +69,7 @@ public class EmbeddingGeneratorManagerTests
         var mockProvider = new Mock<IEmbeddingGeneratorFactory>();
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
-        var settings = new AIClientSettings { ModelId = "custom-model" };
+        var settings = new Dictionary<string, object> { ["ModelId"] = "custom-model" };
         mockProvider.Setup(p => p.Create(settings)).Returns(mockGenerator.Object);
         var manager = new EmbeddingGeneratorManager(new[] { mockProvider.Object });
 

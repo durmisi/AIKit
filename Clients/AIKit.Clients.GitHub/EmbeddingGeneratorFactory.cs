@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.ClientModel;
@@ -8,9 +7,9 @@ namespace AIKit.Clients.GitHub;
 
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
+    private readonly Dictionary<string, object> _defaultSettings;
 
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
     {
         _defaultSettings = settings
             ?? throw new ArgumentNullException(nameof(settings));
@@ -22,7 +21,7 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    public IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings)
     {
         Validate(settings);
 
@@ -31,20 +30,21 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
             Endpoint = new Uri(Constants.GitHubModelsEndpoint)
         };
 
-        var credential = new ApiKeyCredential(settings.GitHubToken!);
+        var gitHubToken = (string)settings["GitHubToken"];
+        var credential = new ApiKeyCredential(gitHubToken);
         var client = new OpenAIClient(credential, options);
-        return client.GetEmbeddingClient(settings.ModelId!).AsIEmbeddingGenerator();
+        var modelId = (string)settings["ModelId"];
+        return client.GetEmbeddingClient(modelId).AsIEmbeddingGenerator();
     }
 
-    private static void Validate(AIClientSettings settings)
+    private static void Validate(Dictionary<string, object> settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (string.IsNullOrWhiteSpace(settings.GitHubToken))
-            throw new ArgumentException(
-                "GitHubToken is required.",
-                nameof(AIClientSettings.GitHubToken));
+        if (!settings.TryGetValue("GitHubToken", out var gitHubToken) || string.IsNullOrWhiteSpace(gitHubToken as string))
+            throw new ArgumentException("GitHubToken is required.", "GitHubToken");
 
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
     }
 }

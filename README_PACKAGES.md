@@ -3,12 +3,15 @@
 AIKit provides modular NuGet packages for various AI providers. Install only the packages you need.
 
 ## Core Package
+
 Install the core package first:
+
 ```
 dotnet add package AIKit.Core.Clients --version 1.0.0
 ```
 
 ## Provider Packages
+
 Choose and install the desired provider(s):
 
 - **OpenAI**: `dotnet add package AIKit.Clients.OpenAI --version 1.0.0`
@@ -21,14 +24,15 @@ Choose and install the desired provider(s):
 - **Claude** (Anthropic): `dotnet add package AIKit.Clients.Claude --version 1.0.0`
 
 ## Usage Example
+
 ```csharp
 using AIKit.Core.Clients;
 
 // Configure settings
-var settings = new AIClientSettings
+var settings = new Dictionary<string, object>
 {
-    ApiKey = "your-key",
-    ModelId = "gpt-4o"
+    ["ApiKey"] = "your-key",
+    ["ModelId"] = "gpt-4o"
 };
 
 // Create provider
@@ -39,7 +43,9 @@ IChatClient client = provider.Create();
 ```
 
 ## Publishing
+
 To publish packages to NuGet.org:
+
 1. Obtain an API key from https://www.nuget.org/account/apikeys
 2. For each package: `dotnet nuget push <path-to-nupkg> --api-key <your-key> --source https://api.nuget.org/v3/index.json`
 

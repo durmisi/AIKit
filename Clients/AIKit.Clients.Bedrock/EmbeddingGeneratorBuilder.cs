@@ -88,14 +88,14 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new AIClientSettings
+        var settings = new Dictionary<string, object>
         {
-            ApiKey = _apiKey,
-            ModelId = _modelId,
-            AwsAccessKey = _awsAccessKey,
-            AwsSecretKey = _awsSecretKey,
-            AwsRegion = _awsRegion,
-            RetryPolicy = _retryPolicy
+            ["ApiKey"] = _apiKey,
+            ["ModelId"] = _modelId!,
+            ["AwsAccessKey"] = _awsAccessKey!,
+            ["AwsSecretKey"] = _awsSecretKey!,
+            ["AwsRegion"] = _awsRegion!,
+            ["RetryPolicy"] = _retryPolicy
         };
 
         var factory = new EmbeddingGeneratorFactory(settings);

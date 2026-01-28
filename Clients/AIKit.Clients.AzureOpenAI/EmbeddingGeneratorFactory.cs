@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Base;
-using AIKit.Clients.Settings;
 using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
@@ -15,55 +14,70 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorFactory"/> class.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
-    public EmbeddingGeneratorFactory(AIClientSettings settings)
+    /// <param name="settings">The settings as key-value pairs.</param>
+    public EmbeddingGeneratorFactory(Dictionary<string, object> settings)
         : base(settings)
     {
     }
 
     /// <summary>
-    /// Gets the default provider name.
+    /// Gets the provider name from settings.
     /// </summary>
-    /// <returns>The default provider name.</returns>
-    protected override string GetDefaultProviderName() => "azure-open-ai";
+    /// <param name="settings">The settings dictionary.</param>
+    /// <returns>The provider name.</returns>
+    protected override string GetProviderName(Dictionary<string, object> settings)
+        => settings.TryGetValue("ProviderName", out var provider) && provider is string s ? s : "azure-open-ai";
 
     /// <summary>
     /// Validates the settings for this provider.
     /// </summary>
-    /// <param name="settings">The AI client settings to validate.</param>
-    protected override void Validate(AIClientSettings settings)
+    /// <param name="settings">The settings to validate.</param>
+    protected override void Validate(Dictionary<string, object> settings)
     {
-        AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireModel(settings);
+        if (!settings.TryGetValue("Endpoint", out var endpoint) || string.IsNullOrWhiteSpace(endpoint as string))
+            throw new ArgumentException("Endpoint is required.", "Endpoint");
 
-        if (!settings.UseDefaultAzureCredential)
+        if (!Uri.TryCreate(endpoint as string, UriKind.Absolute, out _))
+            throw new ArgumentException("Endpoint must be a valid absolute URI.", "Endpoint");
+
+        if (!settings.TryGetValue("ModelId", out var modelId) || string.IsNullOrWhiteSpace(modelId as string))
+            throw new ArgumentException("ModelId is required.", "ModelId");
+
+        var useDefault = settings.TryGetValue("UseDefaultAzureCredential", out var useDef) && useDef is bool b && b;
+        if (!useDefault)
         {
-            AIClientSettingsValidator.RequireApiKey(settings);
+            if (!settings.TryGetValue("ApiKey", out var apiKey) || string.IsNullOrWhiteSpace(apiKey as string))
+                throw new ArgumentException("ApiKey is required when not using default Azure credential.", "ApiKey");
         }
     }
 
     /// <summary>
     /// Creates the actual embedding generator instance.
     /// </summary>
-    /// <param name="settings">The AI client settings.</param>
+    /// <param name="settings">The settings as key-value pairs.</param>
     /// <returns>The created embedding generator.</returns>
-    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(AIClientSettings settings)
+    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(Dictionary<string, object> settings)
     {
         EmbeddingsClient client;
 
-        if (settings.UseDefaultAzureCredential)
+        var useDefault = settings.TryGetValue("UseDefaultAzureCredential", out var useDef) && useDef is bool b && b;
+        var endpoint = (string)settings["Endpoint"];
+
+        if (useDefault)
         {
             client = new EmbeddingsClient(
-                new Uri(settings.Endpoint!),
+                new Uri(endpoint),
                 new DefaultAzureCredential());
         }
         else
         {
+            var apiKey = (string)settings["ApiKey"];
             client = new EmbeddingsClient(
-                new Uri(settings.Endpoint!),
-                new AzureKeyCredential(settings.ApiKey!));
+                new Uri(endpoint),
+                new AzureKeyCredential(apiKey));
         }
 
-        return client.AsIEmbeddingGenerator(settings.ModelId!);
+        var modelId = (string)settings["ModelId"];
+        return client.AsIEmbeddingGenerator(modelId);
     }
 }

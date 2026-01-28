@@ -1,5 +1,4 @@
 using AIKit.Clients.AzureOpenAI;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;
@@ -63,7 +62,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = "test", ["Endpoint"] = "https://test.openai.azure.com", ["ModelId"] = "text-embedding-ada-002" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
@@ -77,7 +76,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = null, ["Endpoint"] = "https://test.openai.azure.com", ["ModelId"] = "text-embedding-ada-002" };
 
         // Act
         Action act = () => new EmbeddingGeneratorFactory(settings);
@@ -90,7 +89,7 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.openai.azure.com", ModelId = "text-embedding-ada-002" };
+        var settings = new Dictionary<string, object> { ["ApiKey"] = "test-key", ["Endpoint"] = "https://test.openai.azure.com", ["ModelId"] = "text-embedding-ada-002" };
         var factory = new EmbeddingGeneratorFactory(settings);
 
         // Act
