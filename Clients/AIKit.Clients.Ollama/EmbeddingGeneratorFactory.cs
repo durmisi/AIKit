@@ -3,7 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Ollama;
 
-public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactory
 {
     private readonly Dictionary<string, object> _defaultSettings;
 

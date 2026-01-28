@@ -10,7 +10,7 @@ namespace AIKit.Clients.OpenAI;
 /// <summary>
 /// Factory for creating OpenAI embedding generators.
 /// </summary>
-public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactory
 {
     private readonly Dictionary<string, object> _defaultSettings;
 

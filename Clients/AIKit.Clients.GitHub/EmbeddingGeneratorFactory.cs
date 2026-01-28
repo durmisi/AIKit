@@ -5,7 +5,7 @@ using System.ClientModel;
 
 namespace AIKit.Clients.GitHub;
 
-public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactory
 {
     private readonly Dictionary<string, object> _defaultSettings;
 
