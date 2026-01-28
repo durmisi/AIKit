@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.2.0" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\AIKit.Clients\AIKit.Clients.csproj" />
 	</ItemGroup>
