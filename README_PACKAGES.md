@@ -56,5 +56,5 @@ For private feeds, adjust the source URL accordingly.
 ## Deprecated types ⚠️
 
 - **`BaseEmbeddingGeneratorFactory`**: Deprecated — this base class will be removed in a future release. Implement `IEmbeddingGeneratorFactory` directly in your provider factory and move constructor validation, `Provider`, `Create()`/`Create(settings)`, and any `RetryPolicy` handling into the concrete implementation.
-</content>
-<parameter name="filePath">README_PACKAGES.md
+  </content>
+  <parameter name="filePath">README_PACKAGES.md
