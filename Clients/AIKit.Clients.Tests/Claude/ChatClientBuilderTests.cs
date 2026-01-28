@@ -29,7 +29,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -45,7 +45,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();
@@ -61,7 +61,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var client = builder.Create("claude-3-haiku-20240307");
+        var client = builder.Build("claude-3-haiku-20240307");
 
         // Assert
         client.ShouldNotBeNull();

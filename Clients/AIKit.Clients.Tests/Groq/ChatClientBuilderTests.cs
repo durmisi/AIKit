@@ -29,7 +29,7 @@ public class ChatClientBuilderTests
             .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -45,7 +45,7 @@ public class ChatClientBuilderTests
             .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();

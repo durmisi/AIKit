@@ -34,7 +34,7 @@ public class ChatClientBuilderTests
             .WithModel("anthropic.claude-v2");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -52,7 +52,7 @@ public class ChatClientBuilderTests
             .WithModel("anthropic.claude-v2");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();

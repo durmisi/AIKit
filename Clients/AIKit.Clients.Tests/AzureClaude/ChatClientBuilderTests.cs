@@ -31,7 +31,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -47,7 +47,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("Endpoint must be a valid absolute URI");
@@ -62,7 +62,7 @@ public class ChatClientBuilderTests
             .WithEndpoint("https://test.claude.azure.com");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ModelId is required");
@@ -78,7 +78,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();

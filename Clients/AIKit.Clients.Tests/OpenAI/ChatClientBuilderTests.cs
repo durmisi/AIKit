@@ -29,7 +29,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -45,7 +45,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();
@@ -61,7 +61,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var client = builder.Create("gpt-3.5-turbo");
+        var client = builder.Build("gpt-3.5-turbo");
 
         // Assert
         client.ShouldNotBeNull();

@@ -31,7 +31,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        Action act = () => builder.Create();
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -47,7 +47,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var client = builder.Create();
+        var client = builder.Build();
 
         // Assert
         client.ShouldNotBeNull();
