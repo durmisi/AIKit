@@ -6,17 +6,18 @@ using Xunit;
 
 namespace AIKit.Clients.Tests.GitHub;
 
-public class ChatClientFactoryTests
+public class ChatClientBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { GitHubToken = "test", ModelId = "gpt-4o" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.GitHub.ChatClientBuilder()
+            .WithGitHubToken("test")
+            .WithModel("gpt-4o");
 
         // Act
-        var result = factory.Provider;
+        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
 
         // Assert
         result.ShouldBe("github-models");
@@ -26,10 +27,11 @@ public class ChatClientFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { GitHubToken = null, ModelId = "gpt-4o" };
+        var builder = new AIKit.Clients.GitHub.ChatClientBuilder()
+            .WithModel("gpt-4o");
 
         // Act
-        Action act = () => new ChatClientFactory(settings);
+        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -40,11 +42,12 @@ public class ChatClientFactoryTests
     public void Create_ReturnsChatClient()
     {
         // Arrange
-        var settings = new AIClientSettings { GitHubToken = "test-token", ModelId = "gpt-4o" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.GitHub.ChatClientBuilder()
+            .WithGitHubToken("test-token")
+            .WithModel("gpt-4o");
 
         // Act
-        var client = factory.Create();
+        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         client.ShouldNotBeNull();

@@ -6,17 +6,20 @@ using Xunit;
 
 namespace AIKit.Clients.Tests.Bedrock;
 
-public class ChatClientFactoryTests
+public class ChatClientBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = "test", AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "anthropic.claude-v2" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.Bedrock.ChatClientBuilder()
+            .WithAwsAccessKey("test")
+            .WithAwsSecretKey("test")
+            .WithAwsRegion("us-east-1")
+            .WithModel("anthropic.claude-v2");
 
         // Act
-        var result = factory.Provider;
+        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
 
         // Assert
         result.ShouldBe("aws-bedrock");
@@ -26,10 +29,13 @@ public class ChatClientFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = null, AwsSecretKey = "test", AwsRegion = "us-east-1", ModelId = "anthropic.claude-v2" };
+        var builder = new AIKit.Clients.Bedrock.ChatClientBuilder()
+            .WithAwsSecretKey("test")
+            .WithAwsRegion("us-east-1")
+            .WithModel("anthropic.claude-v2");
 
         // Act
-        Action act = () => new ChatClientFactory(settings);
+        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -40,11 +46,14 @@ public class ChatClientFactoryTests
     public void Create_ReturnsChatClient()
     {
         // Arrange
-        var settings = new AIClientSettings { AwsAccessKey = "test-key", AwsSecretKey = "test-secret", AwsRegion = "us-east-1", ModelId = "anthropic.claude-v2" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.Bedrock.ChatClientBuilder()
+            .WithAwsAccessKey("test-key")
+            .WithAwsSecretKey("test-secret")
+            .WithAwsRegion("us-east-1")
+            .WithModel("anthropic.claude-v2");
 
         // Act
-        var client = factory.Create();
+        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         client.ShouldNotBeNull();

@@ -1,21 +1,27 @@
+using AIKit.Clients.Base;
+using AIKit.Clients.Interfaces;
 using AIKit.Clients.Mistral;
+using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using OpenAI;
+using System.ClientModel;
+using System.ClientModel.Primitives;
 
 namespace AIKit.Clients.Mistral;
 
 /// <summary>
 /// Builder for creating Mistral chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder
+public class ChatClientBuilder : IChatClientFactory
 {
     private string? _apiKey;
     private string? _modelId;
     private string? _gitHubToken;
     private RetryPolicySettings? _retryPolicy;
     private int _timeoutSeconds = 30;
-    private ILogger<ChatClientFactory>? _logger;
+    private ILogger<ChatClientBuilder>? _logger;
 
     /// <summary>
     /// Sets the API key.
@@ -77,10 +83,44 @@ public class ChatClientBuilder
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithLogger(ILogger<ChatClientFactory> logger)
+    public ChatClientBuilder WithLogger(ILogger<ChatClientBuilder> logger)
     {
         _logger = logger;
         return this;
+    }
+
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
+    public string Provider => GetDefaultProviderName();
+
+    /// <summary>
+    /// Creates a chat client using the default settings.
+    /// </summary>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
+    public IChatClient Create(string? modelName = null)
+        => Create(BuildSettings(), modelName);
+
+    /// <summary>
+    /// Creates a chat client with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
+    public IChatClient Create(AIClientSettings settings, string? modelName = null)
+    {
+        Validate(settings);
+
+        var client = CreateClient(settings, modelName);
+
+        if (settings.RetryPolicy != null)
+        {
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
+            return new RetryChatClient(client, settings.RetryPolicy);
+        }
+
+        return client;
     }
 
     /// <summary>
@@ -89,7 +129,12 @@ public class ChatClientBuilder
     /// <returns>The created chat client.</returns>
     public IChatClient Build()
     {
-        var settings = new AIClientSettings
+        return Create();
+    }
+
+    private AIClientSettings BuildSettings()
+    {
+        return new AIClientSettings
         {
             ApiKey = _apiKey,
             ModelId = _modelId,
@@ -97,8 +142,38 @@ public class ChatClientBuilder
             RetryPolicy = _retryPolicy,
             TimeoutSeconds = _timeoutSeconds
         };
+    }
 
-        var factory = new ChatClientFactory(settings, _logger);
-        return factory.Create();
+    private string GetDefaultProviderName() => "mistral";
+
+    private void Validate(AIClientSettings settings)
+    {
+        AIClientSettingsValidator.RequireApiKey(settings);
+        AIClientSettingsValidator.RequireModel(settings);
+    }
+
+    private IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    {
+        var options = new OpenAIClientOptions
+        {
+            Endpoint = new Uri("https://api.mistral.ai/v1/")
+        };
+
+        if (settings.HttpClient != null)
+        {
+            options.Transport = new HttpClientPipelineTransport(settings.HttpClient);
+        }
+        else
+        {
+            options.NetworkTimeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        }
+
+        var credential = new ApiKeyCredential(settings.ApiKey!);
+        var client = new OpenAIClient(credential, options);
+
+        var targetModel = modelName ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Mistral chat client for model {Model}", targetModel);
+
+        return client.GetChatClient(targetModel).AsIChatClient();
     }
 }

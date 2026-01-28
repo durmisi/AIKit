@@ -6,17 +6,19 @@ using Xunit;
 
 namespace AIKit.Clients.Tests.AzureOpenAI;
 
-public class ChatClientFactoryTests
+public class ChatClientBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test", Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.AzureOpenAI.ChatClientBuilder()
+            .WithApiKey("test")
+            .WithEndpoint("https://test.openai.azure.com")
+            .WithModel("gpt-4");
 
         // Act
-        var result = factory.Provider;
+        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
 
         // Assert
         result.ShouldBe("azure-open-ai");
@@ -26,10 +28,12 @@ public class ChatClientFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = null, Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
+        var builder = new AIKit.Clients.AzureOpenAI.ChatClientBuilder()
+            .WithEndpoint("https://test.openai.azure.com")
+            .WithModel("gpt-4");
 
         // Act
-        Action act = () => new ChatClientFactory(settings);
+        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -39,11 +43,13 @@ public class ChatClientFactoryTests
     public void Create_ReturnsChatClient()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test-key", Endpoint = "https://test.openai.azure.com", ModelId = "gpt-4" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.AzureOpenAI.ChatClientBuilder()
+            .WithApiKey("test-key")
+            .WithEndpoint("https://test.openai.azure.com")
+            .WithModel("gpt-4");
 
         // Act
-        var client = factory.Create();
+        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         client.ShouldNotBeNull();

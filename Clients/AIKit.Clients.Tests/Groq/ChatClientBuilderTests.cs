@@ -6,17 +6,18 @@ using Xunit;
 
 namespace AIKit.Clients.Tests.Groq;
 
-public class ChatClientFactoryTests
+public class ChatClientBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test", ModelId = "llama-3.3-70b-versatile" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.Groq.ChatClientBuilder()
+            .WithApiKey("test")
+            .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        var result = factory.Provider;
+        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
 
         // Assert
         result.ShouldBe("groq");
@@ -26,10 +27,11 @@ public class ChatClientFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = null, ModelId = "llama-3.3-70b-versatile" };
+        var builder = new AIKit.Clients.Groq.ChatClientBuilder()
+            .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        Action act = () => new ChatClientFactory(settings);
+        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -40,11 +42,12 @@ public class ChatClientFactoryTests
     public void Create_ReturnsChatClient()
     {
         // Arrange
-        var settings = new AIClientSettings { ApiKey = "test-key", ModelId = "llama-3.3-70b-versatile" };
-        var factory = new ChatClientFactory(settings);
+        var builder = new AIKit.Clients.Groq.ChatClientBuilder()
+            .WithApiKey("test-key")
+            .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        var client = factory.Create();
+        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
 
         // Assert
         client.ShouldNotBeNull();

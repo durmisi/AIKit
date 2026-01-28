@@ -14,6 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Azure.Identity" Version="1.13.1" />
 	  <PackageReference Include="elbruno.Extensions.AI.Claude" Version="0.1.0-preview.6" />
 	</ItemGroup>
 

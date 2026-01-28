@@ -1,4 +1,7 @@
+using AIKit.Clients.Base;
+using AIKit.Clients.Interfaces;
 using AIKit.Clients.Ollama;
+using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
@@ -8,13 +11,13 @@ namespace AIKit.Clients.Ollama;
 /// <summary>
 /// Builder for creating Ollama chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder
+public class ChatClientBuilder : IChatClientFactory
 {
     private string? _endpoint;
     private string? _modelId;
     private RetryPolicySettings? _retryPolicy;
     private int _timeoutSeconds = 30;
-    private ILogger<ChatClientFactory>? _logger;
+    private ILogger<ChatClientBuilder>? _logger;
 
     /// <summary>
     /// Sets the Ollama endpoint.
@@ -65,10 +68,44 @@ public class ChatClientBuilder
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithLogger(ILogger<ChatClientFactory> logger)
+    public ChatClientBuilder WithLogger(ILogger<ChatClientBuilder> logger)
     {
         _logger = logger;
         return this;
+    }
+
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
+    public string Provider => GetDefaultProviderName();
+
+    /// <summary>
+    /// Creates a chat client using the default settings.
+    /// </summary>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
+    public IChatClient Create(string? modelName = null)
+        => Create(BuildSettings(), modelName);
+
+    /// <summary>
+    /// Creates a chat client with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
+    public IChatClient Create(AIClientSettings settings, string? modelName = null)
+    {
+        Validate(settings);
+
+        var client = CreateClient(settings, modelName);
+
+        if (settings.RetryPolicy != null)
+        {
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", settings.RetryPolicy.MaxRetries);
+            return new RetryChatClient(client, settings.RetryPolicy);
+        }
+
+        return client;
     }
 
     /// <summary>
@@ -77,15 +114,34 @@ public class ChatClientBuilder
     /// <returns>The created chat client.</returns>
     public IChatClient Build()
     {
-        var settings = new AIClientSettings
+        return Create();
+    }
+
+    private AIClientSettings BuildSettings()
+    {
+        return new AIClientSettings
         {
             Endpoint = _endpoint,
             ModelId = _modelId,
             RetryPolicy = _retryPolicy,
             TimeoutSeconds = _timeoutSeconds
         };
+    }
 
-        var factory = new ChatClientFactory(settings, _logger);
-        return factory.Create();
+    private string GetDefaultProviderName() => "ollama";
+
+    private void Validate(AIClientSettings settings)
+    {
+        AIClientSettingsValidator.RequireEndpoint(settings);
+        AIClientSettingsValidator.RequireModel(settings);
+    }
+
+    private IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    {
+        var endpoint = new Uri(settings.Endpoint!);
+        var targetModel = modelName ?? settings.ModelId!;
+        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, endpoint);
+
+        return new OllamaChatClient(endpoint, targetModel);
     }
 }
