@@ -68,13 +68,4 @@ public sealed class EmbeddingGeneratorBuilder
         var client = new OpenAIClient(credential, options);
         return client.GetEmbeddingClient(_modelId).AsIEmbeddingGenerator();
     }
-
-    /// <summary>
-    /// Creates an embedding generator using the default settings.
-    /// </summary>
-    /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
-    public IEmbeddingGenerator<string, Embedding<float>> Create()
-    {
-        return Build();
-    }
 }

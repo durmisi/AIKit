@@ -94,13 +94,4 @@ public sealed class EmbeddingGeneratorBuilder
 
         return runtime.AsIEmbeddingGenerator(_modelId);
     }
-
-    /// <summary>
-    /// Creates an embedding generator using the default settings.
-    /// </summary>
-    /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
-    public IEmbeddingGenerator<string, Embedding<float>> Create()
-    {
-        return Build();
-    }
 }
