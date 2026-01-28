@@ -80,13 +80,12 @@ public class ChatClientBuilder
     /// <summary>
     /// Builds the IChatClient instance.
     /// </summary>
-    /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
-    public IChatClient Build(string? modelName = null)
+    public IChatClient Build()
     {
         Validate();
 
-        var client = CreateClient(modelName);
+        var client = CreateClient();
 
         if (_retryPolicy != null)
         {
@@ -108,7 +107,7 @@ public class ChatClientBuilder
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient(string? modelName)
+    private IChatClient CreateClient()
     {
         AnthropicClient client = new(new Anthropic.Core.ClientOptions()
         {
@@ -116,7 +115,8 @@ public class ChatClientBuilder
             Timeout = TimeSpan.FromSeconds(_timeoutSeconds),
         });
 
-        var targetModel = modelName ?? _modelId;
+        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
+        var targetModel = _modelId!;
         IChatClient chatClient = client.AsIChatClient(targetModel)
             .AsBuilder()
             .UseFunctionInvocation()

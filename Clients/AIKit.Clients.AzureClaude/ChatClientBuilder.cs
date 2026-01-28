@@ -130,13 +130,12 @@ public class ChatClientBuilder
     /// <summary>
     /// Builds the IChatClient instance.
     /// </summary>
-    /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
-    public IChatClient Build(string? modelName = null)
+    public IChatClient Build()
     {
         Validate();
 
-        var client = CreateClient(modelName);
+        var client = CreateClient();
 
         if (_retryPolicy != null)
         {
@@ -164,15 +163,14 @@ public class ChatClientBuilder
             throw new ArgumentException("ApiKey is required when not using default Azure credential.", nameof(_apiKey));
     }
 
-    private IChatClient CreateClient(string? modelName)
+    private IChatClient CreateClient()
     {
         var endpoint = new Uri(_endpoint!);
 
-        var targetModelId = modelName ?? _modelId;
-
+        var targetModelId = _modelId;
         if (string.IsNullOrWhiteSpace(targetModelId))
         {
-            throw new ArgumentException("ModelId must be provided either in builder or as modelName parameter.");
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
         }
 
         _logger?.LogInformation("Creating Azure Claude chat client for model {Model} at {Endpoint}", targetModelId, endpoint);

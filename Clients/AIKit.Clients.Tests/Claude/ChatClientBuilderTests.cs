@@ -37,6 +37,21 @@ public class ChatClientBuilderTests
     }
 
     [Fact]
+    public void Create_Throws_WhenModelMissing()
+    {
+        // Arrange
+        var builder = new AIKit.Clients.Claude.ChatClientBuilder()
+            .WithApiKey("test-key");
+
+        // Act
+        Action act = () => builder.Build();
+
+        // Assert
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ModelId is required");
+    }
+
+    [Fact]
     public void Create_ReturnsChatClient()
     {
         // Arrange
@@ -61,7 +76,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var client = builder.Build("claude-3-haiku-20240307");
+        var client = builder.WithModel("claude-3-haiku-20240307").Build();
 
         // Assert
         client.ShouldNotBeNull();

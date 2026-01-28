@@ -118,13 +118,12 @@ public class ChatClientBuilder
     /// <summary>
     /// Builds the IChatClient instance.
     /// </summary>
-    /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
-    public IChatClient Build(string? modelName = null)
+    public IChatClient Build()
     {
         Validate();
 
-        var client = CreateClient(modelName);
+        var client = CreateClient();
 
         if (_retryPolicy != null)
         {
@@ -146,7 +145,7 @@ public class ChatClientBuilder
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient(string? modelName)
+    private IChatClient CreateClient()
     {
         var options = new OpenAIClientOptions();
 
@@ -172,7 +171,8 @@ public class ChatClientBuilder
         var credential = new ApiKeyCredential(_apiKey!);
         var client = new OpenAIClient(credential, options);
 
-        var targetModel = modelName ?? _modelId!;
+        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
+        var targetModel = _modelId!;
         _logger?.LogInformation("Creating OpenAI chat client for model {Model}", targetModel);
 
         return client

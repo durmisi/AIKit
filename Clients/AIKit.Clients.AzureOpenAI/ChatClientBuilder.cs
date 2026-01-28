@@ -119,13 +119,12 @@ public class ChatClientBuilder
     /// <summary>
     /// Builds the IChatClient instance.
     /// </summary>
-    /// <param name="modelName">Optional model name to use for the client.</param>
     /// <returns>The created chat client.</returns>
-    public IChatClient Build(string? modelName = null)
+    public IChatClient Build()
     {
         Validate();
 
-        var client = CreateClient(modelName);
+        var client = CreateClient();
 
         if (_retryPolicy != null)
         {
@@ -153,7 +152,7 @@ public class ChatClientBuilder
             throw new ArgumentException("ApiKey is required when not using default Azure credential.", nameof(_apiKey));
     }
 
-    private IChatClient CreateClient(string? modelName)
+    private IChatClient CreateClient()
     {
         ChatCompletionsClient? client = null;
 
@@ -170,7 +169,8 @@ public class ChatClientBuilder
                 new AzureKeyCredential(_apiKey!));
         }
 
-        var targetModel = modelName ?? _modelId;
+        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
+        var targetModel = _modelId!;
         _logger?.LogInformation("Creating Azure OpenAI chat client for model {Model}", targetModel);
 
         return client.AsIChatClient(targetModel);

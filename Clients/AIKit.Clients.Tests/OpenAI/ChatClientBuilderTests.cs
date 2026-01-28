@@ -37,6 +37,21 @@ public class ChatClientBuilderTests
     }
 
     [Fact]
+    public void Create_Throws_WhenModelMissing()
+    {
+        // Arrange
+        var builder = new AIKit.Clients.OpenAI.ChatClientBuilder()
+            .WithApiKey("test-key");
+
+        // Act
+        Action act = () => builder.Build();
+
+        // Assert
+        act.ShouldThrow<ArgumentException>()
+            .Message.ShouldContain("ModelId is required");
+    }
+
+    [Fact]
     public void Create_ReturnsChatClient()
     {
         // Arrange
@@ -61,7 +76,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var client = builder.Build("gpt-3.5-turbo");
+        var client = builder.WithModel("gpt-3.5-turbo").Build();
 
         // Assert
         client.ShouldNotBeNull();
