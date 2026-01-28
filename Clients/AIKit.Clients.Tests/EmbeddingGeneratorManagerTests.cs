@@ -1,3 +1,6 @@
+using AIKit.Clients.Interfaces;
+using AIKit.Clients.Managers;
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Moq;
 using Shouldly;

@@ -1,4 +1,6 @@
-﻿using Azure;
+﻿using AIKit.Clients.Base;
+using AIKit.Clients.Settings;
+using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
@@ -6,29 +8,28 @@ using Microsoft.Extensions.Logging;
 
 namespace AIKit.Clients.AzureOpenAI;
 
-public sealed class ChatClientFactory : IChatClientFactory
+public sealed class ChatClientFactory : BaseChatClientFactory
 {
-    private readonly AIClientSettings _defaultSettings;
-    private readonly ILogger<ChatClientFactory>? _logger;
-
     public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
+        : base(settings, logger)
     {
-        _defaultSettings = settings
-            ?? throw new ArgumentNullException(nameof(settings));
-        _logger = logger;
-
-        Validate(_defaultSettings);
     }
 
-    public string Provider => _defaultSettings.ProviderName ?? "azure-open-ai";
+    protected override string GetDefaultProviderName() => "azure-open-ai";
 
-    public IChatClient Create(string? model = null)
-        => Create(_defaultSettings, model);
-
-    public IChatClient Create(AIClientSettings settings, string? model = null)
+    protected override void Validate(AIClientSettings settings)
     {
-        Validate(settings);
+        AIClientSettingsValidator.RequireEndpoint(settings);
+        AIClientSettingsValidator.RequireModel(settings);
 
+        if (!settings.UseDefaultAzureCredential)
+        {
+            AIClientSettingsValidator.RequireApiKey(settings);
+        }
+    }
+
+    protected override IChatClient CreateClient(AIClientSettings settings, string? modelName)
+    {
         ChatCompletionsClient? client = null;
 
         if (settings.UseDefaultAzureCredential)
@@ -44,20 +45,9 @@ public sealed class ChatClientFactory : IChatClientFactory
                 new AzureKeyCredential(settings.ApiKey!));
         }
 
-        var targetModel = model ?? settings.ModelId;
+        var targetModel = modelName ?? settings.ModelId;
         _logger?.LogInformation("Creating Azure OpenAI chat client for model {Model}", targetModel);
 
         return client.AsIChatClient(targetModel);
-    }
-
-    private static void Validate(AIClientSettings settings)
-    {
-        AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireModel(settings);
-
-        if (!settings.UseDefaultAzureCredential)
-        {
-            AIClientSettingsValidator.RequireApiKey(settings);
-        }
     }
 }

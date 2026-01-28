@@ -1,30 +1,34 @@
-﻿using Azure;
+﻿using AIKit.Clients.Base;
+using AIKit.Clients.Settings;
+using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.AzureOpenAI;
 
-public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
+public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
 {
-    private readonly AIClientSettings _defaultSettings;
-
     public EmbeddingGeneratorFactory(AIClientSettings settings)
+        : base(settings)
     {
-        _defaultSettings = settings
-            ?? throw new ArgumentNullException(nameof(settings));
-
-        Validate(_defaultSettings);
     }
 
-    public string Provider => "azure-open-ai";
+    protected override string GetDefaultProviderName() => "azure-open-ai";
 
-    public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
-
-    public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
+    protected override void Validate(AIClientSettings settings)
     {
-        Validate(settings);
+        AIClientSettingsValidator.RequireEndpoint(settings);
+        AIClientSettingsValidator.RequireModel(settings);
 
+        if (!settings.UseDefaultAzureCredential)
+        {
+            AIClientSettingsValidator.RequireApiKey(settings);
+        }
+    }
+
+    protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(AIClientSettings settings)
+    {
         EmbeddingsClient client;
 
         if (settings.UseDefaultAzureCredential)
@@ -41,16 +45,5 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
         }
 
         return client.AsIEmbeddingGenerator(settings.ModelId!);
-    }
-
-    private static void Validate(AIClientSettings settings)
-    {
-        AIClientSettingsValidator.RequireEndpoint(settings);
-        AIClientSettingsValidator.RequireModel(settings);
-
-        if (!settings.UseDefaultAzureCredential)
-        {
-            AIClientSettingsValidator.RequireApiKey(settings);
-        }
     }
 }

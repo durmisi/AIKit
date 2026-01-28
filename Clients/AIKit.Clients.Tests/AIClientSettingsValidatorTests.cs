@@ -1,3 +1,4 @@
+using AIKit.Clients.Settings;
 using Shouldly;
 using Xunit;
 

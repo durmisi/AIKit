@@ -1,7 +1,9 @@
+using AIKit.Clients.Interfaces;
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using System.Collections.Concurrent;
 
-namespace AIKit.Clients;
+namespace AIKit.Clients.Managers;
 
 /// <summary>
 /// Manages embedding generator factories for different AI providers, allowing creation of embedding generators by provider name.

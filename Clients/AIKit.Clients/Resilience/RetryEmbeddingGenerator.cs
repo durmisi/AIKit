@@ -1,6 +1,7 @@
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
-namespace AIKit.Clients;
+namespace AIKit.Clients.Resilience;
 
 /// <summary>
 /// An embedding generator that wraps another generator with retry logic.

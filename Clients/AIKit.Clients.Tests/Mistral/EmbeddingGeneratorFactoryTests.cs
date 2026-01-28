@@ -1,4 +1,5 @@
 using AIKit.Clients.Mistral;
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;

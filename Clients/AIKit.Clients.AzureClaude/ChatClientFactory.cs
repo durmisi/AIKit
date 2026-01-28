@@ -1,4 +1,6 @@
-﻿using Azure.Identity;
+﻿using AIKit.Clients.Interfaces;
+using AIKit.Clients.Settings;
+using Azure.Identity;
 using elbruno.Extensions.AI.Claude;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

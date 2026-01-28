@@ -1,4 +1,5 @@
 using AIKit.Clients.OpenAI;
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;

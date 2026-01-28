@@ -1,4 +1,6 @@
-﻿using Amazon;
+﻿using AIKit.Clients.Interfaces;
+using AIKit.Clients.Settings;
+using Amazon;
 using Amazon.BedrockRuntime;
 using Microsoft.Extensions.AI;
 

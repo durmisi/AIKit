@@ -1,4 +1,6 @@
-﻿using GeminiDotnet;
+﻿using AIKit.Clients.Interfaces;
+using AIKit.Clients.Settings;
+using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

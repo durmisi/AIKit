@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.AI;
+﻿using AIKit.Clients.Interfaces;
+using AIKit.Clients.Settings;
+using Microsoft.Extensions.AI;
 using System.Collections.Concurrent;
 
-namespace AIKit.Clients;
+namespace AIKit.Clients.Managers;
 
 /// <summary>
 /// Manages chat client factories for different AI providers, allowing creation of chat clients by provider name.

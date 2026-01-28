@@ -1,6 +1,7 @@
+using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 
-namespace AIKit.Clients;
+namespace AIKit.Clients.Resilience;
 
 /// <summary>
 /// A chat client that wraps another client with retry logic.

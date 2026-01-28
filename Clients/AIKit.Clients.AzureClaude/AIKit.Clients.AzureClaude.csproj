@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="elbruno.Extensions.AI.Claude" Version="0.1.0-preview.6" />
+	  <PackageReference Include="elbruno.Extensions.AI.Claude" Version="0.1.0-preview.6" />
 	</ItemGroup>
 
 	<ItemGroup>
