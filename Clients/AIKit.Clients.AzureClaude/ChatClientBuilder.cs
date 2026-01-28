@@ -4,6 +4,9 @@ using Azure.Identity;
 using elbruno.Extensions.AI.Claude;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Net;
 
 namespace AIKit.Clients.AzureClaude;
 
@@ -16,22 +19,13 @@ public class ChatClientBuilder
     private string? _modelId;
     private string? _apiKey;
     private bool _useDefaultAzureCredential;
-    private string? _providerName;
     private RetryPolicySettings? _retryPolicy;
     private HttpClient? _httpClient;
     private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
-
-    /// <summary>
-    /// Sets the provider name.
-    /// </summary>
-    /// <param name="providerName">The provider name.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProvider(string providerName)
-    {
-        _providerName = providerName;
-        return this;
-    }
+    private string? _userAgent;
+    private IWebProxy? _proxy;
+    private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
     /// Sets the Azure Claude endpoint.
@@ -123,9 +117,42 @@ public class ChatClientBuilder
     }
 
     /// <summary>
+    /// Sets the user agent.
+    /// </summary>
+    /// <param name="userAgent">The user agent string.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithUserAgent(string userAgent)
+    {
+        _userAgent = userAgent;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the proxy.
+    /// </summary>
+    /// <param name="proxy">The web proxy.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithProxy(IWebProxy proxy)
+    {
+        _proxy = proxy;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets custom headers.
+    /// </summary>
+    /// <param name="headers">The custom headers.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithCustomHeaders(Dictionary<string, string> headers)
+    {
+        _customHeaders = headers;
+        return this;
+    }
+
+    /// <summary>
     /// Gets the provider name.
     /// </summary>
-    public string Provider => _providerName ?? GetDefaultProviderName();
+    public string Provider => GetDefaultProviderName();
 
     /// <summary>
     /// Builds the IChatClient instance.
@@ -165,6 +192,33 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
+        if (_httpClient == null)
+        {
+            var handler = new HttpClientHandler();
+            if (_proxy != null)
+            {
+                handler.Proxy = _proxy;
+            }
+            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(_timeoutSeconds) };
+        }
+        else if (_proxy != null)
+        {
+            _logger?.LogWarning("HttpClient provided, proxy setting ignored.");
+        }
+
+        if (!string.IsNullOrEmpty(_userAgent))
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
+        }
+
+        if (_customHeaders != null)
+        {
+            foreach (var kvp in _customHeaders)
+            {
+                _httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+            }
+        }
+
         var endpoint = new Uri(_endpoint!);
 
         var targetModelId = _modelId;
