@@ -76,14 +76,13 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
-            .WithEndpoint(null)
             .WithModelId("nomic-embed-text");
 
         // Act
         Action act = () => builder.Build();
 
         // Assert
-        act.ShouldThrow<ArgumentException>()
+        act.ShouldThrow<InvalidOperationException>()
             .Message.ShouldContain("Endpoint is required");
     }
 

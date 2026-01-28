@@ -80,7 +80,7 @@ public class EmbeddingGeneratorBuilderTests
         .Build();
 
         // Assert
-        act.ShouldThrow<ArgumentException>()
+        act.ShouldThrow<InvalidOperationException>()
             .Message.ShouldContain("GitHubToken is required");
     }
 
