@@ -13,7 +13,7 @@ namespace AIKit.Clients.Bedrock;
 /// <summary>
 /// Builder for creating Bedrock chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _apiKey;
     private string? _modelId;

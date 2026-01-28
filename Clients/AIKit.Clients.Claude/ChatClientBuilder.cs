@@ -12,7 +12,7 @@ namespace AIKit.Clients.Claude;
 /// <summary>
 /// Builder for creating Claude chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _apiKey;
     private string? _modelId;

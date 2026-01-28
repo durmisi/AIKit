@@ -17,7 +17,7 @@ public class ChatClientBuilderTests
             .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("groq");
@@ -31,7 +31,7 @@ public class ChatClientBuilderTests
             .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -47,7 +47,7 @@ public class ChatClientBuilderTests
             .WithModel("llama-3.3-70b-versatile");
 
         // Act
-        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        var client = builder.Create();
 
         // Assert
         client.ShouldNotBeNull();

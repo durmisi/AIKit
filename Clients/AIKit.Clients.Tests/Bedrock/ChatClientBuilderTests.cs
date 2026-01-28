@@ -19,7 +19,7 @@ public class ChatClientBuilderTests
             .WithModel("anthropic.claude-v2");
 
         // Act
-        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("aws-bedrock");
@@ -35,7 +35,7 @@ public class ChatClientBuilderTests
             .WithModel("anthropic.claude-v2");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -53,7 +53,7 @@ public class ChatClientBuilderTests
             .WithModel("anthropic.claude-v2");
 
         // Act
-        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        var client = builder.Create();
 
         // Assert
         client.ShouldNotBeNull();

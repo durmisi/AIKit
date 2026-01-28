@@ -18,7 +18,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var result = ((IChatClientFactory)builder).Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("claude");
@@ -32,7 +32,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        Action act = () => ((IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -48,7 +48,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var client = ((IChatClientFactory)builder).Create();
+        var client = builder.Create();
 
         // Assert
         client.ShouldNotBeNull();
@@ -64,7 +64,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-3-5-sonnet-20241022");
 
         // Act
-        var client = ((IChatClientFactory)builder).Create("claude-3-haiku-20240307");
+        var client = builder.Create("claude-3-haiku-20240307");
 
         // Assert
         client.ShouldNotBeNull();

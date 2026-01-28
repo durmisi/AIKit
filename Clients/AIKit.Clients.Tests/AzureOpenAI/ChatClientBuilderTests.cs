@@ -18,7 +18,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("azure-open-ai");
@@ -33,7 +33,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -49,7 +49,7 @@ public class ChatClientBuilderTests
             .WithModel("gpt-4");
 
         // Act
-        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        var client = builder.Create();
 
         // Assert
         client.ShouldNotBeNull();

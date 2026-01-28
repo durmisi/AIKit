@@ -13,7 +13,7 @@ namespace AIKit.Clients.AzureClaude;
 /// <summary>
 /// Builder for creating Azure Claude chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _endpoint;
     private string? _modelId;

@@ -18,7 +18,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        var result = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("azure-claude");
@@ -33,7 +33,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
@@ -49,7 +49,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("Endpoint must be a valid absolute URI");
@@ -64,7 +64,7 @@ public class ChatClientBuilderTests
             .WithEndpoint("https://test.claude.azure.com");
 
         // Act
-        Action act = () => ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        Action act = () => builder.Create();
 
         // Assert
         act.ShouldThrow<ArgumentException>().Message.ShouldContain("ModelId is required");
@@ -80,7 +80,7 @@ public class ChatClientBuilderTests
             .WithModel("claude-sonnet-4-5");
 
         // Act
-        var client = ((AIKit.Clients.Interfaces.IChatClientFactory)builder).Create();
+        var client = builder.Create();
 
         // Assert
         client.ShouldNotBeNull();

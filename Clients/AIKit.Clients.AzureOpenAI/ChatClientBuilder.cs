@@ -14,7 +14,7 @@ namespace AIKit.Clients.AzureOpenAI;
 /// <summary>
 /// Builder for creating Azure OpenAI chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _endpoint;
     private string? _modelId;

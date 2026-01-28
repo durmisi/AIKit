@@ -14,7 +14,7 @@ namespace AIKit.Clients.Groq;
 /// <summary>
 /// Builder for creating Groq chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _apiKey;
     private string? _modelId;

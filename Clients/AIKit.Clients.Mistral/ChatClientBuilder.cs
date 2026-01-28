@@ -14,7 +14,7 @@ namespace AIKit.Clients.Mistral;
 /// <summary>
 /// Builder for creating Mistral chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _apiKey;
     private string? _modelId;

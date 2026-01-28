@@ -11,7 +11,7 @@ namespace AIKit.Clients.Ollama;
 /// <summary>
 /// Builder for creating Ollama chat clients with maximum flexibility.
 /// </summary>
-public class ChatClientBuilder : IChatClientFactory
+public class ChatClientBuilder
 {
     private string? _endpoint;
     private string? _modelId;
