@@ -11,9 +11,20 @@ namespace AIKit.Clients.Base;
 /// </summary>
 public abstract class BaseChatClientFactory : IChatClientFactory
 {
+    /// <summary>
+    /// The default AI client settings.
+    /// </summary>
     protected readonly AIClientSettings _defaultSettings;
+    /// <summary>
+    /// The optional logger instance.
+    /// </summary>
     protected readonly ILogger? _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseChatClientFactory"/> class.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="logger">Optional logger instance.</param>
     protected BaseChatClientFactory(AIClientSettings settings, ILogger? logger = null)
     {
         _defaultSettings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -21,11 +32,25 @@ public abstract class BaseChatClientFactory : IChatClientFactory
         Validate(_defaultSettings);
     }
 
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
     public string Provider => _defaultSettings.ProviderName ?? GetDefaultProviderName();
 
+    /// <summary>
+    /// Creates a chat client using the default settings.
+    /// </summary>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
     public IChatClient Create(string? modelName = null)
         => Create(_defaultSettings, modelName);
 
+    /// <summary>
+    /// Creates a chat client with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
     public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
         Validate(settings);

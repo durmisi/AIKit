@@ -21,6 +21,10 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
     {
     }
 
+    /// <summary>
+    /// Gets the default provider name.
+    /// </summary>
+    /// <returns>The default provider name.</returns>
     protected override string GetDefaultProviderName() => "open-ai";
 
     /// <summary>
@@ -33,6 +37,11 @@ public sealed class EmbeddingGeneratorFactory : BaseEmbeddingGeneratorFactory
         AIClientSettingsValidator.RequireModel(settings);
     }
 
+    /// <summary>
+    /// Creates the actual embedding generator instance.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <returns>The created embedding generator.</returns>
     protected override IEmbeddingGenerator<string, Embedding<float>> CreateGenerator(AIClientSettings settings)
     {
         var options = new OpenAIClientOptions();

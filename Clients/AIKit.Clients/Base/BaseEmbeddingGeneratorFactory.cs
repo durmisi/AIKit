@@ -10,19 +10,38 @@ namespace AIKit.Clients.Base;
 /// </summary>
 public abstract class BaseEmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
+    /// <summary>
+    /// The default AI client settings.
+    /// </summary>
     protected readonly AIClientSettings _defaultSettings;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseEmbeddingGeneratorFactory"/> class.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
     protected BaseEmbeddingGeneratorFactory(AIClientSettings settings)
     {
         _defaultSettings = settings ?? throw new ArgumentNullException(nameof(settings));
         Validate(_defaultSettings);
     }
 
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
     public string Provider => _defaultSettings.ProviderName ?? GetDefaultProviderName();
 
+    /// <summary>
+    /// Creates an embedding generator using the default settings.
+    /// </summary>
+    /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Create()
         => Create(_defaultSettings);
 
+    /// <summary>
+    /// Creates an embedding generator with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
     {
         Validate(settings);

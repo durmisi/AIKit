@@ -24,6 +24,10 @@ public sealed class ChatClientFactory : BaseChatClientFactory
     {
     }
 
+    /// <summary>
+    /// Gets the default provider name.
+    /// </summary>
+    /// <returns>The default provider name.</returns>
     protected override string GetDefaultProviderName() => "open-ai";
 
     /// <summary>
@@ -36,6 +40,12 @@ public sealed class ChatClientFactory : BaseChatClientFactory
         AIClientSettingsValidator.RequireModel(settings);
     }
 
+    /// <summary>
+    /// Creates the actual chat client instance.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="modelName">Optional model name.</param>
+    /// <returns>The created chat client.</returns>
     protected override IChatClient CreateClient(AIClientSettings settings, string? modelName)
     {
         var options = new OpenAIClientOptions();

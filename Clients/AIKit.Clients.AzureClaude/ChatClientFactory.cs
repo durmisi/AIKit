@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AIKit.Clients.AzureClaude;
 
 /// <summary>
+/// Factory for creating Azure Claude chat clients.
 /// Requires Endpoint, ModelId, and either ApiKey or UseDefaultAzureCredential.
 /// </summary>
 public sealed class ChatClientFactory : IChatClientFactory
@@ -15,6 +16,11 @@ public sealed class ChatClientFactory : IChatClientFactory
     private readonly AIClientSettings _defaultSettings;
     private readonly ILogger<ChatClientFactory>? _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ChatClientFactory"/> class.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="logger">Optional logger instance.</param>
     public ChatClientFactory(AIClientSettings settings, ILogger<ChatClientFactory>? logger = null)
     {
         _defaultSettings = settings
@@ -24,11 +30,25 @@ public sealed class ChatClientFactory : IChatClientFactory
         Validate(_defaultSettings);
     }
 
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
     public string Provider => _defaultSettings.ProviderName ?? "azure-claude";
 
+    /// <summary>
+    /// Creates a chat client using the default settings.
+    /// </summary>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
     public IChatClient Create(string? modelName = null)
         => Create(_defaultSettings);
 
+    /// <summary>
+    /// Creates a chat client with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <param name="modelName">Optional model name to use for the client.</param>
+    /// <returns>The created chat client.</returns>
     public IChatClient Create(AIClientSettings settings, string? modelName = null)
     {
         Validate(settings);

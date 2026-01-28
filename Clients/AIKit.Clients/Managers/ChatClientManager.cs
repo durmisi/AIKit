@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Interfaces;
-using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
 using System.Collections.Concurrent;
 

@@ -6,10 +6,17 @@ using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Bedrock;
 
+/// <summary>
+/// Factory for creating AWS Bedrock embedding generators.
+/// </summary>
 public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
 {
     private readonly AIClientSettings _defaultSettings;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EmbeddingGeneratorFactory"/> class.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
     public EmbeddingGeneratorFactory(AIClientSettings settings)
     {
         _defaultSettings = settings
@@ -18,10 +25,22 @@ public sealed class EmbeddingGeneratorFactory : IEmbeddingGeneratorFactory
         Validate(_defaultSettings);
     }
 
+    /// <summary>
+    /// Gets the provider name.
+    /// </summary>
     public string Provider => "aws-bedrock";
 
+    /// <summary>
+    /// Creates an embedding generator using the default settings.
+    /// </summary>
+    /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Create() => Create(_defaultSettings);
 
+    /// <summary>
+    /// Creates an embedding generator with the specified settings.
+    /// </summary>
+    /// <param name="settings">The AI client settings.</param>
+    /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Create(AIClientSettings settings)
     {
         Validate(settings);

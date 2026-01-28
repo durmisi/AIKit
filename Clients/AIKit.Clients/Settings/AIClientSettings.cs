@@ -121,6 +121,9 @@ public sealed class RetryPolicySettings
     public double BackoffMultiplier { get; init; } = 2.0;
 }
 
+/// <summary>
+/// Validator for AI client settings.
+/// </summary>
 public static class AIClientSettingsValidator
 {
     /// <summary>
