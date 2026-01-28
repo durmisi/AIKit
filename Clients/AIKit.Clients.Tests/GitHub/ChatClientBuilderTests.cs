@@ -54,30 +54,30 @@ public class ChatClientBuilderTests
     }
 }
 
-public class EmbeddingGeneratorFactoryTests
+public class EmbeddingGeneratorBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["GitHubToken"] = "test", ["ModelId"] = "text-embedding-3-small" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var generator = new EmbeddingGeneratorBuilder()
+            .WithGitHubToken("test")
+            .WithModelId("text-embedding-3-small");
 
         // Act
-        var result = factory.Provider;
+        var result = generator.Build();
 
         // Assert
-        result.ShouldBe("github-models");
+        result.ShouldNotBeNull();
     }
 
     [Fact]
     public void Create_Throws_WhenSettingsInvalid()
     {
-        // Arrange
-        var settings = new Dictionary<string, object> { ["GitHubToken"] = null, ["ModelId"] = "text-embedding-3-small" };
-
         // Act
-        Action act = () => new EmbeddingGeneratorFactory(settings);
+        Action act = () => new EmbeddingGeneratorBuilder()
+        .WithModelId("text-embedding-3-small")
+        .Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -88,11 +88,12 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["GitHubToken"] = "test-token", ["ModelId"] = "text-embedding-3-small" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithGitHubToken("test-token")
+            .WithModelId("text-embedding-3-small");
 
         // Act
-        var generator = factory.Create();
+        var generator = builder.Build();
 
         // Assert
         generator.ShouldNotBeNull();

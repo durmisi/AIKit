@@ -17,13 +17,7 @@ public interface IEmbeddingGeneratorFactory
     /// <summary>
     /// Creates an embedding generator using the default settings.
     /// </summary>
+    /// <param name="settings">Optional settings to override defaults.</param>
     /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
-    IEmbeddingGenerator<string, Embedding<float>> Create();
-
-    /// <summary>
-    /// Creates an embedding generator with custom settings.
-    /// </summary>
-    /// <param name="settings">The settings to use for the generator as key-value pairs.</param>
-    /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
-    IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object> settings);
+    IEmbeddingGenerator<string, Embedding<float>> Create(Dictionary<string, object>? settings = null);
 }

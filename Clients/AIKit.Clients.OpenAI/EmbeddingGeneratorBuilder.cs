@@ -1,12 +1,15 @@
+﻿using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
 using Microsoft.Extensions.AI;
+using OpenAI;
+using System.ClientModel;
 
 namespace AIKit.Clients.OpenAI;
 
 /// <summary>
-/// Builder for creating OpenAI embedding generators with maximum flexibility.
+/// Builder for creating OpenAI embedding generators.
 /// </summary>
-public class EmbeddingGeneratorBuilder
+public sealed class EmbeddingGeneratorBuilder
 {
     private string? _apiKey;
     private string? _modelId;
@@ -14,35 +17,35 @@ public class EmbeddingGeneratorBuilder
     private RetryPolicySettings? _retryPolicy;
 
     /// <summary>
-    /// Sets the API key for authentication.
+    /// Sets the API key.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithApiKey(string apiKey)
     {
-        _apiKey = apiKey;
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         return this;
     }
 
     /// <summary>
     /// Sets the model ID.
     /// </summary>
-    /// <param name="modelId">The model identifier.</param>
+    /// <param name="modelId">The model ID.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModel(string modelId)
+    public EmbeddingGeneratorBuilder WithModelId(string modelId)
     {
-        _modelId = modelId;
+        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
         return this;
     }
 
     /// <summary>
     /// Sets the organization ID.
     /// </summary>
-    /// <param name="organization">The organization identifier.</param>
+    /// <param name="organization">The organization ID.</param>
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithOrganization(string organization)
     {
-        _organization = organization;
+        _organization = organization ?? throw new ArgumentNullException(nameof(organization));
         return this;
     }
 
@@ -53,7 +56,7 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
     {
-        _retryPolicy = retryPolicy;
+        _retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
         return this;
     }
 
@@ -63,15 +66,27 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new Dictionary<string, object>
-        {
-            ["ApiKey"] = _apiKey!,
-            ["ModelId"] = _modelId!,
-            ["Organization"] = _organization,
-            ["RetryPolicy"] = _retryPolicy
-        };
+        if (string.IsNullOrWhiteSpace(_apiKey))
+            throw new InvalidOperationException("ApiKey is required. Call WithApiKey().");
 
-        var factory = new EmbeddingGeneratorFactory(settings);
-        return factory.Create();
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
+
+        var options = new OpenAIClientOptions();
+        if (!string.IsNullOrWhiteSpace(_organization))
+        {
+            options.OrganizationId = _organization;
+        }
+
+        var credential = new ApiKeyCredential(_apiKey!);
+        var client = new OpenAIClient(credential, options);
+        var generator = client.GetEmbeddingClient(_modelId!).AsIEmbeddingGenerator();
+
+        if (_retryPolicy != null)
+        {
+            return new RetryEmbeddingGenerator(generator, _retryPolicy);
+        }
+
+        return generator;
     }
 }

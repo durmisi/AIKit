@@ -1,34 +1,36 @@
+﻿using GeminiDotnet;
+using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Gemini;
 
 /// <summary>
-/// Builder for creating Gemini embedding generators with maximum flexibility.
+/// Builder for creating Gemini embedding generators.
 /// </summary>
-public class EmbeddingGeneratorBuilder
+public sealed class EmbeddingGeneratorBuilder
 {
     private string? _apiKey;
     private string? _modelId;
 
     /// <summary>
-    /// Sets the API key for authentication.
+    /// Sets the API key.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithApiKey(string apiKey)
     {
-        _apiKey = apiKey;
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         return this;
     }
 
     /// <summary>
     /// Sets the model ID.
     /// </summary>
-    /// <param name="modelId">The model identifier.</param>
+    /// <param name="modelId">The model ID.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModel(string modelId)
+    public EmbeddingGeneratorBuilder WithModelId(string modelId)
     {
-        _modelId = modelId;
+        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
         return this;
     }
 
@@ -39,18 +41,17 @@ public class EmbeddingGeneratorBuilder
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
-            throw new ArgumentException("ApiKey is required.", nameof(_apiKey));
+            throw new InvalidOperationException("ApiKey is required. Call WithApiKey().");
 
         if (string.IsNullOrWhiteSpace(_modelId))
-            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var settings = new Dictionary<string, object>
+        var options = new GeminiClientOptions
         {
-            ["ApiKey"] = _apiKey,
-            ["ModelId"] = _modelId
+            ApiKey = _apiKey,
+            ModelId = _modelId
         };
 
-        var factory = new EmbeddingGeneratorFactory(settings);
-        return factory.Create();
+        return new GeminiEmbeddingGenerator(options);
     }
 }

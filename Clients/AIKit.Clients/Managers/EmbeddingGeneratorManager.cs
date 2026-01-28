@@ -38,7 +38,7 @@ public sealed class EmbeddingGeneratorManager
     /// Creates an embedding generator for the specified provider with optional settings.
     /// </summary>
     /// <param name="provider">The name of the provider (e.g., "open-ai").</param>
-    /// <param name="settings">Optional settings to use for the generator as key-value pairs. If null, uses factory defaults.</param>
+    /// <param name="settings">Optional settings to override defaults.</param>
     /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance for the specified provider.</returns>
     /// <exception cref="ArgumentNullException">Thrown if provider is null or whitespace.</exception>
     /// <exception cref="InvalidOperationException">Thrown if no factory is registered for the provider.</exception>
@@ -55,11 +55,7 @@ public sealed class EmbeddingGeneratorManager
             );
         }
 
-        if (settings is not null)
-        {
-            return EmbeddingGeneratorFactory.Create(settings);
-        }
-
-        return EmbeddingGeneratorFactory.Create();
+        return EmbeddingGeneratorFactory.Create(settings);
     }
+
 }

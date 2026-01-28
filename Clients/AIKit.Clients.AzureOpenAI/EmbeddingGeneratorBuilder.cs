@@ -1,12 +1,16 @@
+﻿using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
+using Azure;
+using Azure.AI.Inference;
+using Azure.Identity;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.AzureOpenAI;
 
 /// <summary>
-/// Builder for creating Azure OpenAI embedding generators with maximum flexibility.
+/// Builder for creating Azure OpenAI embedding generators.
 /// </summary>
-public class EmbeddingGeneratorBuilder
+public sealed class EmbeddingGeneratorBuilder
 {
     private string? _endpoint;
     private string? _modelId;
@@ -21,41 +25,39 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithEndpoint(string endpoint)
     {
-        _endpoint = endpoint;
+        _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         return this;
     }
 
     /// <summary>
     /// Sets the model ID.
     /// </summary>
-    /// <param name="modelId">The model identifier.</param>
+    /// <param name="modelId">The model ID.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModel(string modelId)
+    public EmbeddingGeneratorBuilder WithModelId(string modelId)
     {
-        _modelId = modelId;
+        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
         return this;
     }
 
     /// <summary>
-    /// Sets the API key for authentication.
+    /// Sets the API key.
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithApiKey(string apiKey)
     {
-        _apiKey = apiKey;
-        _useDefaultAzureCredential = false;
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         return this;
     }
 
     /// <summary>
-    /// Configures to use default Azure credential for authentication.
+    /// Configures to use the default Azure credential.
     /// </summary>
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithDefaultAzureCredential()
     {
         _useDefaultAzureCredential = true;
-        _apiKey = null;
         return this;
     }
 
@@ -66,7 +68,7 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
     {
-        _retryPolicy = retryPolicy;
+        _retryPolicy = retryPolicy ?? throw new ArgumentNullException(nameof(retryPolicy));
         return this;
     }
 
@@ -76,16 +78,37 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        var settings = new Dictionary<string, object>
-        {
-            ["Endpoint"] = _endpoint!,
-            ["ModelId"] = _modelId!,
-            ["ApiKey"] = _apiKey,
-            ["UseDefaultAzureCredential"] = _useDefaultAzureCredential,
-            ["RetryPolicy"] = _retryPolicy
-        };
+        if (string.IsNullOrWhiteSpace(_endpoint))
+            throw new InvalidOperationException("Endpoint is required. Call WithEndpoint().");
 
-        var factory = new EmbeddingGeneratorFactory(settings);
-        return factory.Create();
+        if (string.IsNullOrWhiteSpace(_modelId))
+            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
+
+        if (!_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
+            throw new InvalidOperationException("ApiKey is required when not using default Azure credential. Call WithApiKey() or WithDefaultAzureCredential().");
+
+        EmbeddingsClient client;
+
+        if (_useDefaultAzureCredential)
+        {
+            client = new EmbeddingsClient(
+                new Uri(_endpoint!),
+                new DefaultAzureCredential());
+        }
+        else
+        {
+            client = new EmbeddingsClient(
+                new Uri(_endpoint!),
+                new AzureKeyCredential(_apiKey!));
+        }
+
+        var generator = client.AsIEmbeddingGenerator(_modelId!);
+
+        if (_retryPolicy != null)
+        {
+            return new RetryEmbeddingGenerator(generator, _retryPolicy);
+        }
+
+        return generator;
     }
 }

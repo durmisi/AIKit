@@ -54,17 +54,18 @@ public class ChatClientBuilderTests
     }
 }
 
-public class EmbeddingGeneratorTests
+public class EmbeddingGeneratorBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["Endpoint"] = "http://localhost:11434", ["ModelId"] = "nomic-embed-text" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithEndpoint("http://localhost:11434")
+            .WithModelId("nomic-embed-text");
 
         // Act
-        var result = factory.Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("ollama");
@@ -74,10 +75,12 @@ public class EmbeddingGeneratorTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["Endpoint"] = null, ["ModelId"] = "nomic-embed-text" };
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithEndpoint(null)
+            .WithModelId("nomic-embed-text");
 
         // Act
-        Action act = () => new EmbeddingGeneratorFactory(settings);
+        Action act = () => builder.Build();
 
         // Assert
         act.ShouldThrow<ArgumentException>()
@@ -88,11 +91,12 @@ public class EmbeddingGeneratorTests
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["Endpoint"] = "http://localhost:11434", ["ModelId"] = "nomic-embed-text" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithEndpoint("http://localhost:11434")
+            .WithModelId("nomic-embed-text");
 
         // Act
-        var generator = factory.Create();
+        var generator = builder.Build();
 
         // Assert
         generator.ShouldNotBeNull();

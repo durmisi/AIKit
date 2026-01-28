@@ -60,17 +60,20 @@ public class ChatClientBuilderTests
     }
 }
 
-public class EmbeddingGeneratorFactoryTests
+public class EmbeddingGeneratorBuilderTests
 {
     [Fact]
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = "test", ["AwsSecretKey"] = "test", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithAwsAccessKey("test")
+            .WithAwsSecretKey("test")
+            .WithAwsRegion("us-east-1")
+            .WithModelId("amazon.titan-embed-text-v1");
 
         // Act
-        var result = factory.Provider;
+        var result = builder.Provider;
 
         // Assert
         result.ShouldBe("aws-bedrock");
@@ -80,25 +83,26 @@ public class EmbeddingGeneratorFactoryTests
     public void Create_Throws_WhenSettingsInvalid()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = null, ["AwsSecretKey"] = "test", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
 
         // Act
-        Action act = () => new EmbeddingGeneratorFactory(settings);
+        Action act = () => new EmbeddingGeneratorBuilder().WithAwsAccessKey(null);
 
         // Assert
-        act.ShouldThrow<ArgumentException>()
-            .Message.ShouldContain("AwsAccessKey is required");
+        act.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
     public void Create_ReturnsEmbeddingGenerator()
     {
         // Arrange
-        var settings = new Dictionary<string, object> { ["AwsAccessKey"] = "test-key", ["AwsSecretKey"] = "test-secret", ["AwsRegion"] = "us-east-1", ["ModelId"] = "amazon.titan-embed-text-v1" };
-        var factory = new EmbeddingGeneratorFactory(settings);
+        var builder = new EmbeddingGeneratorBuilder()
+            .WithAwsAccessKey("test-key")
+            .WithAwsSecretKey("test-secret")
+            .WithAwsRegion("us-east-1")
+            .WithModelId("amazon.titan-embed-text-v1");
 
         // Act
-        var generator = factory.Create();
+        var generator = builder.Build();
 
         // Assert
         generator.ShouldNotBeNull();

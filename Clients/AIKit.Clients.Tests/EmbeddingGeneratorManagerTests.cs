@@ -51,7 +51,7 @@ public class EmbeddingGeneratorManagerTests
         var mockProvider = new Mock<IEmbeddingGeneratorFactory>();
         mockProvider.Setup(p => p.Provider).Returns("test-provider");
         var mockGenerator = new Mock<IEmbeddingGenerator<string, Embedding<float>>>();
-        mockProvider.Setup(p => p.Create()).Returns(mockGenerator.Object);
+        mockProvider.Setup(p => p.Create(It.IsAny<Dictionary<string, object>>())).Returns(mockGenerator.Object);
         var manager = new EmbeddingGeneratorManager(new[] { mockProvider.Object });
 
         // Act

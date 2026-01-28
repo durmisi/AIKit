@@ -1,37 +1,29 @@
+﻿using AIKit.Clients.Interfaces;
 using Microsoft.Extensions.AI;
+using OpenAI;
+using System.ClientModel;
 
 namespace AIKit.Clients.GitHub;
 
 /// <summary>
-/// Builder for creating GitHub embedding generators with maximum flexibility.
+/// Builder for creating GitHub Models embedding generators.
 /// </summary>
-public class EmbeddingGeneratorBuilder
+public sealed class EmbeddingGeneratorBuilder 
 {
-    private string? _apiKey;
-    private string? _modelId;
     private string? _gitHubToken;
+    private string? _modelId;
 
     /// <summary>
-    /// Sets the API key.
+    /// Initializes a new instance of the <see cref="EmbeddingGeneratorBuilder"/>.
     /// </summary>
-    /// <param name="apiKey">The API key.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithApiKey(string apiKey)
+    public EmbeddingGeneratorBuilder()
     {
-        _apiKey = apiKey;
-        return this;
     }
 
     /// <summary>
-    /// Sets the model ID.
+    /// Gets the provider name.
     /// </summary>
-    /// <param name="modelId">The model identifier.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModel(string modelId)
-    {
-        _modelId = modelId;
-        return this;
-    }
+    public string Provider => "github";
 
     /// <summary>
     /// Sets the GitHub token.
@@ -40,7 +32,18 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithGitHubToken(string gitHubToken)
     {
-        _gitHubToken = gitHubToken;
+        _gitHubToken = gitHubToken ?? throw new ArgumentNullException(nameof(gitHubToken));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the model ID.
+    /// </summary>
+    /// <param name="modelId">The model ID.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithModelId(string modelId)
+    {
+        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
         return this;
     }
 
@@ -51,18 +54,27 @@ public class EmbeddingGeneratorBuilder
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
         if (string.IsNullOrWhiteSpace(_gitHubToken))
-            throw new ArgumentException("GitHubToken is required.", nameof(_gitHubToken));
+            throw new InvalidOperationException("GitHubToken is required. Call WithGitHubToken().");
 
         if (string.IsNullOrWhiteSpace(_modelId))
-            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var settings = new Dictionary<string, object>
+        var options = new OpenAIClientOptions
         {
-            ["GitHubToken"] = _gitHubToken,
-            ["ModelId"] = _modelId
+            Endpoint = new Uri("https://models.inference.ai.azure.com/") // Assuming Constants.GitHubModelsEndpoint
         };
 
-        var factory = new EmbeddingGeneratorFactory(settings);
-        return factory.Create();
+        var credential = new ApiKeyCredential(_gitHubToken);
+        var client = new OpenAIClient(credential, options);
+        return client.GetEmbeddingClient(_modelId).AsIEmbeddingGenerator();
+    }
+
+    /// <summary>
+    /// Creates an embedding generator using the default settings.
+    /// </summary>
+    /// <returns>An <see cref="IEmbeddingGenerator{TInput, TEmbedding}"/> instance.</returns>
+    public IEmbeddingGenerator<string, Embedding<float>> Create()
+    {
+        return Build();
     }
 }

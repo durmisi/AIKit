@@ -1,15 +1,16 @@
 using Microsoft.Extensions.AI;
+using OpenAI;
+using System.ClientModel;
 
 namespace AIKit.Clients.Mistral;
 
 /// <summary>
-/// Builder for creating Mistral embedding generators with maximum flexibility.
+/// Builder for creating Mistral embedding generators.
 /// </summary>
-public class EmbeddingGeneratorBuilder
+public sealed class EmbeddingGeneratorBuilder
 {
     private string? _apiKey;
     private string? _modelId;
-    private string? _gitHubToken;
 
     /// <summary>
     /// Sets the API key.
@@ -18,29 +19,18 @@ public class EmbeddingGeneratorBuilder
     /// <returns>The builder instance.</returns>
     public EmbeddingGeneratorBuilder WithApiKey(string apiKey)
     {
-        _apiKey = apiKey;
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         return this;
     }
 
     /// <summary>
     /// Sets the model ID.
     /// </summary>
-    /// <param name="modelId">The model identifier.</param>
+    /// <param name="modelId">The model ID.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModel(string modelId)
+    public EmbeddingGeneratorBuilder WithModelId(string modelId)
     {
-        _modelId = modelId;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the GitHub token.
-    /// </summary>
-    /// <param name="gitHubToken">The GitHub token.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithGitHubToken(string gitHubToken)
-    {
-        _gitHubToken = gitHubToken;
+        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
         return this;
     }
 
@@ -51,23 +41,19 @@ public class EmbeddingGeneratorBuilder
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
-            throw new ArgumentException("ApiKey is required.", nameof(_apiKey));
+            throw new InvalidOperationException("ApiKey is required. Call WithApiKey().");
 
         if (string.IsNullOrWhiteSpace(_modelId))
-            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var settings = new Dictionary<string, object>
+        var options = new OpenAIClientOptions
         {
-            ["ApiKey"] = _apiKey,
-            ["ModelId"] = _modelId
+            Endpoint = new Uri("https://api.mistral.ai/v1/")
         };
 
-        if (!string.IsNullOrWhiteSpace(_gitHubToken))
-        {
-            settings["GitHubToken"] = _gitHubToken;
-        }
+        var credential = new ApiKeyCredential(_apiKey);
+        var client = new OpenAIClient(credential, options);
 
-        var factory = new EmbeddingGeneratorFactory(settings);
-        return factory.Create();
+        return client.GetEmbeddingClient(_modelId).AsIEmbeddingGenerator();
     }
 }
