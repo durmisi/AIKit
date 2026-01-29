@@ -1,80 +1,112 @@
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.CosmosMongoDB;
 using MongoDB.Driver;
 
 namespace AIKit.VectorStores.CosmosMongoDB;
 
-public sealed class CosmosMongoDBVectorStoreOptionsConfig
+public sealed class MongoConnectionOptions
 {
-    public string ConnectionString { get; init; }
-    public string DatabaseName { get; init; }
-    public int? MongoConnectionTimeoutSeconds { get; init; }
-    public int? MongoMaxConnectionPoolSize { get; init; }
-    public bool? MongoUseSsl { get; init; }
+    public int? ConnectionTimeoutSeconds { get; init; }
+    public int? MaxConnectionPoolSize { get; init; }
+    public bool? UseSsl { get; init; }
 }
 
 public sealed class VectorStoreBuilder
 {
     public string Provider => "cosmos-mongodb";
 
-    private readonly CosmosMongoDBVectorStoreOptionsConfig _config;
-    private readonly IEmbeddingGenerator _embeddingGenerator;
+    private string? _connectionString;
+    private string? _databaseName;
+    private IEmbeddingGenerator? _embeddingGenerator;
+    private MongoConnectionOptions? _mongoConnectionOptions;
 
-    public VectorStoreBuilder(
-        IOptions<CosmosMongoDBVectorStoreOptionsConfig> config,
-        IEmbeddingGenerator embeddingGenerator)
+    public VectorStoreBuilder()
     {
-        _config = config.Value ?? throw new ArgumentNullException(nameof(config));
+    }
+
+    public VectorStoreBuilder WithConnectionString(string connectionString)
+    {
+        _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        return this;
+    }
+
+    public VectorStoreBuilder WithDatabaseName(string databaseName)
+    {
+        _databaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName));
+        return this;
+    }
+
+    public VectorStoreBuilder WithEmbeddingGenerator(IEmbeddingGenerator embeddingGenerator)
+    {
         _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+        return this;
+    }
+
+    public VectorStoreBuilder WithMongoConnectionOptions(MongoConnectionOptions options)
+    {
+        _mongoConnectionOptions = options ?? throw new ArgumentNullException(nameof(options));
+        return this;
     }
 
     public VectorStore Build()
     {
-        if (string.IsNullOrWhiteSpace(_config.ConnectionString))
+        Validate();
+
+        var mongoClient = CreateMongoClient();
+        var mongoDatabase = mongoClient.GetDatabase(_databaseName!);
+
+        var options = new CosmosMongoVectorStoreOptions
         {
-            throw new InvalidOperationException("Cosmos MongoDB connection string is not configured.");
-        }
-
-        if (string.IsNullOrWhiteSpace(_config.DatabaseName))
-        {
-            throw new InvalidOperationException("Cosmos MongoDB database name is not configured.");
-        }
-
-        var mongoClient = CreateMongoClient(_config);
-        var mongoDatabase = mongoClient.GetDatabase(_config.DatabaseName);
-
-        var options = CosmosMongoDBVectorStoreOptionsFactory.Create(_config, _embeddingGenerator);
+            EmbeddingGenerator = _embeddingGenerator!,
+        };
 
         return new CosmosMongoVectorStore(mongoDatabase, options);
     }
 
-    private static MongoClient CreateMongoClient(CosmosMongoDBVectorStoreOptionsConfig config)
+    private void Validate()
     {
-        var connectionString = config.ConnectionString;
+        if (string.IsNullOrWhiteSpace(_connectionString))
+        {
+            throw new InvalidOperationException("Cosmos MongoDB connection string is not configured.");
+        }
 
-        // If any MongoDB-specific settings are provided, use MongoClientSettings
-        if (config.MongoConnectionTimeoutSeconds.HasValue ||
-            config.MongoMaxConnectionPoolSize.HasValue ||
-            config.MongoUseSsl.HasValue)
+        if (string.IsNullOrWhiteSpace(_databaseName))
+        {
+            throw new InvalidOperationException("Cosmos MongoDB database name is not configured.");
+        }
+
+        if (_embeddingGenerator == null)
+        {
+            throw new InvalidOperationException("Embedding generator is not configured.");
+        }
+    }
+
+    private MongoClient CreateMongoClient()
+    {
+        var connectionString = _connectionString!;
+
+        // If MongoDB-specific settings are provided, use MongoClientSettings
+        if (_mongoConnectionOptions != null &&
+            (_mongoConnectionOptions.ConnectionTimeoutSeconds.HasValue ||
+             _mongoConnectionOptions.MaxConnectionPoolSize.HasValue ||
+             _mongoConnectionOptions.UseSsl.HasValue))
         {
             var mongoSettings = MongoClientSettings.FromConnectionString(connectionString);
 
-            if (config.MongoConnectionTimeoutSeconds.HasValue)
+            if (_mongoConnectionOptions.ConnectionTimeoutSeconds.HasValue)
             {
-                mongoSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(config.MongoConnectionTimeoutSeconds.Value);
+                mongoSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(_mongoConnectionOptions.ConnectionTimeoutSeconds.Value);
             }
 
-            if (config.MongoMaxConnectionPoolSize.HasValue)
+            if (_mongoConnectionOptions.MaxConnectionPoolSize.HasValue)
             {
-                mongoSettings.MaxConnectionPoolSize = config.MongoMaxConnectionPoolSize.Value;
+                mongoSettings.MaxConnectionPoolSize = _mongoConnectionOptions.MaxConnectionPoolSize.Value;
             }
 
-            if (config.MongoUseSsl.HasValue)
+            if (_mongoConnectionOptions.UseSsl.HasValue)
             {
-                mongoSettings.UseTls = config.MongoUseSsl.Value;
+                mongoSettings.UseTls = _mongoConnectionOptions.UseSsl.Value;
             }
 
             return new MongoClient(mongoSettings);
@@ -82,93 +114,5 @@ public sealed class VectorStoreBuilder
 
         // Default: use connection string directly
         return new MongoClient(connectionString);
-    }
-}
-
-internal static class CosmosMongoDBVectorStoreOptionsFactory
-{
-    public static CosmosMongoVectorStoreOptions Create(
-        CosmosMongoDBVectorStoreOptionsConfig config,
-        IEmbeddingGenerator embeddingGenerator)
-    {
-        return new CosmosMongoVectorStoreOptions
-        {
-            EmbeddingGenerator = embeddingGenerator,
-        };
-    }
-}
-
-public sealed class CosmosMongoDBVectorStoreBuilder
-{
-    private IMongoDatabase? _database;
-    private CosmosMongoVectorStoreOptions? _options;
-
-    public CosmosMongoDBVectorStoreBuilder WithDatabase(IMongoDatabase database)
-    {
-        _database = database;
-        return this;
-    }
-
-    public CosmosMongoDBVectorStoreBuilder WithOptions(CosmosMongoVectorStoreOptions options)
-    {
-        _options = options;
-        return this;
-    }
-
-    public VectorStore Build()
-    {
-        if (_database is null)
-            throw new InvalidOperationException("IMongoDatabase must be set.");
-
-        if (_options is null)
-            throw new InvalidOperationException("CosmosMongoVectorStoreOptions must be set.");
-
-        return new CosmosMongoVectorStore(_database, _options);
-    }
-}
-
-public static class ServiceCollectionExtensions
-{
-    public static IServiceCollection AddCosmosMongoDBVectorStore(
-        this IServiceCollection services,
-        Action<CosmosMongoDBVectorStoreOptionsConfig> configure)
-    {
-        // Configure options
-        services.Configure(configure);
-
-        // Register the factory
-        services.AddSingleton<VectorStoreBuilder>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddCosmosMongoDBVectorStore(
-        this IServiceCollection services,
-        CosmosMongoVectorStore store)
-    {
-        if (store == null) throw new ArgumentNullException(nameof(store));
-
-        var factory = new CosmosMongoDBFactory(store);
-
-        services.AddSingleton<VectorStoreBuilder>(factory);
-
-        return services;
-    }
-
-    private sealed class CosmosMongoDBFactory
-    {
-        private readonly CosmosMongoVectorStore _store;
-
-        public CosmosMongoDBFactory(CosmosMongoVectorStore store)
-        {
-            _store = store ?? throw new ArgumentNullException(nameof(store));
-        }
-
-        public string Provider => "cosmos-mongodb";
-
-        public VectorStore Build()
-        {
-            return _store;
-        }
     }
 }
