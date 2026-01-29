@@ -73,8 +73,8 @@ public class PromptExecutorTests
             },
             ["orders"] = new[]
             {
-                new Dictionary<string, object> { ["id"] = "A1", ["product"] = "Laptop", ["price"] = "1200�" },
-                new Dictionary<string, object> { ["id"] = "B2", ["product"] = "Mouse", ["price"] = "25�" }
+                new Dictionary<string, object> { ["id"] = "A1", ["product"] = "Laptop", ["price"] = "1200€" },
+                new Dictionary<string, object> { ["id"] = "B2", ["product"] = "Mouse", ["price"] = "25€" }
             }
         };
 
@@ -94,7 +94,7 @@ public class PromptExecutorTests
         _output.WriteLine(template);
         _output.WriteLine("=== Arguments ===");
         _output.WriteLine($"user.name: John, user.isPremium: false");
-        _output.WriteLine("orders: [A1: Laptop (1200�), B2: Mouse (25�)]");
+        _output.WriteLine("orders: [A1: Laptop (1200€), B2: Mouse (25€)]");
         _output.WriteLine("=== Rendered Output ===");
         _output.WriteLine(rendered);
 
@@ -179,8 +179,8 @@ public class PromptExecutorTests
             },
             ["orders"] = new[]
             {
-                new Dictionary<string, object> { ["id"] = "X1", ["product"] = "Phone", ["price"] = "800�" },
-                new Dictionary<string, object> { ["id"] = "Y2", ["product"] = "Case", ["price"] = "20�" }
+                new Dictionary<string, object> { ["id"] = "X1", ["product"] = "Phone", ["price"] = "800€" },
+                new Dictionary<string, object> { ["id"] = "Y2", ["product"] = "Case", ["price"] = "20€" }
             }
         };
 
@@ -200,7 +200,7 @@ public class PromptExecutorTests
         _output.WriteLine(template);
         _output.WriteLine("=== Arguments ===");
         _output.WriteLine("user.name: Jane, user.isPremium: false");
-        _output.WriteLine("orders: [X1: Phone (800�), Y2: Case (20�)]");
+        _output.WriteLine("orders: [X1: Phone (800€), Y2: Case (20€)]");
         _output.WriteLine("=== Rendered Output ===");
         _output.WriteLine(rendered);
 
@@ -244,6 +244,47 @@ public class PromptExecutorTests
         _output.WriteLine(rendered);
 
         rendered.ShouldContain("Orders:");
+        rendered.ShouldNotContain("-"); // No items should be rendered
+    }
+
+    [Fact]
+    public async Task HandlebarsPromptExecutor_HandlesEmptyCollection()
+    {
+        var executor = new Handlebars.PromptExecutor(_mockChatClient.Object);
+
+        var template = """
+            Orders:
+            {{#each orders}}
+            - {{id}}
+            {{/each}}
+            """;
+
+        var arguments = new KernelArguments
+        {
+            ["orders"] = new Dictionary<string, object>[0] // empty array
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new HandlebarsPromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "HandlebarsEmptyCollection",
+            Template = template,
+            TemplateFormat = "handlebars",
+            AllowDangerouslySetContent = true
+        });
+
+        var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Handlebars Template Input (Empty Collection) ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("orders: [] (empty array)");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
+
+        rendered.ShouldContain("Orders:");
+        rendered.ShouldNotContain("-"); // No items should be rendered
     }
 
     // -------------------------
@@ -260,13 +301,23 @@ public class PromptExecutorTests
 
         var promptExecutor = new PromptExecutor(executors);
 
+        var template = "Hello {{name}}";
+        var arguments = new KernelArguments
+        {
+            ["name"] = "World"
+        };
+
+        _output.WriteLine("=== Liquid Execution Test ===");
+        _output.WriteLine($"Template: {template}");
+        _output.WriteLine("Arguments: name = World");
+        _output.WriteLine("Expected Rendered: Hello World");
+
         var result = await promptExecutor.ExecuteAsync(
             "liquid",
-            "Hello {{name}}",
-            new KernelArguments
-            {
-                ["name"] = "World"
-            });
+            template,
+            arguments);
+
+        _output.WriteLine($"Execution Result: {result}");
 
         result.ShouldBe("Mock response");
     }
@@ -283,8 +334,19 @@ public class PromptExecutorTests
             ["name"] = "World"
         };
 
+        _output.WriteLine("=== Handlebars Streaming Execution Test ===");
+        _output.WriteLine($"Template: {template}");
+        _output.WriteLine("Arguments: name = World");
+        _output.WriteLine("Expected Rendered: Hello World");
+
         var stream = executor.ExecuteStreamingAsync(template, arguments);
         var results = await stream.ToListAsync();
+
+        _output.WriteLine($"Streaming Results Count: {results.Count}");
+        for (int i = 0; i < results.Count; i++)
+        {
+            _output.WriteLine($"Result {i}: {results[i]}");
+        }
 
         results.ShouldNotBeEmpty();
     }
