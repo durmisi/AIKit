@@ -1,10 +1,6 @@
 using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using OpenAI;
-using System.ClientModel;
-using System.ClientModel.Primitives;
-using System.Net;
 
 namespace AIKit.Clients.GitHub;
 
@@ -17,11 +13,9 @@ public class ChatClientBuilder
     private HttpClient? _httpClient;
     private string? _gitHubToken;
     private RetryPolicySettings? _retryPolicy;
-    private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
     private string? _organizationId;
     private string? _projectId;
-    private IWebProxy? _proxy;
 
     /// <summary>
     /// Sets the model ID.
@@ -68,17 +62,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the logger.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
@@ -112,17 +95,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
-        return this;
-    }
-
-    /// <summary>
     /// Gets the provider name.
     /// </summary>
     public string Provider => GetDefaultProviderName();
@@ -135,15 +107,21 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var client = ClientCreator.CreateOpenAIClient(
+            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient);
+
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating GitHub Models chat client for model {Model}", targetModel);
+
+        var chatClient = client.GetChatClient(targetModel).AsIChatClient();
 
         if (_retryPolicy != null)
         {
             _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
-            return new RetryChatClient(client, _retryPolicy);
+            return new RetryChatClient(chatClient, _retryPolicy);
         }
 
-        return client;
+        return chatClient;
     }
 
     private string GetDefaultProviderName() => "github-models";
@@ -155,18 +133,6 @@ public class ChatClientBuilder
 
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateOpenAIClient(
-            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient, _proxy, _timeoutSeconds);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating GitHub Models chat client for model {Model}", targetModel);
-
-        return client.GetChatClient(targetModel).AsIChatClient();
     }
 }
 

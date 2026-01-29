@@ -1,7 +1,6 @@
-﻿using AIKit.Clients.Interfaces;
+﻿using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
-using OpenAI;
-using System.ClientModel;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Clients.GitHub;
 
@@ -10,8 +9,13 @@ namespace AIKit.Clients.GitHub;
 /// </summary>
 public sealed class EmbeddingGeneratorBuilder 
 {
-    private string? _gitHubToken;
     private string? _modelId;
+    private HttpClient? _httpClient;
+    private string? _gitHubToken;
+    private RetryPolicySettings? _retryPolicy;
+    private ILogger<EmbeddingGeneratorBuilder>? _logger;
+    private string? _organizationId;
+    private string? _projectId;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorBuilder"/>.
@@ -23,7 +27,7 @@ public sealed class EmbeddingGeneratorBuilder
     /// <summary>
     /// Gets the provider name.
     /// </summary>
-    public string Provider => "github";
+    public string Provider => "github-models";
 
     /// <summary>
     /// Sets the GitHub token.
@@ -48,24 +52,91 @@ public sealed class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
+    /// Sets the HTTP client.
+    /// </summary>
+    /// <param name="httpClient">The HTTP client.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithHttpClient(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the retry policy.
+    /// </summary>
+    /// <param name="retryPolicy">The retry policy settings.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
+    {
+        _retryPolicy = retryPolicy;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the logger.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithLogger(ILogger<EmbeddingGeneratorBuilder> logger)
+    {
+        _logger = logger;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the organization ID.
+    /// </summary>
+    /// <param name="organizationId">The organization identifier.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithOrganizationId(string organizationId)
+    {
+        _organizationId = organizationId;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the project ID.
+    /// </summary>
+    /// <param name="projectId">The project identifier.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithProjectId(string projectId)
+    {
+        _projectId = projectId;
+        return this;
+    }
+
+    /// <summary>
     /// Builds the IEmbeddingGenerator instance.
     /// </summary>
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
+        Validate();
+
+        var client = ClientCreator.CreateOpenAIClient(
+            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient);
+
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating GitHub Models embedding generator for model {Model}", targetModel);
+
+        var embeddingClient = client.GetEmbeddingClient(targetModel).AsIEmbeddingGenerator();
+
+        if (_retryPolicy != null)
+        {
+            _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
+            return new RetryEmbeddingGenerator(embeddingClient, _retryPolicy);
+        }
+
+        return embeddingClient;
+    }
+
+    private void Validate()
+    {
         if (string.IsNullOrWhiteSpace(_gitHubToken))
-            throw new InvalidOperationException("GitHubToken is required. Call WithGitHubToken().");
+            throw new ArgumentException("GitHubToken is required.", nameof(_gitHubToken));
 
         if (string.IsNullOrWhiteSpace(_modelId))
-            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
-
-        var options = new OpenAIClientOptions
-        {
-            Endpoint = new Uri("https://models.inference.ai.azure.com/") // Assuming Constants.GitHubModelsEndpoint
-        };
-
-        var credential = new ApiKeyCredential(_gitHubToken);
-        var client = new OpenAIClient(credential, options);
-        return client.GetEmbeddingClient(_modelId).AsIEmbeddingGenerator();
+            throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 }
