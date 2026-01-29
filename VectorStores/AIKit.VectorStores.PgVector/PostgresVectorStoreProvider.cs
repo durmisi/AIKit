@@ -12,14 +12,14 @@ public sealed class PostgresVectorStoreOptionsConfig
     public string? Schema { get; init; }
 }
 
-public sealed class PostgresVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "postgres-vector";
 
     private readonly PostgresVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public PostgresVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<PostgresVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -30,7 +30,7 @@ public sealed class PostgresVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -96,7 +96,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, PostgresVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -109,12 +109,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new PostgresFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class PostgresFactory : IVectorStoreFactory
+    private sealed class PostgresFactory
     {
         private readonly PostgresVectorStore _store;
 
@@ -125,7 +125,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "postgres-vector";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

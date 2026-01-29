@@ -12,14 +12,14 @@ public sealed class CosmosNoSQLVectorStoreOptionsConfig
     public string DatabaseName { get; init; }
 }
 
-public sealed class CosmosNoSQLVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "cosmos-nosql";
 
     private readonly CosmosNoSQLVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public CosmosNoSQLVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<CosmosNoSQLVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -30,7 +30,7 @@ public sealed class CosmosNoSQLVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -135,7 +135,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, CosmosNoSQLVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -148,12 +148,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new CosmosNoSQLFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class CosmosNoSQLFactory : IVectorStoreFactory
+    private sealed class CosmosNoSQLFactory
     {
         private readonly CosmosNoSqlVectorStore _store;
 
@@ -164,7 +164,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "cosmos-nosql";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

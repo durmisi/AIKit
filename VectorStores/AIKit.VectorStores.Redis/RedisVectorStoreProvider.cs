@@ -16,14 +16,14 @@ public sealed class RedisVectorStoreOptionsConfig
     public int? SyncTimeout { get; init; }
 }
 
-public sealed class RedisVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "redis";
 
     private readonly RedisVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public RedisVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<RedisVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -34,7 +34,7 @@ public sealed class RedisVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.Endpoint))
         {
@@ -181,7 +181,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, RedisVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -194,12 +194,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new RedisFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class RedisFactory : IVectorStoreFactory
+    private sealed class RedisFactory
     {
         private readonly RedisVectorStore _store;
 
@@ -210,7 +210,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "redis";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

@@ -12,14 +12,14 @@ public sealed class SqliteVecVectorStoreOptionsConfig
     public string? TableName { get; init; }
 }
 
-public sealed class SqliteVecVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "sqlite-vec";
 
     private readonly SqliteVecVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public SqliteVecVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<SqliteVecVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -30,7 +30,7 @@ public sealed class SqliteVecVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -103,7 +103,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, SqliteVecVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -116,12 +116,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new SqliteVecFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class SqliteVecFactory : IVectorStoreFactory
+    private sealed class SqliteVecFactory
     {
         private readonly SqliteVectorStore _store;
 
@@ -132,7 +132,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "sqlite-vec";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

@@ -5,13 +5,13 @@ using Microsoft.SemanticKernel.Connectors.InMemory;
 
 namespace AIKit.VectorStores.InMemory;
 
-public sealed class InMemoryVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
-    private readonly ILogger<InMemoryVectorStoreFactory>? _logger;
+    private readonly ILogger<VectorStoreBuilder>? _logger;
 
     public string Provider => "in-memory";
 
-    public InMemoryVectorStoreFactory(ILogger<InMemoryVectorStoreFactory>? logger = null)
+    public VectorStoreBuilder(ILogger<VectorStoreBuilder>? logger = null)
     {
         _logger = logger;
     }
@@ -19,7 +19,7 @@ public sealed class InMemoryVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a default in-memory vector store.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         _logger?.LogInformation("Creating in-memory vector store");
         return new InMemoryVectorStore();
@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, InMemoryVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }

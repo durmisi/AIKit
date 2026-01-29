@@ -12,14 +12,14 @@ public sealed class SqlServerVectorStoreOptionsConfig
     public string? Schema { get; init; }
 }
 
-public sealed class SqlServerVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "sql-server";
 
     private readonly SqlServerVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public SqlServerVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<SqlServerVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -30,7 +30,7 @@ public sealed class SqlServerVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -96,7 +96,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, SqlServerVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -109,12 +109,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new SqlServerFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class SqlServerFactory : IVectorStoreFactory
+    private sealed class SqlServerFactory
     {
         private readonly SqlServerVectorStore _store;
 
@@ -125,7 +125,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "sql-server";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

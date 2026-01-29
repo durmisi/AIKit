@@ -16,14 +16,14 @@ public sealed class CosmosMongoDBVectorStoreOptionsConfig
     public bool? MongoUseSsl { get; init; }
 }
 
-public sealed class CosmosMongoDBVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "cosmos-mongodb";
 
     private readonly CosmosMongoDBVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public CosmosMongoDBVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<CosmosMongoDBVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -31,7 +31,7 @@ public sealed class CosmosMongoDBVectorStoreFactory : IVectorStoreFactory
         _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
     }
 
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -137,7 +137,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, CosmosMongoDBVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -150,12 +150,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new CosmosMongoDBFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class CosmosMongoDBFactory : IVectorStoreFactory
+    private sealed class CosmosMongoDBFactory
     {
         private readonly CosmosMongoVectorStore _store;
 
@@ -166,7 +166,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "cosmos-mongodb";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

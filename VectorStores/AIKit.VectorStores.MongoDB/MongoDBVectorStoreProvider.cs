@@ -13,14 +13,14 @@ public sealed class MongoDBVectorStoreOptionsConfig
     public string? DatabaseName { get; init; }
 }
 
-public sealed class MongoDBVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "mongodb";
 
     private readonly MongoDBVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public MongoDBVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<MongoDBVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -31,7 +31,7 @@ public sealed class MongoDBVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.ConnectionString))
         {
@@ -107,7 +107,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, MongoDBVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -120,12 +120,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new MongoDBFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class MongoDBFactory : IVectorStoreFactory
+    private sealed class MongoDBFactory
     {
         private readonly MongoVectorStore _store;
 
@@ -136,7 +136,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "mongodb";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

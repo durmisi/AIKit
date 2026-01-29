@@ -16,14 +16,14 @@ public sealed class ElasticsearchVectorStoreOptionsConfig
     public string? ApiKey { get; init; }
 }
 
-public sealed class ElasticsearchVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "elasticsearch";
 
     private readonly ElasticsearchVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public ElasticsearchVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<ElasticsearchVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -31,7 +31,7 @@ public sealed class ElasticsearchVectorStoreFactory : IVectorStoreFactory
         _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
     }
 
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (_config.Endpoint is null)
         {
@@ -145,7 +145,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, ElasticsearchVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -158,12 +158,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new ElasticsearchFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class ElasticsearchFactory : IVectorStoreFactory
+    private sealed class ElasticsearchFactory
     {
 #pragma warning disable SKEXP0020 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed
         private readonly ElasticsearchVectorStore _store;
@@ -176,7 +176,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "elasticsearch";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

@@ -13,14 +13,14 @@ public sealed class WeaviateVectorStoreOptionsConfig
     public int? TimeoutSeconds { get; init; }
 }
 
-public sealed class WeaviateVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "weaviate";
 
     private readonly WeaviateVectorStoreOptionsConfig _config;
     private readonly IEmbeddingGenerator _embeddingGenerator;
 
-    public WeaviateVectorStoreFactory(
+    public VectorStoreBuilder(
         IOptions<WeaviateVectorStoreOptionsConfig> config,
         IEmbeddingGenerator embeddingGenerator)
     {
@@ -31,7 +31,7 @@ public sealed class WeaviateVectorStoreFactory : IVectorStoreFactory
     /// <summary>
     /// Creates a vector store with full configuration from settings.
     /// </summary>
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (_config.Endpoint is null)
         {
@@ -139,7 +139,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, WeaviateVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -152,12 +152,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new WeaviateFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class WeaviateFactory : IVectorStoreFactory
+    private sealed class WeaviateFactory
     {
         private readonly WeaviateVectorStore _store;
 
@@ -168,7 +168,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "weaviate";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }

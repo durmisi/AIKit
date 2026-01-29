@@ -13,18 +13,18 @@ public sealed class QdrantVectorStoreOptionsConfig
     public string? ApiKey { get; init; }
 }
 
-public sealed class QdrantVectorStoreFactory : IVectorStoreFactory
+public sealed class VectorStoreBuilder
 {
     public string Provider => "qdrant";
 
     private readonly QdrantVectorStoreOptionsConfig _config;
 
-    public QdrantVectorStoreFactory(IOptions<QdrantVectorStoreOptionsConfig> config)
+    public VectorStoreBuilder(IOptions<QdrantVectorStoreOptionsConfig> config)
     {
         _config = config.Value ?? throw new ArgumentNullException(nameof(config));
     }
 
-    public VectorStore Create()
+    public VectorStore Build()
     {
         if (string.IsNullOrWhiteSpace(_config.Host))
         {
@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Register the factory
-        services.AddSingleton<IVectorStoreFactory, QdrantVectorStoreFactory>();
+        services.AddSingleton<VectorStoreBuilder>();
 
         return services;
     }
@@ -106,12 +106,12 @@ public static class ServiceCollectionExtensions
 
         var factory = new QdrantFactory(store);
 
-        services.AddSingleton<IVectorStoreFactory>(factory);
+        services.AddSingleton<VectorStoreBuilder>(factory);
 
         return services;
     }
 
-    private sealed class QdrantFactory : IVectorStoreFactory
+    private sealed class QdrantFactory
     {
         private readonly QdrantVectorStore _store;
 
@@ -122,7 +122,7 @@ public static class ServiceCollectionExtensions
 
         public string Provider => "qdrant";
 
-        public VectorStore Create()
+        public VectorStore Build()
         {
             return _store;
         }
