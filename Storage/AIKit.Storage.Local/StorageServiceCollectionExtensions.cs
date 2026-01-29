@@ -51,4 +51,25 @@ public static class StorageServiceCollectionExtensions
 
         return services;
     }
+
+    /// <summary>
+    /// Adds the local versioned storage provider to the service collection using a builder.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="builderFactory">Factory to create the storage provider builder.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddLocalVersionedStorage(
+        this IServiceCollection services,
+        Func<IServiceProvider, StorageProviderBuilder> builderFactory)
+    {
+        ArgumentNullException.ThrowIfNull(builderFactory);
+
+        services.TryAddSingleton<IStorageProvider>(sp =>
+        {
+            var builder = builderFactory(sp);
+            return builder.Build();
+        });
+
+        return services;
+    }
 }
