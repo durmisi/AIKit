@@ -14,8 +14,7 @@ public class PgVectorIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _postgresContainer = new ContainerBuilder()
-                .WithImage("pgvector/pgvector:pg16")
+            _postgresContainer = new ContainerBuilder("pgvector/pgvector:pg16")
                 .WithPortBinding(5432, true)
                 .WithEnvironment("POSTGRES_DB", "testdb")
                 .WithEnvironment("POSTGRES_USER", "testuser")

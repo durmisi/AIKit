@@ -29,8 +29,7 @@ public class AzuriteFixture : IAsyncLifetime
     {
         try
         {
-            _container = new ContainerBuilder()
-                .WithImage("mcr.microsoft.com/azure-storage/azurite:3.30.0")
+            _container = new ContainerBuilder("mcr.microsoft.com/azure-storage/azurite:3.30.0")
                 .WithPortBinding(10000, 10000)
                 .WithPortBinding(10001, 10001) // For queue and table if needed
                 .WithEnvironment("AZURITE_SKIP_API_VERSION_CHECK", "true")

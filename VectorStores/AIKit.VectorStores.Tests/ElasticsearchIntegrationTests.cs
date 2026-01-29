@@ -14,8 +14,7 @@ public class ElasticsearchIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _elasticsearchContainer = new ContainerBuilder()
-                .WithImage("docker.elastic.co/elasticsearch/elasticsearch:8.11.0")
+            _elasticsearchContainer = new ContainerBuilder("docker.elastic.co/elasticsearch/elasticsearch:8.11.0")
                 .WithPortBinding(9200, true)
                 .WithEnvironment("discovery.type", "single-node")
                 .WithEnvironment("xpack.security.enabled", "false")

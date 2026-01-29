@@ -14,8 +14,7 @@ public class RedisIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _redisContainer = new ContainerBuilder()
-                .WithImage("redis/redis-stack:latest")
+            _redisContainer = new ContainerBuilder("redis/redis-stack:latest")
                 .WithPortBinding(6379, true)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilCommandIsCompleted("redis-cli", "ping"))
                 .Build();

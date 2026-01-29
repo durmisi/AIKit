@@ -19,8 +19,7 @@ public class WeaviateIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _weaviateContainer = new ContainerBuilder()
-                .WithImage("semitechnologies/weaviate:latest")
+            _weaviateContainer = new ContainerBuilder("semitechnologies/weaviate:latest")
                 .WithPortBinding(8080, true)
                 .WithEnvironment("AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED", "true")
                 .WithEnvironment("PERSISTENCE_DATA_PATH", "/var/lib/weaviate")

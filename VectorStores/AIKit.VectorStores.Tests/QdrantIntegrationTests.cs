@@ -15,8 +15,7 @@ public class QdrantIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _qdrantContainer = new ContainerBuilder()
-                .WithImage("qdrant/qdrant:latest")
+            _qdrantContainer = new ContainerBuilder("qdrant/qdrant:latest")
                 .WithPortBinding(6333, true)
                 .WithPortBinding(6334, true)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(6333).ForPath("/healthz")))

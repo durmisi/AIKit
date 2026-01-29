@@ -19,8 +19,7 @@ public class SqlServerIntegrationTests : IAsyncLifetime
     {
         try
         {
-            _sqlServerContainer = new ContainerBuilder()
-                .WithImage("mcr.microsoft.com/mssql/server:latest")
+            _sqlServerContainer = new ContainerBuilder("mcr.microsoft.com/mssql/server:latest")
                 .WithPortBinding(1433, true)
                 .WithEnvironment("ACCEPT_EULA", "Y")
                 .WithEnvironment("SA_PASSWORD", "StrongPass123!")
