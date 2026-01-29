@@ -1,10 +1,5 @@
-using AIKit.VectorStores.Redis;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.VectorData;
 using Shouldly;
 
 namespace AIKit.VectorStores.Tests;
@@ -52,17 +47,11 @@ public class RedisIntegrationTests : IAsyncLifetime
         Skip.IfNot(_dockerAvailable, "Docker not available for Redis");
 
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(Options.Create(new RedisVectorStoreOptionsConfig
-        {
-            Endpoint = _endpoint
-        }));
-        services.AddSingleton<IEmbeddingGenerator>(new FakeEmbeddingGenerator());
-        services.AddSingleton<RedisVectorStoreFactory>();
+        var builder = new AIKit.VectorStores.Redis.VectorStoreBuilder()
+            .WithEmbeddingGenerator(new FakeEmbeddingGenerator())
+            .WithEndpoint(_endpoint);
 
-        var serviceProvider = services.BuildServiceProvider();
-        var factory = serviceProvider.GetRequiredService<RedisVectorStoreFactory>();
-        var store = factory.Create();
+        var store = builder.Build();
 
         // Define a record type
         var collection = store.GetCollection<string, TestRecord>("test-collection");

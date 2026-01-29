@@ -1,9 +1,5 @@
-using AIKit.VectorStores.Qdrant;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.VectorData;
 using Shouldly;
 
@@ -52,18 +48,12 @@ public class QdrantIntegrationTests : IAsyncLifetime
         Skip.IfNot(_dockerAvailable, "Docker not available for Qdrant");
 
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(Options.Create(new QdrantVectorStoreOptionsConfig
-        {
-            Host = "localhost",
-            Port = _grpcPort
-        }));
-        services.AddSingleton<IEmbeddingGenerator>(new FakeEmbeddingGenerator());
-        services.AddSingleton<QdrantVectorStoreFactory>();
+        var builder = new AIKit.VectorStores.Qdrant.VectorStoreBuilder()
+            .WithEmbeddingGenerator(new FakeEmbeddingGenerator())
+            .WithHost("localhost")
+            .WithPort(_grpcPort);
 
-        var serviceProvider = services.BuildServiceProvider();
-        var factory = serviceProvider.GetRequiredService<QdrantVectorStoreFactory>();
-        var store = factory.Create();
+        var store = builder.Build();
 
         // Define a record type
         var collection = store.GetCollection<Guid, QdrantTestRecord>("test-collection");

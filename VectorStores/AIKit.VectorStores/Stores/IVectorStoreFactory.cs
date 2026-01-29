@@ -1,6 +1,6 @@
 using Microsoft.Extensions.VectorData;
 
-namespace AIKit.VectorStores;
+namespace AIKit.VectorStores.Stores;
 
 /// <summary>
 /// Factory for creating vector store instances.

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.VectorData;
 
-namespace AIKit.VectorStores;
+namespace AIKit.VectorStores.Stores;
 
 /// <summary>
 /// Resolves vector store instances by provider name.

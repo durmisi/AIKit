@@ -1,5 +1,4 @@
-﻿using AIKit.VectorStores.InMemory;
-using Microsoft.Extensions.VectorData;
+﻿using Microsoft.Extensions.VectorData;
 using Shouldly;
 
 namespace AIKit.VectorStores.Tests;
@@ -10,8 +9,8 @@ public class VectorStoreIntegrationTests
     public async Task InMemoryVectorStore_AddDocuments_VerifyAddition()
     {
         // Arrange
-        var factory = new InMemoryVectorStoreFactory();
-        var store = factory.Create();
+        var builder = new AIKit.VectorStores.InMemory.VectorStoreBuilder();
+        var store = builder.Build();
 
         // Define a record type
         var collection = store.GetCollection<string, TestRecord>("test-collection");

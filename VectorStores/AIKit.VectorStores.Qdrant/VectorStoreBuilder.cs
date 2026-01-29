@@ -1,3 +1,4 @@
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Qdrant.Client;
@@ -12,9 +13,16 @@ public sealed class VectorStoreBuilder
     private int _port = 6334;
     private string? _apiKey;
     private bool _ownsClient = true;
+    private IEmbeddingGenerator _embeddingGenerator;
 
     public VectorStoreBuilder()
     {
+    }
+
+    public VectorStoreBuilder WithEmbeddingGenerator(IEmbeddingGenerator embeddingGenerator)
+    {
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+        return this;
     }
 
     public VectorStoreBuilder WithHost(string host)
@@ -48,8 +56,23 @@ public sealed class VectorStoreBuilder
             throw new InvalidOperationException("Qdrant host is not configured.");
         }
 
+        if(_embeddingGenerator == null)
+        {
+            throw new InvalidOperationException("Embedding generator is not configured.");
+        }   
+
         var client = new QdrantClient(_host, _port, apiKey: _apiKey);
 
-        return new QdrantVectorStore(client, ownsClient: _ownsClient);
+        var options = CreateStoreOptions(_embeddingGenerator);
+
+        return new QdrantVectorStore(client, ownsClient: _ownsClient, options);
+    }
+
+    private QdrantVectorStoreOptions? CreateStoreOptions(IEmbeddingGenerator embeddingGenerator)
+    {
+        return new QdrantVectorStoreOptions
+        {
+            EmbeddingGenerator = embeddingGenerator
+        };
     }
 }

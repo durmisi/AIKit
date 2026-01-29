@@ -24,6 +24,11 @@ public sealed class VectorStoreBuilder
     public VectorStoreBuilder()
     {
     }
+    public VectorStoreBuilder WithEmbeddingGenerator(IEmbeddingGenerator embeddingGenerator)
+    {
+        _embeddingGenerator = embeddingGenerator ?? throw new ArgumentNullException(nameof(embeddingGenerator));
+        return this;
+    }
 
     public VectorStoreBuilder WithHttpClient(HttpClient httpClient, HttpClientOptions? options = null)
     {

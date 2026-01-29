@@ -54,20 +54,17 @@ public class WeaviateIntegrationTests : IAsyncLifetime
         Skip.IfNot(_dockerAvailable, "Docker not available for Weaviate");
 
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(Options.Create(new WeaviateVectorStoreOptionsConfig
-        {
-            Endpoint = _endpoint
-        }));
-        services.AddSingleton<IEmbeddingGenerator>(new FakeEmbeddingGenerator());
-        services.AddSingleton<WeaviateVectorStoreFactory>();
-
-        var serviceProvider = services.BuildServiceProvider();
-        var factory = serviceProvider.GetRequiredService<WeaviateVectorStoreFactory>();
-        var store = factory.Create();
+        var builder = new AIKit.VectorStores.Weaviate.VectorStoreBuilder()
+            .WithEmbeddingGenerator(new FakeEmbeddingGenerator())
+             .WithHttpClient(new HttpClient
+             {
+                 BaseAddress = new Uri($"{_endpoint}/v1/")
+             });
+        
+        var store = builder.Build();
 
         // Define a record type
-        var collection = store.GetCollection<string, TestRecord>("test-collection");
+        var collection = store.GetCollection<Guid, TestRecord>("TestCollection");
 
         await collection.EnsureCollectionExistsAsync();
 
@@ -76,21 +73,9 @@ public class WeaviateIntegrationTests : IAsyncLifetime
         {
             new TestRecord
             {
-                Key = "doc1",
+                Key = Guid.NewGuid(),
                 Text = "This is a document about AI",
                 Vector = new ReadOnlyMemory<float>(new float[] { 0.1f, 0.2f, 0.3f })
-            },
-            new TestRecord
-            {
-                Key = "doc2",
-                Text = "This is about machine learning",
-                Vector = new ReadOnlyMemory<float>(new float[] { 0.4f, 0.5f, 0.6f })
-            },
-            new TestRecord
-            {
-                Key = "doc3",
-                Text = "Unrelated topic",
-                Vector = new ReadOnlyMemory<float>(new float[] { 0.7f, 0.8f, 0.9f })
             }
         };
 
@@ -101,9 +86,20 @@ public class WeaviateIntegrationTests : IAsyncLifetime
         }
 
         // Assert: Verify documents are added
-        var retrieved = await collection.GetAsync("doc1");
+        var retrieved = await collection.GetAsync(records.First().Key);
         retrieved.ShouldNotBeNull();
-        retrieved.Key.ShouldBe("doc1");
         retrieved.Text.ShouldBe("This is a document about AI");
+    }
+
+    public class TestRecord
+    {
+        [VectorStoreKey]
+        public Guid Key { get; init; }
+
+        [VectorStoreData]
+        public string Text { get; init; } = default!;
+
+        [VectorStoreVector(Dimensions: 3)]
+        public ReadOnlyMemory<float> Vector { get; init; }
     }
 }

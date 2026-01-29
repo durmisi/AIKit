@@ -1,10 +1,5 @@
-using AIKit.VectorStores.PgVector;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.VectorData;
 using Shouldly;
 
 namespace AIKit.VectorStores.Tests;
@@ -62,17 +57,10 @@ public class PgVectorIntegrationTests : IAsyncLifetime
         Skip.IfNot(_dockerAvailable, "Docker not available for PostgreSQL with pgvector");
 
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(Options.Create(new PostgresVectorStoreOptionsConfig
-        {
-            ConnectionString = _connectionString
-        }));
-        services.AddSingleton<IEmbeddingGenerator>(new FakeEmbeddingGenerator());
-        services.AddSingleton<PostgresVectorStoreFactory>();
-
-        var serviceProvider = services.BuildServiceProvider();
-        var factory = serviceProvider.GetRequiredService<PostgresVectorStoreFactory>();
-        var store = factory.Create();
+        var builder = new AIKit.VectorStores.PgVector.VectorStoreBuilder()
+            .WithEmbeddingGenerator(new FakeEmbeddingGenerator())
+            .WithConnectionString(_connectionString);
+        var store = builder.Build();
 
         // Define a record type
         var collection = store.GetCollection<string, TestRecord>("test-collection");
@@ -114,20 +102,4 @@ public class PgVectorIntegrationTests : IAsyncLifetime
         retrieved.Key.ShouldBe("doc1");
         retrieved.Text.ShouldBe("This is a document about AI");
     }
-}
-
-public class FakeEmbeddingGenerator : IEmbeddingGenerator
-{
-    public EmbeddingGeneratorMetadata Metadata => new("fake");
-
-    public Task<GeneratedEmbeddings<Embedding<float>>> GenerateAsync(IEnumerable<string> values, EmbeddingGenerationOptions? options = null, CancellationToken cancellationToken = default)
-    {
-        var embeddings = values.Select(v => new Embedding<float>(new float[] { 0.1f, 0.2f, 0.3f })).ToList();
-        return Task.FromResult(new GeneratedEmbeddings<Embedding<float>>(embeddings));
-    }
-
-    public object? GetService(Type serviceType, object? serviceKey = null) => null;
-
-    public void Dispose()
-    { }
 }

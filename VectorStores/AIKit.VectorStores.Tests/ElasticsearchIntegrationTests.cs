@@ -1,10 +1,5 @@
-using AIKit.VectorStores.Elasticsearch;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.VectorData;
 using Shouldly;
 
 namespace AIKit.VectorStores.Tests;
@@ -56,17 +51,10 @@ public class ElasticsearchIntegrationTests : IAsyncLifetime
         Skip.IfNot(_dockerAvailable, "Docker not available for Elasticsearch");
 
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(Options.Create(new ElasticsearchVectorStoreOptionsConfig
-        {
-            Endpoint = _endpoint
-        }));
-        services.AddSingleton<IEmbeddingGenerator>(new FakeEmbeddingGenerator());
-        services.AddSingleton<ElasticsearchVectorStoreFactory>();
-
-        var serviceProvider = services.BuildServiceProvider();
-        var factory = serviceProvider.GetRequiredService<ElasticsearchVectorStoreFactory>();
-        var store = factory.Create();
+        var builder = new AIKit.VectorStores.Elasticsearch.VectorStoreBuilder()
+            .WithEndpoint(_endpoint)
+            .WithEmbeddingGenerator(new FakeEmbeddingGenerator());
+        var store = builder.Build();
 
         // Define a record type
         var collection = store.GetCollection<string, TestRecord>("test-collection");
