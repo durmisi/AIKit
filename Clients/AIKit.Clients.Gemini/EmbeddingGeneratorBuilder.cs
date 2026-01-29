@@ -46,12 +46,6 @@ public sealed class EmbeddingGeneratorBuilder
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var options = new GeminiClientOptions
-        {
-            ApiKey = _apiKey,
-            ModelId = _modelId
-        };
-
-        return new GeminiEmbeddingGenerator(options);
+        return ClientCreator.CreateGeminiEmbeddingGenerator(_apiKey, _modelId);
     }
 }

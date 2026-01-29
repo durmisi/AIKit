@@ -103,19 +103,7 @@ public sealed class EmbeddingGeneratorBuilder
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var regionEndpoint = RegionEndpoint.GetBySystemName(_awsRegion);
-
-        AWSCredentials credentials;
-        if (_awsCredentials != null)
-        {
-            credentials = _awsCredentials;
-        }
-        else
-        {
-            credentials = new BasicAWSCredentials(_awsAccessKey, _awsSecretKey);
-        }
-
-        var runtime = new AmazonBedrockRuntimeClient(credentials, regionEndpoint);
+        var runtime = ClientCreator.CreateBedrockRuntimeClient(_awsRegion, _awsAccessKey, _awsSecretKey, _awsCredentials);
 
         return runtime.AsIEmbeddingGenerator(_modelId);
     }

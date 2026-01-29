@@ -105,27 +105,7 @@ public sealed class EmbeddingGeneratorBuilder
         if (_tokenCredential == null && !_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
             throw new InvalidOperationException("Either ApiKey, DefaultAzureCredential, or TokenCredential is required. Call WithApiKey(), WithDefaultAzureCredential(), or WithTokenCredential().");
 
-        EmbeddingsClient client;
-
-        if (_tokenCredential != null)
-        {
-            client = new EmbeddingsClient(
-                new Uri(_endpoint!),
-                _tokenCredential);
-        }
-        else if (_useDefaultAzureCredential)
-        {
-            client = new EmbeddingsClient(
-                new Uri(_endpoint!),
-                new DefaultAzureCredential());
-        }
-        else
-        {
-            client = new EmbeddingsClient(
-                new Uri(_endpoint!),
-                new AzureKeyCredential(_apiKey!));
-        }
-
+        var client = ClientCreator.CreateEmbeddingsClient(_endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential);
         var generator = client.AsIEmbeddingGenerator(_modelId!);
 
         if (_retryPolicy != null)

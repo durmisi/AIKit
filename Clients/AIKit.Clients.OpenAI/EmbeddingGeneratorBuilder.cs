@@ -71,14 +71,7 @@ public sealed class EmbeddingGeneratorBuilder
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
-        var options = new OpenAIClientOptions();
-        if (!string.IsNullOrWhiteSpace(_organization))
-        {
-            options.OrganizationId = _organization;
-        }
-
-        var credential = new ApiKeyCredential(_apiKey!);
-        var client = new OpenAIClient(credential, options);
+        var client = ClientCreator.CreateClient(_apiKey!, _organization);
         var generator = client.GetEmbeddingClient(_modelId!).AsIEmbeddingGenerator();
 
         if (_retryPolicy != null)

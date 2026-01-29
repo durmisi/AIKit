@@ -177,25 +177,8 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        var regionEndpoint = RegionEndpoint.GetBySystemName(_awsRegion!);
-
-        AWSCredentials credentials;
-        if (_awsCredentials != null)
-        {
-            credentials = _awsCredentials;
-        }
-        else
-        {
-            credentials = new BasicAWSCredentials(_awsAccessKey!, _awsSecretKey!);
-        }
-
-        var config = new AmazonBedrockRuntimeConfig();
-        config.RegionEndpoint = regionEndpoint;
-        if (_maxRetries.HasValue) config.MaxErrorRetry = _maxRetries.Value;
-        config.Timeout = TimeSpan.FromSeconds(_timeoutSeconds);
-        if (!string.IsNullOrEmpty(_serviceUrl)) config.ServiceURL = _serviceUrl;
-
-        IAmazonBedrockRuntime runtime = new AmazonBedrockRuntimeClient(credentials, config);
+        var runtime = ClientCreator.CreateBedrockRuntimeClient(
+            _awsRegion!, _awsAccessKey, _awsSecretKey, _awsCredentials, _timeoutSeconds, _maxRetries, _serviceUrl);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;

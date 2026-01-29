@@ -173,25 +173,13 @@ public class ChatClientBuilder
             _logger?.LogWarning("HttpClient provided, proxy setting ignored.");
         }
 
-        if (!string.IsNullOrEmpty(_userAgent))
-        {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
-        }
+        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders);
 
-        if (_customHeaders != null)
-        {
-            foreach (var kvp in _customHeaders)
-            {
-                _httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
-            }
-        }
-
-        var endpoint = new Uri(_endpoint!);
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;
-        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, endpoint);
+        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, _endpoint);
 
-        return new OllamaChatClient(endpoint, targetModel, _httpClient);
+        return client;
     }
 }
 

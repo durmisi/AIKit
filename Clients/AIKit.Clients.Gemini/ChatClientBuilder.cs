@@ -158,44 +158,14 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        if (_httpClient == null)
-        {
-            var handler = new HttpClientHandler();
-            if (_proxy != null)
-            {
-                handler.Proxy = _proxy;
-            }
-            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(_timeoutSeconds) };
-        }
-        else if (_proxy != null)
-        {
-            _logger?.LogWarning("HttpClient provided, proxy setting ignored.");
-        }
-
-        if (!string.IsNullOrEmpty(_userAgent))
-        {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
-        }
-
-        if (_customHeaders != null)
-        {
-            foreach (var kvp in _customHeaders)
-            {
-                _httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
-            }
-        }
-
-        var options = new GeminiClientOptions
-        {
-            ApiKey = _apiKey!,
-            ModelId = _modelId!
-        };
+        var client = ClientCreator.CreateGeminiChatClient(
+            _apiKey!, _modelId!, _httpClient, _proxy, _timeoutSeconds, _userAgent, _customHeaders);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
 
-        return new GeminiChatClient(options);
+        return client;
     }
 }
 

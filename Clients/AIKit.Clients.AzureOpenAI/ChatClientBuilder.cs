@@ -207,53 +207,8 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        if (_httpClient == null)
-        {
-            var handler = new HttpClientHandler();
-            if (_proxy != null)
-            {
-                handler.Proxy = _proxy;
-            }
-            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(_timeoutSeconds) };
-        }
-        else if (_proxy != null)
-        {
-            _logger?.LogWarning("HttpClient provided, proxy setting ignored.");
-        }
-
-        if (!string.IsNullOrEmpty(_userAgent))
-        {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_userAgent);
-        }
-
-        if (_customHeaders != null)
-        {
-            foreach (var kvp in _customHeaders)
-            {
-                _httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
-            }
-        }
-
-        ChatCompletionsClient? client = null;
-
-        if (_tokenCredential != null)
-        {
-            client = new ChatCompletionsClient(
-                new Uri(_endpoint!),
-                _tokenCredential);
-        }
-        else if (_useDefaultAzureCredential)
-        {
-            client = new ChatCompletionsClient(
-                new Uri(_endpoint!),
-                new DefaultAzureCredential());
-        }
-        else
-        {
-            client = new ChatCompletionsClient(
-                new Uri(_endpoint!),
-                new AzureKeyCredential(_apiKey!));
-        }
+        var client = ClientCreator.CreateChatCompletionsClient(
+            _endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _proxy, _timeoutSeconds, _userAgent, _customHeaders);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;

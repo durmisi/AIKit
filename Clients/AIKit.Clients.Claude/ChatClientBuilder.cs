@@ -132,16 +132,7 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        var options = new Anthropic.Core.ClientOptions()
-        {
-            ApiKey = _apiKey,
-            Timeout = TimeSpan.FromSeconds(_timeoutSeconds),
-        };
-
-        if (!string.IsNullOrEmpty(_baseUrl)) options.BaseUrl = _baseUrl;
-        if (_maxRetries.HasValue) options.MaxRetries = _maxRetries.Value;
-
-        AnthropicClient client = new(options);
+        var client = ClientCreator.CreateAnthropicClient(_apiKey!, _baseUrl, _timeoutSeconds, _maxRetries);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;

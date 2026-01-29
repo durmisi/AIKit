@@ -159,35 +159,8 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        var options = new OpenAIClientOptions
-        {
-            Endpoint = new Uri(Constants.GitHubModelsEndpoint)
-        };
-
-        if (!string.IsNullOrEmpty(_organizationId)) options.OrganizationId = _organizationId;
-        if (!string.IsNullOrEmpty(_projectId)) options.ProjectId = _projectId;
-
-        if (_httpClient != null)
-        {
-            options.Transport = new HttpClientPipelineTransport(_httpClient);
-        }
-        else
-        {
-            if (_proxy != null)
-            {
-                var handler = new HttpClientHandler { Proxy = _proxy };
-                _httpClient = new HttpClient(handler);
-            }
-            else
-            {
-                _httpClient = new HttpClient();
-            }
-            _httpClient.Timeout = TimeSpan.FromSeconds(_timeoutSeconds);
-            options.Transport = new HttpClientPipelineTransport(_httpClient);
-        }
-
-        var credential = new ApiKeyCredential(_gitHubToken!);
-        var client = new OpenAIClient(credential, options);
+        var client = ClientCreator.CreateOpenAIClient(
+            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient, _proxy, _timeoutSeconds);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;
