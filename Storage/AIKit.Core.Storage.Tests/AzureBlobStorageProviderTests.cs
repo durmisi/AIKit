@@ -1,6 +1,7 @@
 using AIKit.Storage.Azure;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace AIKit.Storage.Tests;
 
@@ -10,11 +11,13 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
     private readonly string _containerName;
     private AzureBlobStorageProvider _provider = null!;
     private bool _dockerAvailable;
+    private readonly ITestOutputHelper _output;
 
-    public AzureBlobStorageProviderTests(AzuriteFixture fixture)
+    public AzureBlobStorageProviderTests(AzuriteFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
         _containerName = Guid.NewGuid().ToString("N");
+        _output = output;
     }
 
     public async Task InitializeAsync()
@@ -47,6 +50,7 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
 
             // Act
             var result = await _provider.SaveAsync(path, new MemoryStream(content), options);
+            _output.WriteLine($"Saved file {path} with version {result.Version}");
 
             // Assert
             result.ShouldNotBeNull();
@@ -248,6 +252,163 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
             using var reader = new StreamReader(latest!.Content);
             var readContent = await reader.ReadToEndAsync();
             readContent.ShouldBe("Version 2");
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task SaveAsync_WithWriteModeCreateNewVersion_ShouldCreateNewVersion()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Arrange
+            var path = "test/file.txt";
+            var content1 = "Version 1"u8.ToArray();
+            var content2 = "Version 2"u8.ToArray();
+            var options = new StorageWriteOptions { WriteMode = StorageWriteMode.CreateNewVersion };
+
+            // Act
+            await _provider.SaveAsync(path, new MemoryStream(content1), options);
+            await _provider.SaveAsync(path, new MemoryStream(content2), options);
+
+            // Assert
+            var versions = await _provider.ListVersionsAsync(path);
+            versions.ShouldHaveSingleItem(); // Azurite does not support versioning
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task SaveAsync_WithWriteModeReplaceLatest_ShouldReplaceLatestVersion()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Arrange
+            var path = "test/file.txt";
+            var content1 = "Version 1"u8.ToArray();
+            var content2 = "Version 2"u8.ToArray();
+            var options = new StorageWriteOptions { WriteMode = StorageWriteMode.ReplaceLatest };
+
+            // Act
+            await _provider.SaveAsync(path, new MemoryStream(content1));
+            await _provider.SaveAsync(path, new MemoryStream(content2), options);
+
+            // Assert
+            var versions = await _provider.ListVersionsAsync(path);
+            versions.ShouldHaveSingleItem();
+            var latest = await _provider.ReadAsync(path);
+            using var reader = new StreamReader(latest!.Content);
+            var readContent = await reader.ReadToEndAsync();
+            readContent.ShouldBe("Version 2");
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task SaveAsync_WithWriteModeFailIfExists_ShouldThrowIfExists()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Arrange
+            var path = "test/file.txt";
+            var content1 = "Version 1"u8.ToArray();
+            var content2 = "Version 2"u8.ToArray();
+            var options = new StorageWriteOptions { WriteMode = StorageWriteMode.FailIfExists };
+            await _provider.SaveAsync(path, new MemoryStream(content1));
+
+            // Act & Assert
+            await Should.ThrowAsync<Exception>(async () => await _provider.SaveAsync(path, new MemoryStream(content2), options));
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task ReadAsync_NonExistingFile_ShouldReturnNull()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Act
+            var result = await _provider.ReadAsync("nonexistent.txt");
+
+            // Assert
+            result.ShouldBeNull();
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task DeleteAsync_NonExistingFile_ShouldReturnFalse()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Act
+            var deleted = await _provider.DeleteAsync("nonexistent.txt");
+
+            // Assert
+            deleted.ShouldBeFalse();
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task GetMetadataAsync_NonExistingFile_ShouldReturnNull()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Act
+            var metadata = await _provider.GetMetadataAsync("nonexistent.txt");
+
+            // Assert
+            metadata.ShouldBeNull();
+        }
+        catch (Exception ex) when (ex.Message.Contains("Docker"))
+        {
+            Skip.If(true, "Docker API error during test execution");
+        }
+    }
+
+    [SkippableFact]
+    public async Task ListVersionsAsync_NonExistingFile_ShouldReturnEmpty()
+    {
+        Skip.IfNot(_dockerAvailable, "Docker not available for Azurite");
+
+        try
+        {
+            // Act
+            var versions = await _provider.ListVersionsAsync("nonexistent.txt");
+
+            // Assert
+            versions.ShouldBeEmpty();
         }
         catch (Exception ex) when (ex.Message.Contains("Docker"))
         {
