@@ -1,5 +1,4 @@
 using AIKit.Clients.Resilience;
-using AIKit.Clients.Settings;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;

@@ -1,4 +1,4 @@
-namespace AIKit.Clients.Settings;
+namespace AIKit.Clients.Resilience;
 
 /// <summary>
 /// Settings for retry policy.

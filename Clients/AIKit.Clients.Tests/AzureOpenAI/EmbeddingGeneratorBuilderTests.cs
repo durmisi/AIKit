@@ -1,4 +1,5 @@
 using AIKit.Clients.AzureOpenAI;
+using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;
@@ -80,7 +81,7 @@ public class EmbeddingGeneratorBuilderTests
             .WithEndpoint("https://example.azure.com")
             .WithModelId("azure-embed")
             .WithApiKey("test-key")
-            .WithRetryPolicy(new Settings.RetryPolicySettings()
+            .WithRetryPolicy(new RetryPolicySettings()
             {
                 MaxRetries = 3,
                 MaxDelaySeconds = 30,

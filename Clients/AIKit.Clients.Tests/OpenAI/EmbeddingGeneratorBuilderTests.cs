@@ -1,4 +1,5 @@
 using AIKit.Clients.OpenAI;
+using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
 using Shouldly;
 using Xunit;
@@ -60,7 +61,7 @@ public class EmbeddingGeneratorBuilderTests
         var builder = new EmbeddingGeneratorBuilder()
             .WithApiKey("test-key")
             .WithModelId("openai-embed")
-            .WithRetryPolicy(new Settings.RetryPolicySettings()
+            .WithRetryPolicy(new RetryPolicySettings()
             {
                 MaxRetries = 3,
                 MaxDelaySeconds = 30

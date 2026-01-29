@@ -1,5 +1,4 @@
 using AIKit.Clients.Resilience;
-using AIKit.Clients.Settings;
 using Azure.Core;
 using Azure.Identity;
 using elbruno.Extensions.AI.Claude;

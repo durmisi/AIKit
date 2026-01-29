@@ -1,5 +1,4 @@
 ﻿using AIKit.Clients.Resilience;
-using AIKit.Clients.Settings;
 using Azure;
 using Azure.AI.Inference;
 using Azure.Core;

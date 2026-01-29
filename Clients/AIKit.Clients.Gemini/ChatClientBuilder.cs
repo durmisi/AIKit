@@ -1,5 +1,4 @@
 using AIKit.Clients.Resilience;
-using AIKit.Clients.Settings;
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
