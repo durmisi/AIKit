@@ -52,7 +52,7 @@ public class EmbeddingGeneratorBuilderTests
 
         // Assert
         act.ShouldThrow<InvalidOperationException>()
-            .Message.ShouldContain("ApiKey is required");
+            .Message.ShouldContain("Either ApiKey, DefaultAzureCredential, or TokenCredential is required");
     }
 
     [Fact]

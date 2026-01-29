@@ -1,5 +1,6 @@
 using AIKit.Clients.Resilience;
 using AIKit.Clients.Settings;
+using Azure.Core;
 using Azure.Identity;
 using elbruno.Extensions.AI.Claude;
 using Microsoft.Extensions.AI;
@@ -19,6 +20,7 @@ public class ChatClientBuilder
     private string? _modelId;
     private string? _apiKey;
     private bool _useDefaultAzureCredential;
+    private TokenCredential? _tokenCredential;
     private RetryPolicySettings? _retryPolicy;
     private HttpClient? _httpClient;
     private int _timeoutSeconds = 30;
@@ -58,6 +60,7 @@ public class ChatClientBuilder
     {
         _apiKey = apiKey;
         _useDefaultAzureCredential = false;
+        _tokenCredential = null;
         return this;
     }
 
@@ -68,6 +71,20 @@ public class ChatClientBuilder
     public ChatClientBuilder WithDefaultAzureCredential()
     {
         _useDefaultAzureCredential = true;
+        _apiKey = null;
+        _tokenCredential = null;
+        return this;
+    }
+
+    /// <summary>
+    /// Configures to use a custom Azure token credential for authentication.
+    /// </summary>
+    /// <param name="credential">The token credential.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithTokenCredential(TokenCredential credential)
+    {
+        _tokenCredential = credential;
+        _useDefaultAzureCredential = false;
         _apiKey = null;
         return this;
     }
@@ -186,8 +203,8 @@ public class ChatClientBuilder
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
 
-        if (!_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
-            throw new ArgumentException("ApiKey is required when not using default Azure credential.", nameof(_apiKey));
+        if (_tokenCredential == null && !_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
+            throw new ArgumentException("Either ApiKey, DefaultAzureCredential, or TokenCredential is required.", nameof(_apiKey));
     }
 
     private IChatClient CreateClient()
@@ -229,7 +246,11 @@ public class ChatClientBuilder
 
         _logger?.LogInformation("Creating Azure Claude chat client for model {Model} at {Endpoint}", targetModelId, endpoint);
 
-        if (_useDefaultAzureCredential)
+        if (_tokenCredential != null)
+        {
+            return new AzureClaudeClient(endpoint, targetModelId, _tokenCredential, _httpClient);
+        }
+        else if (_useDefaultAzureCredential)
         {
             var credential = new DefaultAzureCredential();
             return new AzureClaudeClient(endpoint, targetModelId, credential, _httpClient);

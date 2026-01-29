@@ -34,7 +34,7 @@ public class ChatClientBuilderTests
         Action act = () => builder.Build();
 
         // Assert
-        act.ShouldThrow<ArgumentException>().Message.ShouldContain("ApiKey is required");
+        act.ShouldThrow<ArgumentException>().Message.ShouldContain("Either ApiKey, DefaultAzureCredential, or TokenCredential is required");
     }
 
     [Fact]
