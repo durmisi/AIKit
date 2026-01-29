@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using System.Net;
 
 namespace AIKit.Clients.Ollama;
 
@@ -11,28 +12,35 @@ internal static class ClientCreator
     /// Creates an OllamaChatClient from the provided settings.
     /// </summary>
     /// <param name="endpoint">The Ollama endpoint.</param>
-    /// <param name="modelId">The model ID.</param>
-    /// <param name="httpClient">The HttpClient to use.</param>
+    /// <param name="modelId">Optional model ID.</param>
+    /// <param name="httpClient">Optional pre-configured HttpClient.</param>
     /// <param name="userAgent">Optional user agent.</param>
     /// <param name="customHeaders">Optional custom headers.</param>
+    /// <param name="proxy">Optional web proxy.</param>
+    /// <param name="timeoutSeconds">Timeout in seconds.</param>
     /// <returns>The configured OllamaChatClient.</returns>
     internal static OllamaChatClient CreateOllamaChatClient(
         string endpoint,
-        string modelId,
-        HttpClient httpClient,
+        string? modelId = null,
+        HttpClient? httpClient = null,
         string? userAgent = null,
-        Dictionary<string, string>? customHeaders = null)
+        Dictionary<string, string>? customHeaders = null,
+        IWebProxy? proxy = null,
+        int timeoutSeconds = 30)
     {
-        if (!string.IsNullOrEmpty(userAgent))
+        if (httpClient != null)
         {
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
-        }
-
-        if (customHeaders != null)
-        {
-            foreach (var kvp in customHeaders)
+            if (!string.IsNullOrEmpty(userAgent))
             {
-                httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
+            }
+
+            if (customHeaders != null)
+            {
+                foreach (var kvp in customHeaders)
+                {
+                    httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+                }
             }
         }
 

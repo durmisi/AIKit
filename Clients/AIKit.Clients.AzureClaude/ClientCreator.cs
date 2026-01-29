@@ -36,30 +36,19 @@ internal static class ClientCreator
         IWebProxy? proxy = null,
         int timeoutSeconds = 30)
     {
-        if (httpClient == null)
+        if (httpClient != null)
         {
-            var handler = new HttpClientHandler();
-            if (proxy != null)
+            if (!string.IsNullOrEmpty(userAgent))
             {
-                handler.Proxy = proxy;
+                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
             }
-            httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
-        }
-        else if (proxy != null)
-        {
-            // HttpClient provided, proxy ignored
-        }
 
-        if (!string.IsNullOrEmpty(userAgent))
-        {
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
-        }
-
-        if (customHeaders != null)
-        {
-            foreach (var kvp in customHeaders)
+            if (customHeaders != null)
             {
-                httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+                foreach (var kvp in customHeaders)
+                {
+                    httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+                }
             }
         }
 

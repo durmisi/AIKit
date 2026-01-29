@@ -159,21 +159,7 @@ public class ChatClientBuilder
 
     private IChatClient CreateClient()
     {
-        if (_httpClient == null)
-        {
-            var handler = new HttpClientHandler();
-            if (_proxy != null)
-            {
-                handler.Proxy = _proxy;
-            }
-            _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(_timeoutSeconds) };
-        }
-        else if (_proxy != null)
-        {
-            _logger?.LogWarning("HttpClient provided, proxy setting ignored.");
-        }
-
-        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders);
+        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders, _proxy, _timeoutSeconds);
 
         if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
         var targetModel = _modelId!;

@@ -51,20 +51,6 @@ internal static class ClientCreator
         {
             options.Transport = new HttpClientPipelineTransport(httpClient);
         }
-        else
-        {
-            if (proxy != null)
-            {
-                var handler = new HttpClientHandler { Proxy = proxy };
-                httpClient = new HttpClient(handler);
-            }
-            else
-            {
-                httpClient = new HttpClient();
-            }
-            httpClient.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
-            options.Transport = new HttpClientPipelineTransport(httpClient);
-        }
 
         var credential = new ApiKeyCredential(gitHubToken);
         return new OpenAIClient(credential, options);

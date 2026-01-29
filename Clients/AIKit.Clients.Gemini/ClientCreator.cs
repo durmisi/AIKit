@@ -30,30 +30,7 @@ internal static class ClientCreator
         string? userAgent = null,
         Dictionary<string, string>? customHeaders = null)
     {
-        if (httpClient == null)
-        {
-            var handler = new HttpClientHandler();
-            if (proxy != null)
-            {
-                handler.Proxy = proxy;
-            }
-            httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
-        }
-        // Note: GeminiClientOptions doesn't directly support HttpClient, but assuming extension or internal setup
-
-        if (!string.IsNullOrEmpty(userAgent))
-        {
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
-        }
-
-        if (customHeaders != null)
-        {
-            foreach (var kvp in customHeaders)
-            {
-                httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
-            }
-        }
-
+        // Note: GeminiClientOptions doesn't support HttpClient, proxy, timeout, etc.
         var options = new GeminiClientOptions
         {
             ApiKey = apiKey,
