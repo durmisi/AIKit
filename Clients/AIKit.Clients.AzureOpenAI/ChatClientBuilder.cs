@@ -1,11 +1,7 @@
 using AIKit.Clients.Resilience;
-using Azure;
-using Azure.AI.Inference;
 using Azure.Core;
-using Azure.Identity;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace AIKit.Clients.AzureOpenAI;
 
@@ -21,10 +17,8 @@ public class ChatClientBuilder
     private TokenCredential? _tokenCredential;
     private RetryPolicySettings? _retryPolicy;
     private HttpClient? _httpClient;
-    private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
     private string? _userAgent;
-    private IWebProxy? _proxy;
     private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
@@ -110,17 +104,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the logger.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
@@ -139,17 +122,6 @@ public class ChatClientBuilder
     public ChatClientBuilder WithUserAgent(string userAgent)
     {
         _userAgent = userAgent;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
         return this;
     }
 
@@ -177,15 +149,21 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var client = ClientCreator.CreateChatCompletionsClient(
+            _endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
+
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating Azure OpenAI chat client for model {Model}", targetModel);
+
+        var chatClient = client.AsIChatClient(targetModel);
 
         if (_retryPolicy != null)
         {
             _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
-            return new RetryChatClient(client, _retryPolicy);
+            return new RetryChatClient(chatClient, _retryPolicy);
         }
 
-        return client;
+        return chatClient;
     }
 
     private string GetDefaultProviderName() => "azure-open-ai";
@@ -203,18 +181,6 @@ public class ChatClientBuilder
 
         if (_tokenCredential == null && !_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
             throw new ArgumentException("Either ApiKey, DefaultAzureCredential, or TokenCredential is required.", nameof(_apiKey));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateChatCompletionsClient(
-            _endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _proxy, _timeoutSeconds, _userAgent, _customHeaders);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating Azure OpenAI chat client for model {Model}", targetModel);
-
-        return client.AsIChatClient(targetModel);
     }
 }
 

@@ -4,7 +4,6 @@ using Azure.AI.Inference;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
-using System.Net;
 
 namespace AIKit.Clients.AzureOpenAI;
 
@@ -20,9 +19,7 @@ public sealed class EmbeddingGeneratorBuilder
     private TokenCredential? _tokenCredential;
     private RetryPolicySettings? _retryPolicy;
     private HttpClient? _httpClient;
-    private int _timeoutSeconds = 30;
     private string? _userAgent;
-    private IWebProxy? _proxy;
     private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
@@ -108,17 +105,6 @@ public sealed class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the user agent.
     /// </summary>
     /// <param name="userAgent">The user agent string.</param>
@@ -126,17 +112,6 @@ public sealed class EmbeddingGeneratorBuilder
     public EmbeddingGeneratorBuilder WithUserAgent(string userAgent)
     {
         _userAgent = userAgent ?? throw new ArgumentNullException(nameof(userAgent));
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy ?? throw new ArgumentNullException(nameof(proxy));
         return this;
     }
 
@@ -166,7 +141,7 @@ public sealed class EmbeddingGeneratorBuilder
         if (_tokenCredential == null && !_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
             throw new InvalidOperationException("Either ApiKey, DefaultAzureCredential, or TokenCredential is required. Call WithApiKey(), WithDefaultAzureCredential(), or WithTokenCredential().");
 
-        var client = ClientCreator.CreateEmbeddingsClient(_endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _proxy, _timeoutSeconds, _userAgent, _customHeaders);
+        var client = ClientCreator.CreateEmbeddingsClient(_endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
         var generator = client.AsIEmbeddingGenerator(_modelId!);
 
         if (_retryPolicy != null)

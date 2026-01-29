@@ -20,8 +20,6 @@ internal static class ClientCreator
     /// <param name="useDefaultAzureCredential">Whether to use default Azure credential.</param>
     /// <param name="tokenCredential">Custom token credential.</param>
     /// <param name="httpClient">Optional pre-configured HttpClient.</param>
-    /// <param name="proxy">Optional web proxy.</param>
-    /// <param name="timeoutSeconds">Timeout in seconds.</param>
     /// <param name="userAgent">Optional user agent.</param>
     /// <param name="customHeaders">Optional custom headers.</param>
     /// <returns>The configured ChatCompletionsClient.</returns>
@@ -31,8 +29,6 @@ internal static class ClientCreator
         bool useDefaultAzureCredential = false,
         TokenCredential? tokenCredential = null,
         HttpClient? httpClient = null,
-        IWebProxy? proxy = null,
-        int timeoutSeconds = 30,
         string? userAgent = null,
         Dictionary<string, string>? customHeaders = null)
     {
@@ -91,8 +87,6 @@ internal static class ClientCreator
     /// <param name="useDefaultAzureCredential">Whether to use default Azure credential.</param>
     /// <param name="tokenCredential">Custom token credential.</param>
     /// <param name="httpClient">Optional pre-configured HttpClient.</param>
-    /// <param name="proxy">Optional web proxy.</param>
-    /// <param name="timeoutSeconds">Timeout in seconds.</param>
     /// <param name="userAgent">Optional user agent.</param>
     /// <param name="customHeaders">Optional custom headers.</param>
     /// <returns>The configured EmbeddingsClient.</returns>
@@ -102,8 +96,6 @@ internal static class ClientCreator
         bool useDefaultAzureCredential = false,
         TokenCredential? tokenCredential = null,
         HttpClient? httpClient = null,
-        IWebProxy? proxy = null,
-        int timeoutSeconds = 30,
         string? userAgent = null,
         Dictionary<string, string>? customHeaders = null)
     {
