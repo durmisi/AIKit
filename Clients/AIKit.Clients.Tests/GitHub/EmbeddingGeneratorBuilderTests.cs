@@ -11,15 +11,15 @@ public class EmbeddingGeneratorBuilderTests
     public void Provider_ReturnsCorrectName()
     {
         // Arrange
-        var generator = new EmbeddingGeneratorBuilder()
+        var builder = new EmbeddingGeneratorBuilder()
             .WithGitHubToken("test")
             .WithModelId("text-embedding-3-small");
 
         // Act
-        var result = generator.Build();
+        var result = builder.Provider;
 
         // Assert
-        result.ShouldNotBeNull();
+        result.ShouldBe("github-models");
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class EmbeddingGeneratorBuilderTests
         .Build();
 
         // Assert
-        act.ShouldThrow<InvalidOperationException>()
+        act.ShouldThrow<ArgumentException>()
             .Message.ShouldContain("GitHubToken is required");
     }
 
