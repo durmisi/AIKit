@@ -1,6 +1,4 @@
-﻿using GeminiDotnet;
-using GeminiDotnet.Extensions.AI;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Gemini;
 

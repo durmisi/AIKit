@@ -3,7 +3,6 @@ using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace AIKit.Clients.Gemini;
 
@@ -15,12 +14,7 @@ public class ChatClientBuilder
     private string? _apiKey;
     private string? _modelId;
     private RetryPolicySettings? _retryPolicy;
-    private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
-    private HttpClient? _httpClient;
-    private string? _userAgent;
-    private IWebProxy? _proxy;
-    private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
     /// Sets the API key for authentication.
@@ -56,17 +50,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the logger.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
@@ -74,50 +57,6 @@ public class ChatClientBuilder
     public ChatClientBuilder WithLogger(ILogger<ChatClientBuilder> logger)
     {
         _logger = logger;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the HTTP client.
-    /// </summary>
-    /// <param name="httpClient">The HTTP client.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithHttpClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the user agent.
-    /// </summary>
-    /// <param name="userAgent">The user agent string.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithUserAgent(string userAgent)
-    {
-        _userAgent = userAgent;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets custom headers.
-    /// </summary>
-    /// <param name="headers">The custom headers.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithCustomHeaders(Dictionary<string, string> headers)
-    {
-        _customHeaders = headers;
         return this;
     }
 
@@ -134,7 +73,10 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var client = ClientCreator.CreateGeminiChatClient(_apiKey!, _modelId!);
+
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
 
         if (_retryPolicy != null)
         {
@@ -154,18 +96,6 @@ public class ChatClientBuilder
 
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateGeminiChatClient(
-            _apiKey!, _modelId!, _httpClient, _proxy, _timeoutSeconds, _userAgent, _customHeaders);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
-
-        return client;
     }
 }
 

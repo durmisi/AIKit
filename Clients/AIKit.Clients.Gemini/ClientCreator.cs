@@ -1,7 +1,5 @@
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
-using Microsoft.Extensions.AI;
-using System.Net;
 
 namespace AIKit.Clients.Gemini;
 
@@ -15,22 +13,11 @@ internal static class ClientCreator
     /// </summary>
     /// <param name="apiKey">The API key.</param>
     /// <param name="modelId">The model ID.</param>
-    /// <param name="httpClient">Optional pre-configured HttpClient.</param>
-    /// <param name="proxy">Optional web proxy.</param>
-    /// <param name="timeoutSeconds">Timeout in seconds.</param>
-    /// <param name="userAgent">Optional user agent.</param>
-    /// <param name="customHeaders">Optional custom headers.</param>
     /// <returns>The configured GeminiChatClient.</returns>
     internal static GeminiChatClient CreateGeminiChatClient(
         string apiKey,
-        string modelId,
-        HttpClient? httpClient = null,
-        IWebProxy? proxy = null,
-        int timeoutSeconds = 30,
-        string? userAgent = null,
-        Dictionary<string, string>? customHeaders = null)
+        string modelId)
     {
-        // Note: GeminiClientOptions doesn't support HttpClient, proxy, timeout, etc.
         var options = new GeminiClientOptions
         {
             ApiKey = apiKey,
