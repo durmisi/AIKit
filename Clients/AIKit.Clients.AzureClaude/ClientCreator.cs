@@ -1,6 +1,7 @@
 using Azure.Core;
 using Azure.Identity;
 using elbruno.Extensions.AI.Claude;
+using System.Net;
 
 namespace AIKit.Clients.AzureClaude;
 
@@ -17,9 +18,11 @@ internal static class ClientCreator
     /// <param name="apiKey">The API key (optional if using credential).</param>
     /// <param name="useDefaultAzureCredential">Whether to use default Azure credential.</param>
     /// <param name="tokenCredential">Custom token credential.</param>
-    /// <param name="httpClient">The HttpClient to use.</param>
+    /// <param name="httpClient">Optional pre-configured HttpClient.</param>
     /// <param name="userAgent">Optional user agent.</param>
     /// <param name="customHeaders">Optional custom headers.</param>
+    /// <param name="proxy">Optional web proxy.</param>
+    /// <param name="timeoutSeconds">Timeout in seconds.</param>
     /// <returns>The configured AzureClaudeClient.</returns>
     internal static AzureClaudeClient CreateAzureClaudeClient(
         string endpoint,
@@ -27,10 +30,26 @@ internal static class ClientCreator
         string? apiKey = null,
         bool useDefaultAzureCredential = false,
         TokenCredential? tokenCredential = null,
-        HttpClient httpClient = null!,
+        HttpClient? httpClient = null,
         string? userAgent = null,
-        Dictionary<string, string>? customHeaders = null)
+        Dictionary<string, string>? customHeaders = null,
+        IWebProxy? proxy = null,
+        int timeoutSeconds = 30)
     {
+        if (httpClient == null)
+        {
+            var handler = new HttpClientHandler();
+            if (proxy != null)
+            {
+                handler.Proxy = proxy;
+            }
+            httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
+        }
+        else if (proxy != null)
+        {
+            // HttpClient provided, proxy ignored
+        }
+
         if (!string.IsNullOrEmpty(userAgent))
         {
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
