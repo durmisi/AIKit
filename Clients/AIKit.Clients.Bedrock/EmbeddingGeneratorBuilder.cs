@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.BedrockRuntime;
+using Amazon.Runtime;
 using AIKit.Clients.Interfaces;
 using Microsoft.Extensions.AI;
 
@@ -14,6 +15,7 @@ public sealed class EmbeddingGeneratorBuilder
     private string? _awsSecretKey;
     private string? _awsRegion;
     private string? _modelId;
+    private AWSCredentials? _awsCredentials;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingGeneratorBuilder"/>.
@@ -35,6 +37,7 @@ public sealed class EmbeddingGeneratorBuilder
     public EmbeddingGeneratorBuilder WithAwsAccessKey(string? awsAccessKey)
     {
         _awsAccessKey = awsAccessKey ?? throw new ArgumentNullException(nameof(awsAccessKey));
+        _awsCredentials = null;
         return this;
     }
 
@@ -46,6 +49,7 @@ public sealed class EmbeddingGeneratorBuilder
     public EmbeddingGeneratorBuilder WithAwsSecretKey(string? awsSecretKey)
     {
         _awsSecretKey = awsSecretKey ?? throw new ArgumentNullException(nameof(awsSecretKey));
+        _awsCredentials = null;
         return this;
     }
 
@@ -57,6 +61,19 @@ public sealed class EmbeddingGeneratorBuilder
     public EmbeddingGeneratorBuilder WithAwsRegion(string? awsRegion)
     {
         _awsRegion = awsRegion ?? throw new ArgumentNullException(nameof(awsRegion));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the AWS credentials.
+    /// </summary>
+    /// <param name="credentials">The AWS credentials.</param>
+    /// <returns>The builder instance.</returns>
+    public EmbeddingGeneratorBuilder WithAwsCredentials(AWSCredentials credentials)
+    {
+        _awsCredentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+        _awsAccessKey = null;
+        _awsSecretKey = null;
         return this;
     }
 
@@ -77,11 +94,8 @@ public sealed class EmbeddingGeneratorBuilder
     /// <returns>The created embedding generator.</returns>
     public IEmbeddingGenerator<string, Embedding<float>> Build()
     {
-        if (string.IsNullOrWhiteSpace(_awsAccessKey))
-            throw new InvalidOperationException("AwsAccessKey is required. Call WithAwsAccessKey().");
-
-        if (string.IsNullOrWhiteSpace(_awsSecretKey))
-            throw new InvalidOperationException("AwsSecretKey is required. Call WithAwsSecretKey().");
+        if (_awsCredentials == null && (string.IsNullOrWhiteSpace(_awsAccessKey) || string.IsNullOrWhiteSpace(_awsSecretKey)))
+            throw new InvalidOperationException("Either AwsCredentials or both AwsAccessKey and AwsSecretKey are required. Call WithAwsCredentials() or WithAwsAccessKey() and WithAwsSecretKey().");
 
         if (string.IsNullOrWhiteSpace(_awsRegion))
             throw new InvalidOperationException("AwsRegion is required. Call WithAwsRegion().");
@@ -90,7 +104,18 @@ public sealed class EmbeddingGeneratorBuilder
             throw new InvalidOperationException("ModelId is required. Call WithModelId().");
 
         var regionEndpoint = RegionEndpoint.GetBySystemName(_awsRegion);
-        var runtime = new AmazonBedrockRuntimeClient(_awsAccessKey, _awsSecretKey, regionEndpoint);
+
+        AWSCredentials credentials;
+        if (_awsCredentials != null)
+        {
+            credentials = _awsCredentials;
+        }
+        else
+        {
+            credentials = new BasicAWSCredentials(_awsAccessKey, _awsSecretKey);
+        }
+
+        var runtime = new AmazonBedrockRuntimeClient(credentials, regionEndpoint);
 
         return runtime.AsIEmbeddingGenerator(_modelId);
     }

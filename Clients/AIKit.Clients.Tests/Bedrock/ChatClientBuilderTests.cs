@@ -38,7 +38,7 @@ public class ChatClientBuilderTests
 
         // Assert
         act.ShouldThrow<ArgumentException>()
-            .Message.ShouldContain("AwsAccessKey is required");
+            .Message.ShouldContain("Either AwsCredentials or both AwsAccessKey and AwsSecretKey are required");
     }
 
     [Fact]

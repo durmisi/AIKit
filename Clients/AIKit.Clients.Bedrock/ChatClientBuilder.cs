@@ -17,6 +17,7 @@ public class ChatClientBuilder
     private string? _awsAccessKey;
     private string? _awsSecretKey;
     private string? _awsRegion;
+    private AWSCredentials? _awsCredentials;
     private RetryPolicySettings? _retryPolicy;
     private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
@@ -42,6 +43,7 @@ public class ChatClientBuilder
     public ChatClientBuilder WithAwsAccessKey(string awsAccessKey)
     {
         _awsAccessKey = awsAccessKey;
+        _awsCredentials = null;
         return this;
     }
 
@@ -53,6 +55,7 @@ public class ChatClientBuilder
     public ChatClientBuilder WithAwsSecretKey(string awsSecretKey)
     {
         _awsSecretKey = awsSecretKey;
+        _awsCredentials = null;
         return this;
     }
 
@@ -64,6 +67,19 @@ public class ChatClientBuilder
     public ChatClientBuilder WithAwsRegion(string awsRegion)
     {
         _awsRegion = awsRegion;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the AWS credentials.
+    /// </summary>
+    /// <param name="credentials">The AWS credentials.</param>
+    /// <returns>The builder instance.</returns>
+    public ChatClientBuilder WithAwsCredentials(AWSCredentials credentials)
+    {
+        _awsCredentials = credentials;
+        _awsAccessKey = null;
+        _awsSecretKey = null;
         return this;
     }
 
@@ -150,24 +166,29 @@ public class ChatClientBuilder
 
     private void Validate()
     {
-        if (string.IsNullOrWhiteSpace(_awsAccessKey))
-            throw new ArgumentException("AwsAccessKey is required.", nameof(_awsAccessKey));
-
-        if (string.IsNullOrWhiteSpace(_awsSecretKey))
-            throw new ArgumentException("AwsSecretKey is required.", nameof(_awsSecretKey));
-
         if (string.IsNullOrWhiteSpace(_awsRegion))
             throw new ArgumentException("AwsRegion is required.", nameof(_awsRegion));
 
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
+
+        if (_awsCredentials == null && (string.IsNullOrWhiteSpace(_awsAccessKey) || string.IsNullOrWhiteSpace(_awsSecretKey)))
+            throw new ArgumentException("Either AwsCredentials or both AwsAccessKey and AwsSecretKey are required.", nameof(_awsAccessKey));
     }
 
     private IChatClient CreateClient()
     {
         var regionEndpoint = RegionEndpoint.GetBySystemName(_awsRegion!);
 
-        var credentials = new BasicAWSCredentials(_awsAccessKey!, _awsSecretKey!);
+        AWSCredentials credentials;
+        if (_awsCredentials != null)
+        {
+            credentials = _awsCredentials;
+        }
+        else
+        {
+            credentials = new BasicAWSCredentials(_awsAccessKey!, _awsSecretKey!);
+        }
 
         var config = new AmazonBedrockRuntimeConfig();
         config.RegionEndpoint = regionEndpoint;
