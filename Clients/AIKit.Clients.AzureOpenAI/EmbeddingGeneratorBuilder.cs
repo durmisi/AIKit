@@ -1,8 +1,5 @@
 ﻿using AIKit.Clients.Resilience;
-using Azure;
-using Azure.AI.Inference;
 using Azure.Core;
-using Azure.Identity;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.AzureOpenAI;

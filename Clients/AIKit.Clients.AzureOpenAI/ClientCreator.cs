@@ -3,7 +3,6 @@ using Azure.AI.Inference;
 using Azure.Core;
 using Azure.Core.Pipeline;
 using Azure.Identity;
-using System.Net;
 
 namespace AIKit.Clients.AzureOpenAI;
 

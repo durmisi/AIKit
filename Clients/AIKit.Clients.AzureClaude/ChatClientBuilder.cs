@@ -2,7 +2,6 @@ using AIKit.Clients.Resilience;
 using Azure.Core;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace AIKit.Clients.AzureClaude;
 
