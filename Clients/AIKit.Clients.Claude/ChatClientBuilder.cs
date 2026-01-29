@@ -1,5 +1,4 @@
 using AIKit.Clients.Resilience;
-using Anthropic;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
@@ -108,15 +107,21 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var client = ClientCreator.CreateAnthropicClient(_apiKey!, _baseUrl, _timeoutSeconds, _maxRetries);
+
+        var targetModel = _modelId!;
+        IChatClient chatClient = client.AsIChatClient(targetModel)
+            .AsBuilder()
+            .UseFunctionInvocation()
+            .Build();
 
         if (_retryPolicy != null)
         {
             _logger?.LogInformation("Applying retry policy with {MaxRetries} max retries", _retryPolicy.MaxRetries);
-            return new RetryChatClient(client, _retryPolicy);
+            return new RetryChatClient(chatClient, _retryPolicy);
         }
 
-        return client;
+        return chatClient;
     }
 
     private string GetDefaultProviderName() => "claude";
@@ -128,20 +133,6 @@ public class ChatClientBuilder
 
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateAnthropicClient(_apiKey!, _baseUrl, _timeoutSeconds, _maxRetries);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        IChatClient chatClient = client.AsIChatClient(targetModel)
-            .AsBuilder()
-            .UseFunctionInvocation()
-            .Build();
-
-        return chatClient;
     }
 }
 
