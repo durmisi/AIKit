@@ -6,15 +6,18 @@ using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using Microsoft.SemanticKernel.PromptTemplates.Liquid;
 using Moq;
 using Shouldly;
+using Xunit.Abstractions;
 
 namespace AIKit.Prompts.Tests;
 
 public class PromptExecutorTests
 {
     private readonly Mock<IChatClient> _mockChatClient;
+    private readonly ITestOutputHelper _output;
 
-    public PromptExecutorTests()
+    public PromptExecutorTests(ITestOutputHelper output)
     {
+        _output = output;
         _mockChatClient = new Mock<IChatClient>();
 
         _mockChatClient
@@ -70,8 +73,8 @@ public class PromptExecutorTests
             },
             ["orders"] = new[]
             {
-                new Dictionary<string, object> { ["id"] = "A1", ["product"] = "Laptop", ["price"] = "1200€" },
-                new Dictionary<string, object> { ["id"] = "B2", ["product"] = "Mouse", ["price"] = "25€" }
+                new Dictionary<string, object> { ["id"] = "A1", ["product"] = "Laptop", ["price"] = "1200ï¿½" },
+                new Dictionary<string, object> { ["id"] = "B2", ["product"] = "Mouse", ["price"] = "25ï¿½" }
             }
         };
 
@@ -86,6 +89,14 @@ public class PromptExecutorTests
         });
 
         var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Liquid Template Input ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine($"user.name: John, user.isPremium: false");
+        _output.WriteLine("orders: [A1: Laptop (1200ï¿½), B2: Mouse (25ï¿½)]");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
 
         rendered.ShouldContain("Hello John!");
         rendered.ShouldContain("Consider upgrading");
@@ -124,6 +135,13 @@ public class PromptExecutorTests
 
         var rendered = await templateObj.RenderAsync(kernel, arguments);
 
+        _output.WriteLine("=== Liquid Template Input (Missing Nested Properties) ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("user.name: John (address missing)");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
+
         rendered.ShouldContain("User: John");
         rendered.ShouldContain("City:");
     }
@@ -161,8 +179,8 @@ public class PromptExecutorTests
             },
             ["orders"] = new[]
             {
-                new Dictionary<string, object> { ["id"] = "X1", ["product"] = "Phone", ["price"] = "800€" },
-                new Dictionary<string, object> { ["id"] = "Y2", ["product"] = "Case", ["price"] = "20€" }
+                new Dictionary<string, object> { ["id"] = "X1", ["product"] = "Phone", ["price"] = "800ï¿½" },
+                new Dictionary<string, object> { ["id"] = "Y2", ["product"] = "Case", ["price"] = "20ï¿½" }
             }
         };
 
@@ -177,6 +195,14 @@ public class PromptExecutorTests
         });
 
         var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Handlebars Template Input ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("user.name: Jane, user.isPremium: false");
+        _output.WriteLine("orders: [X1: Phone (800ï¿½), Y2: Case (20ï¿½)]");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
 
         rendered.ShouldContain("Hello Jane!");
         rendered.ShouldContain("Consider upgrading");
@@ -209,6 +235,13 @@ public class PromptExecutorTests
         });
 
         var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Handlebars Template Input (Missing Collection) ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("orders: missing");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
 
         rendered.ShouldContain("Orders:");
     }
