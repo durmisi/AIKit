@@ -64,7 +64,11 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
                 ContentType = options.ContentType ?? "application/octet-stream"
             },
             Metadata = BuildMetadata(options.Metadata, options.VersionTag),
-            Conditions = options.OverwriteLatest ? null : new BlobRequestConditions { IfNoneMatch = ETag.All }
+            Conditions = options.WriteMode switch
+            {
+                StorageWriteMode.FailIfExists => new BlobRequestConditions { IfNoneMatch = ETag.All },
+                _ => null
+            }
         };
 
         var response = await blobClient.UploadAsync(content, uploadOptions, cancellationToken);

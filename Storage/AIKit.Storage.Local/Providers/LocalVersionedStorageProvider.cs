@@ -42,19 +42,29 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         options ??= new StorageWriteOptions();
 
         var fileFolderPath = GetFileFolderPath(path);
-        var version = GenerateVersion(options.VersionTag);
-        var versionFolderPath = Path.Combine(fileFolderPath, version);
 
-        // Handle overwrite logic
-        if (!options.CreateNewVersion && options.OverwriteLatest)
+        // Handle write mode logic
+        string version;
+        switch (options.WriteMode)
         {
-            var latestVersion = await GetLatestVersionAsync(path, cancellationToken);
-            if (latestVersion is not null)
-            {
-                versionFolderPath = Path.Combine(fileFolderPath, latestVersion);
-                version = latestVersion;
-            }
+            case StorageWriteMode.FailIfExists:
+                if (await ExistsAsync(path, cancellationToken: cancellationToken))
+                {
+                    throw new InvalidOperationException($"File '{path}' already exists.");
+                }
+                version = GenerateVersion(options.VersionTag);
+                break;
+            case StorageWriteMode.ReplaceLatest:
+                var latestVersion = await GetLatestVersionAsync(path, cancellationToken);
+                version = latestVersion ?? GenerateVersion(options.VersionTag);
+                break;
+            case StorageWriteMode.CreateNewVersion:
+            default:
+                version = GenerateVersion(options.VersionTag);
+                break;
         }
+
+        var versionFolderPath = Path.Combine(fileFolderPath, version);
 
         Directory.CreateDirectory(versionFolderPath);
 
@@ -285,7 +295,7 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
             {
                 ContentType = readResult.Metadata.ContentType,
                 Metadata = readResult.Metadata.CustomMetadata,
-                CreateNewVersion = true
+                WriteMode = StorageWriteMode.CreateNewVersion
             };
 
             return await SaveAsync(path, readResult.Content, options, cancellationToken);
