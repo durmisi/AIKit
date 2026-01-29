@@ -26,11 +26,15 @@ public static class StorageServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentException.ThrowIfNullOrWhiteSpace(containerName);
 
-        var options = new AzureBlobStorageOptions() { };
+        var options = new AzureBlobStorageOptions();
         configure?.Invoke(options);
 
         services.TryAddSingleton<IStorageProvider>(sp =>
-            new AzureBlobStorageProvider(connectionString, containerName, options));
+            new StorageProviderBuilder()
+                .WithConnectionString(connectionString)
+                .WithContainerName(containerName)
+                .WithOptions(options)
+                .Build());
 
         return services;
     }
@@ -76,21 +80,12 @@ public static class StorageServiceCollectionExtensions
         var connectionOptions = new AzureBlobStorageConnectionOptions();
         configure(connectionOptions);
 
-        if (string.IsNullOrWhiteSpace(connectionOptions.ConnectionString))
-        {
-            throw new InvalidOperationException("ConnectionString must be configured for Azure Blob storage.");
-        }
-
-        if (string.IsNullOrWhiteSpace(connectionOptions.ContainerName))
-        {
-            throw new InvalidOperationException("ContainerName must be configured for Azure Blob storage.");
-        }
-
         services.TryAddSingleton<IStorageProvider>(sp =>
-            new AzureBlobStorageProvider(
-                connectionOptions.ConnectionString,
-                connectionOptions.ContainerName,
-                connectionOptions.Options));
+            new StorageProviderBuilder()
+                .WithConnectionString(connectionOptions.ConnectionString)
+                .WithContainerName(connectionOptions.ContainerName)
+                .WithOptions(connectionOptions.Options)
+                .Build());
 
         return services;
     }
@@ -119,7 +114,11 @@ public static class StorageServiceCollectionExtensions
         configure?.Invoke(options);
 
         services.AddKeyedSingleton<IStorageProvider>(serviceKey, (sp, key) =>
-            new AzureBlobStorageProvider(connectionString, containerName, options));
+            new StorageProviderBuilder()
+                .WithConnectionString(connectionString)
+                .WithContainerName(containerName)
+                .WithOptions(options)
+                .Build());
 
         return services;
     }
