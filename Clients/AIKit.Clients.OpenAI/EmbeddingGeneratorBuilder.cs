@@ -1,7 +1,5 @@
 ﻿using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
-using OpenAI;
-using System.ClientModel;
 
 namespace AIKit.Clients.OpenAI;
 

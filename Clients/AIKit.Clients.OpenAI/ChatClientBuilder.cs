@@ -1,10 +1,6 @@
 using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using OpenAI;
-using System.ClientModel;
-using System.ClientModel.Primitives;
-using System.Net;
 
 namespace AIKit.Clients.OpenAI;
 
@@ -18,11 +14,9 @@ public class ChatClientBuilder
     private string? _endpoint;
     private string? _organization;
     private HttpClient? _httpClient;
-    private int _timeoutSeconds = 30;
     private RetryPolicySettings? _retryPolicy;
     private ILogger<ChatClientBuilder>? _logger;
     private string? _projectId;
-    private IWebProxy? _proxy;
 
     /// <summary>
     /// Sets the API key for authentication.
@@ -80,17 +74,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the retry policy.
     /// </summary>
     /// <param name="retryPolicy">The retry policy settings.</param>
@@ -124,17 +107,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
-        return this;
-    }
-
-    /// <summary>
     /// Gets the provider name.
     /// </summary>
     public string Provider => GetDefaultProviderName();
@@ -147,7 +119,13 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating OpenAI chat client for model {Model}", targetModel);
+
+        IChatClient client = ClientCreator.CreateClient(
+            _apiKey!, _organization, _projectId, _endpoint, _httpClient)
+            .GetChatClient(targetModel)
+            .AsIChatClient();
 
         if (_retryPolicy != null)
         {
@@ -169,18 +147,5 @@ public class ChatClientBuilder
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
     }
 
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateClient(
-            _apiKey!, _organization, _projectId, _endpoint, _httpClient, _proxy, _timeoutSeconds);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating OpenAI chat client for model {Model}", targetModel);
-
-        return client
-            .GetChatClient(targetModel)
-            .AsIChatClient();
-    }
 }
 

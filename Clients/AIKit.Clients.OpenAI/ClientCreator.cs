@@ -1,7 +1,6 @@
 using OpenAI;
 using System.ClientModel;
 using System.ClientModel.Primitives;
-using System.Net;
 
 namespace AIKit.Clients.OpenAI;
 
@@ -18,17 +17,13 @@ internal static class ClientCreator
     /// <param name="projectId">Optional project ID.</param>
     /// <param name="endpoint">Optional custom endpoint URL.</param>
     /// <param name="httpClient">Optional pre-configured HttpClient.</param>
-    /// <param name="proxy">Optional web proxy.</param>
-    /// <param name="timeoutSeconds">Timeout in seconds (default: 30).</param>
     /// <returns>The configured OpenAIClient.</returns>
     internal static OpenAIClient CreateClient(
         string apiKey,
         string? organization = null,
         string? projectId = null,
         string? endpoint = null,
-        HttpClient? httpClient = null,
-        IWebProxy? proxy = null,
-        int timeoutSeconds = 30)
+        HttpClient? httpClient = null)
     {
         var options = new OpenAIClientOptions();
 
