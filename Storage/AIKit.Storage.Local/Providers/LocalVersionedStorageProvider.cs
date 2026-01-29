@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -40,6 +41,17 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         ArgumentNullException.ThrowIfNull(content);
 
         options ??= new StorageWriteOptions();
+
+        if (string.IsNullOrEmpty(options.ContentType))
+        {
+            options = new StorageWriteOptions
+            {
+                ContentType = GetMimeType(path),
+                Metadata = options.Metadata,
+                WriteMode = options.WriteMode,
+                VersionTag = options.VersionTag
+            };
+        }
 
         _logger?.LogInformation("Starting save operation for file {Path} with write mode {WriteMode}", path, options.WriteMode);
 
@@ -390,6 +402,14 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         sanitized = sanitized.Replace('\\', Path.DirectorySeparatorChar);
 
         return sanitized.Trim(Path.DirectorySeparatorChar);
+    }
+
+    private static string GetMimeType(string fileName)
+    {
+        var provider = new FileExtensionContentTypeProvider();
+        return provider.TryGetContentType(fileName, out var contentType)
+            ? contentType
+            : "application/octet-stream";
     }
 
     private static string GenerateVersion(string? versionTag)

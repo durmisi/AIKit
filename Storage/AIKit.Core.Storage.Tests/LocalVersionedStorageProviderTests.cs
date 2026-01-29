@@ -62,7 +62,7 @@ public class LocalVersionedStorageProviderTests : IDisposable
         // Assert
         result.ShouldNotBeNull();
         result!.Metadata.Path.ShouldBe(path);
-        result.Metadata.ContentType.ShouldBeNull(); // Not set in save
+        result.Metadata.ContentType.ShouldBe("text/plain"); // Detected from .txt extension
         using var reader = new StreamReader(result.Content);
         var readContent = await reader.ReadToEndAsync();
         readContent.ShouldBe("Hello, World!");
