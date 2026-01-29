@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AIKit.Prompts.Jinja2;
 
-internal sealed class Jinja2PromptTemplateFactory : IPromptTemplateFactory
+public sealed class Jinja2PromptTemplateFactory : IPromptTemplateFactory
 {
     public bool TryCreate(
         PromptTemplateConfig templateConfig,

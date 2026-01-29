@@ -1,4 +1,5 @@
 using AIKit.Prompts.Handlebars;
+using AIKit.Prompts.Jinja2;
 using AIKit.Prompts.Liquid;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
@@ -338,6 +339,174 @@ public class PromptExecutorTests
         _output.WriteLine($"Template: {template}");
         _output.WriteLine("Arguments: name = World");
         _output.WriteLine("Expected Rendered: Hello World");
+
+        var stream = executor.ExecuteStreamingAsync(template, arguments);
+        var results = await stream.ToListAsync();
+
+        _output.WriteLine($"Streaming Results Count: {results.Count}");
+        for (int i = 0; i < results.Count; i++)
+        {
+            _output.WriteLine($"Result {i}: {results[i]}");
+        }
+
+        results.ShouldNotBeEmpty();
+    }
+
+    // -------------------------
+    // JINJA2 TEMPLATE TESTS
+    // -------------------------
+
+    [Fact]
+    public async Task Jinja2PromptExecutor_RendersComplexTemplate_WithLoopsAndConditionals()
+    {
+        var executor = new Jinja2.PromptExecutor(_mockChatClient.Object);
+
+        var template = """
+            Hello {{ user.name }}!
+
+            {% if user.isPremium %}
+            Thanks for being a premium user.
+            {% else %}
+            Consider upgrading your plan.
+            {% endif %}
+
+            Your orders:
+            {% for order in orders %}
+            - {{ order.id }}: {{ order.product }} ({{ order.price }})
+            {% endfor %}
+            """;
+
+        var arguments = new KernelArguments
+        {
+            ["user"] = new Dictionary<string, object>
+            {
+                ["name"] = "Alice",
+                ["isPremium"] = true
+            },
+            ["orders"] = new[]
+            {
+                new Dictionary<string, object> { ["id"] = "J1", ["product"] = "Tablet", ["price"] = "500€" },
+                new Dictionary<string, object> { ["id"] = "J2", ["product"] = "Keyboard", ["price"] = "75€" }
+            }
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new Jinja2PromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "ComplexJinja2",
+            Template = template,
+            TemplateFormat = "jinja2",
+            AllowDangerouslySetContent = true
+        });
+
+        var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Jinja2 Template Input ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("user.name: Alice, user.isPremium: true");
+        _output.WriteLine("orders: [J1: Tablet (500€), J2: Keyboard (75€)]");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
+
+        rendered.ShouldContain("Hello Alice!");
+        rendered.ShouldContain("Thanks for being a premium user");
+        rendered.ShouldContain("Tablet");
+        rendered.ShouldContain("Keyboard");
+    }
+
+    [Fact]
+    public async Task Jinja2PromptExecutor_HandlesMissingNestedProperties()
+    {
+        var executor = new Jinja2.PromptExecutor(_mockChatClient.Object);
+
+        var template = """
+            User: {{ user.name }}
+            City: {{ user.address.city }}
+            """;
+
+        var arguments = new KernelArguments
+        {
+            ["user"] = new Dictionary<string, object>
+            {
+                ["name"] = "Alice"
+                // address missing
+            }
+        };
+
+        var kernel = GetKernel(executor);
+        var factory = new Jinja2PromptTemplateFactory();
+        var templateObj = factory.Create(new PromptTemplateConfig
+        {
+            Name = "Jinja2MissingNested",
+            Template = template,
+            TemplateFormat = "jinja2",
+            AllowDangerouslySetContent = true
+        });
+
+        var rendered = await templateObj.RenderAsync(kernel, arguments);
+
+        _output.WriteLine("=== Jinja2 Template Input (Missing Nested Properties) ===");
+        _output.WriteLine(template);
+        _output.WriteLine("=== Arguments ===");
+        _output.WriteLine("user.name: Alice (address missing)");
+        _output.WriteLine("=== Rendered Output ===");
+        _output.WriteLine(rendered);
+
+        rendered.ShouldContain("User: Alice");
+        rendered.ShouldContain("City:");
+    }
+
+    [Fact]
+    public async Task Jinja2PromptExecutor_ExecuteAsync_WithComplexTemplate()
+    {
+        var executors = new List<IPromptExecutor>
+        {
+            new Jinja2.PromptExecutor(_mockChatClient.Object)
+        };
+
+        var promptExecutor = new PromptExecutor(executors);
+
+        var template = "Hello {{name}} from {{location}}";
+        var arguments = new KernelArguments
+        {
+            ["name"] = "World",
+            ["location"] = "Jinja2"
+        };
+
+        _output.WriteLine("=== Jinja2 Execution Test ===");
+        _output.WriteLine($"Template: {template}");
+        _output.WriteLine("Arguments: name = World, location = Jinja2");
+        _output.WriteLine("Expected Rendered: Hello World from Jinja2");
+
+        var result = await promptExecutor.ExecuteAsync(
+            "jinja2",
+            template,
+            arguments);
+
+        _output.WriteLine($"Execution Result: {result}");
+
+        result.ShouldBe("Mock response");
+    }
+
+    [Fact]
+    public async Task Jinja2PromptExecutor_ExecuteStreamingAsync_WithComplexTemplate()
+    {
+        var executor = new Jinja2.PromptExecutor(_mockChatClient.Object);
+
+        var template = "Hello {{name}} from {{location}}";
+
+        var arguments = new KernelArguments
+        {
+            ["name"] = "World",
+            ["location"] = "Jinja2"
+        };
+
+        _output.WriteLine("=== Jinja2 Streaming Execution Test ===");
+        _output.WriteLine($"Template: {template}");
+        _output.WriteLine("Arguments: name = World, location = Jinja2");
+        _output.WriteLine("Expected Rendered: Hello World from Jinja2");
 
         var stream = executor.ExecuteStreamingAsync(template, arguments);
         var results = await stream.ToListAsync();
