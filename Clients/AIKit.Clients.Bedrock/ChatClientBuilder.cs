@@ -149,11 +149,11 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var runtime = ClientCreator.CreateBedrockRuntimeClient(
-            _awsRegion!, _awsAccessKey, _awsSecretKey, _awsCredentials, _timeoutSeconds, _maxRetries, _serviceUrl);
-
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, _awsRegion);
+
+        var runtime = ClientCreator.CreateBedrockRuntimeClient(
+            _awsRegion!, _awsAccessKey, _awsSecretKey, _awsCredentials, _timeoutSeconds, _maxRetries, _serviceUrl);
 
         var client = runtime.AsIChatClient(targetModel);
 

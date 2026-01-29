@@ -107,9 +107,10 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders);
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, _endpoint);
+
+        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders);
 
         if (_retryPolicy != null)
         {

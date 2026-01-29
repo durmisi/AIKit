@@ -149,11 +149,11 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = ClientCreator.CreateChatCompletionsClient(
-            _endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
-
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating Azure OpenAI chat client for model {Model}", targetModel);
+
+        var client = ClientCreator.CreateChatCompletionsClient(
+            _endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
 
         var chatClient = client.AsIChatClient(targetModel);
 

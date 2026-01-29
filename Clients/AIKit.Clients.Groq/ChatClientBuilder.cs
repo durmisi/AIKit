@@ -107,11 +107,11 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = ClientCreator.CreateOpenAIClient(
-            _apiKey!, _organizationId, _projectId, ClientCreator.DefaultEndpoint, _httpClient);
-
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating Groq chat client for model {Model}", targetModel);
+
+        var client = ClientCreator.CreateOpenAIClient(
+            _apiKey!, _organizationId, _projectId, ClientCreator.DefaultEndpoint, _httpClient);
 
         var chatClient = client.GetChatClient(targetModel).AsIChatClient();
 

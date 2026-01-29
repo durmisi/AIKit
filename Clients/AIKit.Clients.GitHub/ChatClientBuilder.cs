@@ -107,11 +107,11 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = ClientCreator.CreateOpenAIClient(
-            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient);
-
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating GitHub Models chat client for model {Model}", targetModel);
+
+        var client = ClientCreator.CreateOpenAIClient(
+            _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient);
 
         var chatClient = client.GetChatClient(targetModel).AsIChatClient();
 

@@ -107,9 +107,11 @@ public class ChatClientBuilder
     {
         Validate();
 
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating Claude chat client for model {Model}", targetModel);
+
         var client = ClientCreator.CreateAnthropicClient(_apiKey!, _baseUrl, _timeoutSeconds, _maxRetries);
 
-        var targetModel = _modelId!;
         IChatClient chatClient = client.AsIChatClient(targetModel)
             .AsBuilder()
             .UseFunctionInvocation()

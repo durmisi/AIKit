@@ -149,10 +149,10 @@ public class ChatClientBuilder
     {
         Validate();
 
+        _logger?.LogInformation("Creating Azure Claude chat client for model {Model} at {Endpoint}", _modelId, _endpoint);
+
         var client = ClientCreator.CreateAzureClaudeClient(
             _endpoint!, _modelId!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
-
-        _logger?.LogInformation("Creating Azure Claude chat client for model {Model} at {Endpoint}", _modelId, _endpoint);
 
         if (_retryPolicy != null)
         {

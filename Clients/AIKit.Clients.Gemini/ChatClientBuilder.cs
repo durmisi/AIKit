@@ -73,10 +73,10 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = ClientCreator.CreateGeminiChatClient(_apiKey!, _modelId!);
-
         var targetModel = _modelId!;
         _logger?.LogInformation("Creating Gemini chat client for model {Model}", targetModel);
+
+        var client = ClientCreator.CreateGeminiChatClient(_apiKey!, _modelId!);
 
         if (_retryPolicy != null)
         {
