@@ -1,7 +1,6 @@
 using AIKit.Clients.Resilience;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace AIKit.Clients.Ollama;
 
@@ -13,11 +12,9 @@ public class ChatClientBuilder
     private string? _endpoint;
     private string? _modelId;
     private RetryPolicySettings? _retryPolicy;
-    private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
     private HttpClient? _httpClient;
     private string? _userAgent;
-    private IWebProxy? _proxy;
     private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
@@ -50,17 +47,6 @@ public class ChatClientBuilder
     public ChatClientBuilder WithRetryPolicy(RetryPolicySettings retryPolicy)
     {
         _retryPolicy = retryPolicy;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
         return this;
     }
 
@@ -98,17 +84,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
-        return this;
-    }
-
-    /// <summary>
     /// Sets custom headers.
     /// </summary>
     /// <param name="headers">The custom headers.</param>
@@ -132,7 +107,9 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders);
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, _endpoint);
 
         if (_retryPolicy != null)
         {
@@ -155,17 +132,6 @@ public class ChatClientBuilder
 
         if (string.IsNullOrWhiteSpace(_modelId))
             throw new ArgumentException("ModelId is required.", nameof(_modelId));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var client = ClientCreator.CreateOllamaChatClient(_endpoint!, _modelId!, _httpClient, _userAgent, _customHeaders, _proxy, _timeoutSeconds);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating Ollama chat client for model {Model} at {Endpoint}", targetModel, _endpoint);
-
-        return client;
     }
 }
 
