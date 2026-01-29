@@ -41,6 +41,8 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
 
         options ??= new StorageWriteOptions();
 
+        _logger?.LogInformation("Starting save operation for file {Path} with write mode {WriteMode}", path, options.WriteMode);
+
         var fileFolderPath = GetFileFolderPath(path);
 
         // Handle write mode logic
@@ -50,23 +52,28 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
             case StorageWriteMode.FailIfExists:
                 if (await ExistsAsync(path, cancellationToken: cancellationToken))
                 {
+                    _logger?.LogWarning("File {Path} already exists, failing as per FailIfExists mode", path);
                     throw new InvalidOperationException($"File '{path}' already exists.");
                 }
                 version = GenerateVersion(options.VersionTag);
+                _logger?.LogInformation("Generated new version {Version} for FailIfExists mode", version);
                 break;
             case StorageWriteMode.ReplaceLatest:
                 var latestVersion = await GetLatestVersionAsync(path, cancellationToken);
                 version = latestVersion ?? GenerateVersion(options.VersionTag);
+                _logger?.LogInformation("Using version {Version} for ReplaceLatest mode (latest was {Latest})", version, latestVersion ?? "none");
                 break;
             case StorageWriteMode.CreateNewVersion:
             default:
                 version = GenerateVersion(options.VersionTag);
+                _logger?.LogInformation("Generated new version {Version} for CreateNewVersion mode", version);
                 break;
         }
 
         var versionFolderPath = Path.Combine(fileFolderPath, version);
 
         Directory.CreateDirectory(versionFolderPath);
+        _logger?.LogDebug("Created directory {VersionFolderPath}", versionFolderPath);
 
         var contentFilePath = Path.Combine(versionFolderPath, ContentFileName);
         var tempContentFilePath = contentFilePath + ".tmp";
@@ -78,14 +85,17 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         try
         {
             // Write content to temp file
+            _logger?.LogDebug("Writing content to temp file {TempContentFilePath}", tempContentFilePath);
             await using (var fileStream = new FileStream(tempContentFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
             {
                 await content.CopyToAsync(fileStream, cancellationToken);
             }
 
             var fileInfo = new FileInfo(tempContentFilePath);
+            _logger?.LogDebug("Content written, size: {Size} bytes", fileInfo.Length);
 
             // Write metadata to temp file
+            _logger?.LogDebug("Writing metadata to temp file {TempMetadataFilePath}", tempMetadataFilePath);
             var metadata = new LocalStorageMetadata
             {
                 Path = path,
@@ -98,9 +108,12 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
 
             var metadataJson = JsonSerializer.Serialize(metadata, _jsonOptions);
             await File.WriteAllTextAsync(tempMetadataFilePath, metadataJson, cancellationToken);
+            _logger?.LogDebug("Metadata written");
 
             // Atomic move
+            _logger?.LogDebug("Performing atomic move for content file");
             File.Move(tempContentFilePath, contentFilePath, overwrite: true);
+            _logger?.LogDebug("Performing atomic move for metadata file");
             File.Move(tempMetadataFilePath, metadataFilePath, overwrite: true);
 
             _logger?.LogInformation("Successfully saved file {Path} version {Version} with size {Size}", path, version, fileInfo.Length);
@@ -124,22 +137,35 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Reading file {Path} version {Version}", path, version ?? "latest");
+
         version ??= await GetLatestVersionAsync(path, cancellationToken);
         if (version is null)
+        {
+            _logger?.LogWarning("No versions found for file {Path}", path);
             return null;
+        }
 
         var versionFolderPath = Path.Combine(GetFileFolderPath(path), version);
         var contentFilePath = Path.Combine(versionFolderPath, ContentFileName);
         var metadataFilePath = Path.Combine(versionFolderPath, MetadataFileName);
 
         if (!File.Exists(contentFilePath))
+        {
+            _logger?.LogWarning("Content file not found for {Path} version {Version}", path, version);
             return null;
+        }
 
         var metadata = await ReadMetadataFileAsync(metadataFilePath, cancellationToken);
         if (metadata is null)
+        {
+            _logger?.LogWarning("Metadata not found or invalid for {Path} version {Version}", path, version);
             return null;
+        }
 
         var stream = new FileStream(contentFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
+
+        _logger?.LogInformation("Successfully read file {Path} version {Version}", path, version);
 
         return new StorageReadResult(stream, new StorageMetadata
         {
@@ -159,6 +185,8 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Deleting file {Path} version {Version}", path, version);
+
         var fileFolderPath = GetFileFolderPath(path);
 
         if (version is not null)
@@ -176,6 +204,8 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
                 Directory.Delete(fileFolderPath);
             }
 
+            _logger?.LogInformation("Successfully deleted file {Path} version {Version}", path, version);
+
             return true;
         }
 
@@ -184,6 +214,9 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
             return false;
 
         Directory.Delete(fileFolderPath, recursive: true);
+
+        _logger?.LogInformation("Successfully deleted all versions of file {Path}", path);
+
         return true;
     }
 
@@ -194,12 +227,21 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Checking existence of file {Path} version {Version}", path, version ?? "latest");
+
         version ??= await GetLatestVersionAsync(path, cancellationToken);
         if (version is null)
+        {
+            _logger?.LogInformation("File {Path} does not exist", path);
             return false;
+        }
 
         var contentFilePath = Path.Combine(GetFileFolderPath(path), version, ContentFileName);
-        return File.Exists(contentFilePath);
+        var exists = File.Exists(contentFilePath);
+
+        _logger?.LogInformation("File {Path} version {Version} exists: {Exists}", path, version, exists);
+
+        return exists;
     }
 
     public async Task<StorageMetadata?> GetMetadataAsync(
@@ -209,15 +251,25 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Getting metadata for file {Path} version {Version}", path, version ?? "latest");
+
         version ??= await GetLatestVersionAsync(path, cancellationToken);
         if (version is null)
+        {
+            _logger?.LogWarning("No versions found for file {Path}", path);
             return null;
+        }
 
         var metadataFilePath = Path.Combine(GetFileFolderPath(path), version, MetadataFileName);
         var metadata = await ReadMetadataFileAsync(metadataFilePath, cancellationToken);
 
         if (metadata is null)
+        {
+            _logger?.LogWarning("Metadata not found or invalid for {Path} version {Version}", path, version);
             return null;
+        }
+
+        _logger?.LogInformation("Successfully retrieved metadata for {Path} version {Version}", path, version);
 
         return new StorageMetadata
         {
@@ -236,9 +288,14 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Listing versions for file {Path}", path);
+
         var fileFolderPath = GetFileFolderPath(path);
         if (!Directory.Exists(fileFolderPath))
+        {
+            _logger?.LogInformation("No versions found for file {Path}", path);
             return Task.FromResult<IReadOnlyList<StorageVersionInfo>>([]);
+        }
 
         var versions = new List<StorageVersionInfo>();
 
@@ -260,7 +317,7 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
                     Version = metadata.Version,
                     Size = metadata.Size,
                     ContentType = metadata.ContentType,
-                    CreatedAt = metadata.CreatedAt ?? DateTimeOffset.MinValue,
+                    CreatedAt = metadata.CreatedAt,
                     Metadata = metadata.CustomMetadata
                 });
             }
@@ -275,6 +332,8 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
             .OrderByDescending(v => v.CreatedAt)
             .ToList();
 
+        _logger?.LogInformation("Found {Count} versions for file {Path}", result.Count, path);
+
         return Task.FromResult<IReadOnlyList<StorageVersionInfo>>(result);
     }
 
@@ -286,20 +345,26 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
 
+        _logger?.LogInformation("Restoring file {Path} to version {Version}", path, version);
+
         var readResult = await ReadAsync(path, version, cancellationToken)
             ?? throw new InvalidOperationException($"Version '{version}' not found for path '{path}'.");
 
+        await using var memoryStream = new MemoryStream();
         await using (readResult.Content)
         {
-            var options = new StorageWriteOptions
-            {
-                ContentType = readResult.Metadata.ContentType,
-                Metadata = readResult.Metadata.CustomMetadata,
-                WriteMode = StorageWriteMode.CreateNewVersion
-            };
-
-            return await SaveAsync(path, readResult.Content, options, cancellationToken);
+            await readResult.Content.CopyToAsync(memoryStream, cancellationToken);
         }
+        memoryStream.Position = 0;
+
+        var options = new StorageWriteOptions
+        {
+            ContentType = readResult.Metadata.ContentType,
+            Metadata = readResult.Metadata.CustomMetadata,
+            WriteMode = StorageWriteMode.CreateNewVersion
+        };
+
+        return await SaveAsync(path, memoryStream, options, cancellationToken);
     }
 
     private string GetFileFolderPath(string path)
@@ -355,8 +420,9 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
             var json = await File.ReadAllTextAsync(metadataFilePath, cancellationToken);
             return JsonSerializer.Deserialize<LocalStorageMetadata>(json, _jsonOptions);
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
+            _logger?.LogWarning(ex, "Failed to deserialize metadata from {Path}", metadataFilePath);
             return null;
         }
     }
@@ -368,6 +434,6 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         public long? Size { get; set; }
         public string? ContentType { get; set; }
         public IDictionary<string, string>? CustomMetadata { get; set; }
-        public DateTimeOffset? CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
     }
 }

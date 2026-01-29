@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Storage.Local;
 
@@ -21,7 +22,13 @@ public static class StorageServiceCollectionExtensions
         ArgumentException.ThrowIfNullOrWhiteSpace(basePath);
 
         services.TryAddSingleton<IStorageProvider>(sp =>
-            new LocalVersionedStorageProvider(basePath));
+        {
+            var logger = sp.GetService<ILogger<LocalVersionedStorageProvider>>();
+            return new StorageProviderBuilder()
+            .WithBasePath(basePath)
+            .WithLogger(logger)
+            .Build();
+        });
 
         return services;
     }
@@ -38,36 +45,13 @@ public static class StorageServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(configure);
 
-        var options = new LocalStorageOptions();
-        configure(options);
-
-        if (string.IsNullOrWhiteSpace(options.BasePath))
-        {
-            throw new InvalidOperationException("BasePath must be configured for local storage.");
-        }
-
-        services.TryAddSingleton<IStorageProvider>(sp =>
-            new LocalVersionedStorageProvider(options.BasePath));
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds the local versioned storage provider to the service collection using a builder.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="builderFactory">Factory to create the storage provider builder.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddLocalVersionedStorage(
-        this IServiceCollection services,
-        Func<IServiceProvider, StorageProviderBuilder> builderFactory)
-    {
-        ArgumentNullException.ThrowIfNull(builderFactory);
-
         services.TryAddSingleton<IStorageProvider>(sp =>
         {
-            var builder = builderFactory(sp);
-            return builder.Build();
+            var logger = sp.GetService<ILogger<LocalVersionedStorageProvider>>();
+            var builder = new StorageProviderBuilder();
+            var options = new LocalStorageOptions();
+            configure(options);
+            return builder.WithOptions(options).WithLogger(logger).Build();
         });
 
         return services;
