@@ -16,6 +16,8 @@ public sealed class VectorStoreBuilder
     private string? _apiKey;
     private IEmbeddingGenerator? _embeddingGenerator;
 
+    private bool _ownsClient = true;
+
     public VectorStoreBuilder()
     {
     }
@@ -45,6 +47,12 @@ public sealed class VectorStoreBuilder
         return this;
     }
 
+    public VectorStoreBuilder WithOwnsClient(bool ownsClient)
+    {
+        _ownsClient = ownsClient;
+        return this;
+    }
+
     public VectorStore Build()
     {
         Validate();
@@ -65,7 +73,7 @@ public sealed class VectorStoreBuilder
 
         var options = CreateStoreOptions(_embeddingGenerator!);
 
-        return new ElasticsearchVectorStore(client, ownsClient: true, options);
+        return new ElasticsearchVectorStore(client, ownsClient: _ownsClient, options);
     }
 
     private ElasticsearchVectorStoreOptions? CreateStoreOptions(IEmbeddingGenerator embeddingGenerator)
