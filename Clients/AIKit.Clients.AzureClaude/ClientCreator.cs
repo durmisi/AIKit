@@ -21,8 +21,6 @@ internal static class ClientCreator
     /// <param name="httpClient">Optional pre-configured HttpClient.</param>
     /// <param name="userAgent">Optional user agent.</param>
     /// <param name="customHeaders">Optional custom headers.</param>
-    /// <param name="proxy">Optional web proxy.</param>
-    /// <param name="timeoutSeconds">Timeout in seconds.</param>
     /// <returns>The configured AzureClaudeClient.</returns>
     internal static AzureClaudeClient CreateAzureClaudeClient(
         string endpoint,
@@ -32,9 +30,7 @@ internal static class ClientCreator
         TokenCredential? tokenCredential = null,
         HttpClient? httpClient = null,
         string? userAgent = null,
-        Dictionary<string, string>? customHeaders = null,
-        IWebProxy? proxy = null,
-        int timeoutSeconds = 30)
+        Dictionary<string, string>? customHeaders = null)
     {
         if (httpClient != null)
         {

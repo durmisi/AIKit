@@ -18,10 +18,8 @@ public class ChatClientBuilder
     private TokenCredential? _tokenCredential;
     private RetryPolicySettings? _retryPolicy;
     private HttpClient? _httpClient;
-    private int _timeoutSeconds = 30;
     private ILogger<ChatClientBuilder>? _logger;
     private string? _userAgent;
-    private IWebProxy? _proxy;
     private Dictionary<string, string>? _customHeaders;
 
     /// <summary>
@@ -107,17 +105,6 @@ public class ChatClientBuilder
     }
 
     /// <summary>
-    /// Sets the timeout in seconds.
-    /// </summary>
-    /// <param name="seconds">The timeout value.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithTimeout(int seconds)
-    {
-        _timeoutSeconds = seconds;
-        return this;
-    }
-
-    /// <summary>
     /// Sets the logger.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
@@ -136,17 +123,6 @@ public class ChatClientBuilder
     public ChatClientBuilder WithUserAgent(string userAgent)
     {
         _userAgent = userAgent;
-        return this;
-    }
-
-    /// <summary>
-    /// Sets the proxy.
-    /// </summary>
-    /// <param name="proxy">The web proxy.</param>
-    /// <returns>The builder instance.</returns>
-    public ChatClientBuilder WithProxy(IWebProxy proxy)
-    {
-        _proxy = proxy;
         return this;
     }
 
@@ -175,7 +151,7 @@ public class ChatClientBuilder
         Validate();
 
         var client = ClientCreator.CreateAzureClaudeClient(
-            _endpoint!, _modelId!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders, _proxy, _timeoutSeconds);
+            _endpoint!, _modelId!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
 
         _logger?.LogInformation("Creating Azure Claude chat client for model {Model} at {Endpoint}", _modelId, _endpoint);
 
