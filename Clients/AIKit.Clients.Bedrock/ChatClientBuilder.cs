@@ -1,5 +1,4 @@
 using AIKit.Clients.Resilience;
-using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.Runtime;
 using Microsoft.Extensions.AI;
@@ -150,7 +149,13 @@ public class ChatClientBuilder
     {
         Validate();
 
-        var client = CreateClient();
+        var runtime = ClientCreator.CreateBedrockRuntimeClient(
+            _awsRegion!, _awsAccessKey, _awsSecretKey, _awsCredentials, _timeoutSeconds, _maxRetries, _serviceUrl);
+
+        var targetModel = _modelId!;
+        _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, _awsRegion);
+
+        var client = runtime.AsIChatClient(targetModel);
 
         if (_retryPolicy != null)
         {
@@ -173,18 +178,6 @@ public class ChatClientBuilder
 
         if (_awsCredentials == null && (string.IsNullOrWhiteSpace(_awsAccessKey) || string.IsNullOrWhiteSpace(_awsSecretKey)))
             throw new ArgumentException("Either AwsCredentials or both AwsAccessKey and AwsSecretKey are required.", nameof(_awsAccessKey));
-    }
-
-    private IChatClient CreateClient()
-    {
-        var runtime = ClientCreator.CreateBedrockRuntimeClient(
-            _awsRegion!, _awsAccessKey, _awsSecretKey, _awsCredentials, _timeoutSeconds, _maxRetries, _serviceUrl);
-
-        if (string.IsNullOrWhiteSpace(_modelId)) throw new ArgumentException("ModelId is required.", nameof(_modelId));
-        var targetModel = _modelId!;
-        _logger?.LogInformation("Creating AWS Bedrock chat client for model {Model} in region {Region}", targetModel, _awsRegion);
-
-        return runtime.AsIChatClient(targetModel);
     }
 }
 

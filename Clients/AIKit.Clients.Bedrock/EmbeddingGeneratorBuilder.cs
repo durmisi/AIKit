@@ -1,7 +1,5 @@
-﻿using Amazon;
-using Amazon.BedrockRuntime;
+﻿using Amazon.BedrockRuntime;
 using Amazon.Runtime;
-using AIKit.Clients.Interfaces;
 using Microsoft.Extensions.AI;
 
 namespace AIKit.Clients.Bedrock;
