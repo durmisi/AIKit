@@ -2,6 +2,7 @@ using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using Microsoft.Extensions.Logging;
 
 namespace AIKit.Storage.Azure;
 
@@ -15,14 +16,16 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
 
     private readonly BlobContainerClient _containerClient;
     private readonly AzureBlobStorageOptions _options;
+    private readonly ILogger<AzureBlobStorageProvider>? _logger;
 
-    public AzureBlobStorageProvider(BlobContainerClient containerClient, AzureBlobStorageOptions? options = null)
+    public AzureBlobStorageProvider(BlobContainerClient containerClient, AzureBlobStorageOptions? options = null, ILogger<AzureBlobStorageProvider>? logger = null)
     {
         _containerClient = containerClient ?? throw new ArgumentNullException(nameof(containerClient));
         _options = options ?? new AzureBlobStorageOptions();
+        _logger = logger;
     }
 
-    public AzureBlobStorageProvider(string connectionString, string containerName, AzureBlobStorageOptions? options = null)
+    public AzureBlobStorageProvider(string connectionString, string containerName, AzureBlobStorageOptions? options = null, ILogger<AzureBlobStorageProvider>? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentException.ThrowIfNullOrWhiteSpace(containerName);
@@ -34,6 +37,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         _containerClient = serviceClient.GetBlobContainerClient(containerName);
 
         _options = options ?? new AzureBlobStorageOptions();
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,7 +45,9 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
     /// </summary>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
+        _logger?.LogInformation("Initializing Azure Blob Storage container {ContainerName}", _containerClient.Name);
         await _containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        _logger?.LogInformation("Azure Blob Storage container {ContainerName} initialized", _containerClient.Name);
     }
 
     public async Task<StorageWriteResult> SaveAsync(
@@ -54,6 +60,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         ArgumentNullException.ThrowIfNull(content);
 
         options ??= new StorageWriteOptions();
+
+        _logger?.LogInformation("Starting save operation for file {Path} with write mode {WriteMode}", path, options.WriteMode);
 
         var blobClient = _containerClient.GetBlobClient(NormalizePath(path));
 
@@ -78,6 +86,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
 
         var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
 
+        _logger?.LogInformation("Successfully saved file {Path} version {Version} with size {Size}", path, versionId, properties.Value.ContentLength);
+
         return new StorageWriteResult(
             path,
             versionId,
@@ -91,6 +101,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        _logger?.LogInformation("Reading file {Path} version {Version}", path, version ?? "latest");
 
         try
         {
@@ -111,6 +123,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
+            _logger?.LogWarning("File {Path} version {Version} not found", path, version ?? "latest");
             return null;
         }
     }
@@ -121,6 +134,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        _logger?.LogInformation("Deleting file {Path} version {Version}", path, version);
 
         try
         {
@@ -141,6 +156,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
+            _logger?.LogWarning("File {Path} version {Version} not found for deletion", path, version);
             return false;
         }
     }
@@ -152,13 +168,18 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
+        _logger?.LogInformation("Checking existence of file {Path} version {Version}", path, version ?? "latest");
+
         try
         {
             var blobClient = GetBlobClient(path, version);
-            return await blobClient.ExistsAsync(cancellationToken);
+            var exists = await blobClient.ExistsAsync(cancellationToken);
+            _logger?.LogInformation("File {Path} version {Version} exists: {Exists}", path, version ?? "latest", exists);
+            return exists;
         }
         catch (RequestFailedException)
         {
+            _logger?.LogInformation("File {Path} version {Version} does not exist", path, version ?? "latest");
             return false;
         }
     }
@@ -169,6 +190,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        _logger?.LogInformation("Getting metadata for file {Path} version {Version}", path, version ?? "latest");
 
         try
         {
@@ -187,6 +210,7 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
+            _logger?.LogWarning("Metadata not found for file {Path} version {Version}", path, version ?? "latest");
             return null;
         }
     }
@@ -196,6 +220,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        _logger?.LogInformation("Listing versions for file {Path}", path);
 
         var normalizedPath = NormalizePath(path);
         var versions = new List<StorageVersionInfo>();
@@ -221,9 +247,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
 
         // Return versions sorted by creation time (latest first)
-        return versions
+        var result = versions
             .OrderByDescending(v => v.CreatedAt)
             .ToList();
+
+        _logger?.LogInformation("Found {Count} versions for file {Path}", result.Count, path);
+
+        return result;
     }
 
     public async Task<StorageWriteResult> RestoreVersionAsync(
@@ -233,6 +263,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
+
+        _logger?.LogInformation("Restoring version {Version} for file {Path}", version, path);
 
         var normalizedPath = NormalizePath(path);
 
@@ -255,6 +287,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         await copyOperation.WaitForCompletionAsync(cancellationToken);
 
         var properties = await destinationBlobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
+
+        _logger?.LogInformation("Successfully restored version {Version} for file {Path} as new version {NewVersion}", version, path, properties.Value.VersionId ?? DateTimeOffset.UtcNow.ToString("o"));
 
         return new StorageWriteResult(
             path,
@@ -314,6 +348,8 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(newMetadata);
 
+        _logger?.LogInformation("Merging metadata for file {Path}, overwrite: {Overwrite}", path, overwriteExisting);
+
         var blobClient = _containerClient.GetBlobClient(NormalizePath(path));
         var properties = await blobClient.GetPropertiesAsync(cancellationToken: cancellationToken);
 
@@ -331,7 +367,10 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
 
         await blobClient.SetMetadataAsync(mergedMetadata, cancellationToken: cancellationToken);
 
-        return ExtractCustomMetadata(mergedMetadata);
+        var result = ExtractCustomMetadata(mergedMetadata);
+        _logger?.LogInformation("Successfully merged metadata for file {Path}, resulting in {Count} custom metadata entries", path, result.Count);
+
+        return result;
     }
 
     private BlobClient GetBlobClient(string path, string? version)
