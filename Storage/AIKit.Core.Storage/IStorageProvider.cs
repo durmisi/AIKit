@@ -1,5 +1,8 @@
 namespace AIKit.Storage;
 
+/// <summary>
+/// Defines the contract for storage providers that support versioning and metadata.
+/// </summary>
 public interface IStorageProvider
 {
     // -------- SAVE / WRITE --------

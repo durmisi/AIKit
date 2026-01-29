@@ -5,10 +5,17 @@ using Xunit.Abstractions;
 
 namespace AIKit.Storage.Tests;
 
+/// <summary>
+/// Tests for the StorageMetadata class.
+/// </summary>
 public class StorageMetadataTests
 {
     private readonly ITestOutputHelper _output;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StorageMetadataTests"/> class.
+    /// </summary>
+    /// <param name="output">The test output helper.</param>
     public StorageMetadataTests(ITestOutputHelper output)
     {
         _output = output;

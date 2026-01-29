@@ -4,14 +4,27 @@ using Xunit;
 
 namespace AIKit.Storage.Tests;
 
+/// <summary>
+/// Fixture for setting up Azurite (Azure Storage emulator) for testing.
+/// </summary>
 public class AzuriteFixture : IAsyncLifetime
 {
     private IContainer? _container;
 
+    /// <summary>
+    /// Gets a value indicating whether Azurite is available.
+    /// </summary>
     public bool IsAvailable { get; private set; }
 
+    /// <summary>
+    /// Gets the connection string for Azurite.
+    /// </summary>
     public string ConnectionString => "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;";
 
+    /// <summary>
+    /// Initializes the Azurite container asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeAsync()
     {
         try
@@ -34,6 +47,10 @@ public class AzuriteFixture : IAsyncLifetime
         }
     }
 
+    /// <summary>
+    /// Disposes the Azurite container asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DisposeAsync()
     {
         if (_container is not null)

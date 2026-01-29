@@ -1,6 +1,8 @@
 namespace AIKit.Storage;
 
-
+/// <summary>
+/// Represents options for a storage write operation.
+/// </summary>
 public sealed class StorageWriteOptions
 {
     /// <summary>
@@ -26,6 +28,9 @@ public sealed class StorageWriteOptions
     public string? VersionTag { get; init; }
 }
 
+/// <summary>
+/// Specifies the mode for writing to storage.
+/// </summary>
 public enum StorageWriteMode
 {
     /// <summary>

@@ -5,6 +5,9 @@ using Xunit.Abstractions;
 
 namespace AIKit.Storage.Tests;
 
+/// <summary>
+/// Tests for the Azure Blob Storage provider.
+/// </summary>
 public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<AzuriteFixture>
 {
     private readonly AzuriteFixture _fixture;
@@ -13,6 +16,11 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
     private bool _dockerAvailable;
     private readonly ITestOutputHelper _output;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AzureBlobStorageProviderTests"/> class.
+    /// </summary>
+    /// <param name="fixture">The Azurite fixture.</param>
+    /// <param name="output">The test output helper.</param>
     public AzureBlobStorageProviderTests(AzuriteFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
@@ -20,6 +28,10 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         _output = output;
     }
 
+    /// <summary>
+    /// Initializes the test asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeAsync()
     {
         _dockerAvailable = _fixture.IsAvailable;
@@ -30,6 +42,10 @@ public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<Azuri
         }
     }
 
+    /// <summary>
+    /// Disposes the test asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task DisposeAsync() => Task.CompletedTask;
 
     [SkippableFact]

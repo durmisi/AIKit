@@ -23,6 +23,11 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LocalVersionedStorageProvider"/> class.
+    /// </summary>
+    /// <param name="basePath">The base path for storing files.</param>
+    /// <param name="logger">Optional logger for logging operations.</param>
     public LocalVersionedStorageProvider(string basePath, ILogger<LocalVersionedStorageProvider>? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(basePath);
@@ -31,6 +36,14 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         Directory.CreateDirectory(_basePath);
     }
 
+    /// <summary>
+    /// Stores a file and returns the generated (or updated) version info.
+    /// </summary>
+    /// <param name="path">The path of the file to save.</param>
+    /// <param name="content">The content stream of the file.</param>
+    /// <param name="options">Optional write options.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The result of the save operation.</returns>
     public async Task<StorageWriteResult> SaveAsync(
         string path,
         Stream content,
@@ -142,6 +155,13 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         }
     }
 
+    /// <summary>
+    /// Reads a specific file version. If version is null, reads the latest.
+    /// </summary>
+    /// <param name="path">The path of the file to read.</param>
+    /// <param name="version">Optional version to read. If null, reads the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The read result if the file exists; otherwise, null.</returns>
     public async Task<StorageReadResult?> ReadAsync(
         string path,
         string? version = null,
@@ -190,6 +210,13 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         });
     }
 
+    /// <summary>
+    /// Deletes a file or a specific version (depending on provider capabilities).
+    /// </summary>
+    /// <param name="path">The path of the file to delete.</param>
+    /// <param name="version">Optional version to delete. If null, deletes the file and all versions.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     public async Task<bool> DeleteAsync(
         string path,
         string? version = null,
@@ -232,6 +259,13 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         return true;
     }
 
+    /// <summary>
+    /// Checks if a file or a specific version exists.
+    /// </summary>
+    /// <param name="path">The path of the file to check.</param>
+    /// <param name="version">Optional version to check. If null, checks the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>True if the file exists; otherwise, false.</returns>
     public async Task<bool> ExistsAsync(
         string path,
         string? version = null,
@@ -256,6 +290,13 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         return exists;
     }
 
+    /// <summary>
+    /// Gets metadata for a file or a specific version.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">Optional version to get metadata for. If null, gets for the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The metadata if available; otherwise, null.</returns>
     public async Task<StorageMetadata?> GetMetadataAsync(
         string path,
         string? version = null,
@@ -294,6 +335,12 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         };
     }
 
+    /// <summary>
+    /// Returns all versions of a file, latest first.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>A read-only list of version information.</returns>
     public Task<IReadOnlyList<StorageVersionInfo>> ListVersionsAsync(
         string path,
         CancellationToken cancellationToken = default)
@@ -349,6 +396,13 @@ public sealed class LocalVersionedStorageProvider : IStorageProvider
         return Task.FromResult<IReadOnlyList<StorageVersionInfo>>(result);
     }
 
+    /// <summary>
+    /// Restores a previous version as the new latest version.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">The version to restore.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The result of the restore operation.</returns>
     public async Task<StorageWriteResult> RestoreVersionAsync(
         string path,
         string version,

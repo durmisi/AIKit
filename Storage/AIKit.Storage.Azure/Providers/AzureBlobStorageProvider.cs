@@ -18,6 +18,12 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
     private readonly AzureBlobStorageOptions _options;
     private readonly ILogger<AzureBlobStorageProvider>? _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AzureBlobStorageProvider"/> class.
+    /// </summary>
+    /// <param name="containerClient">The blob container client.</param>
+    /// <param name="options">Optional configuration options.</param>
+    /// <param name="logger">Optional logger.</param>
     public AzureBlobStorageProvider(BlobContainerClient containerClient, AzureBlobStorageOptions? options = null, ILogger<AzureBlobStorageProvider>? logger = null)
     {
         _containerClient = containerClient ?? throw new ArgumentNullException(nameof(containerClient));
@@ -25,6 +31,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         _logger = logger;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AzureBlobStorageProvider"/> class.
+    /// </summary>
+    /// <param name="connectionString">The connection string for Azure Storage.</param>
+    /// <param name="containerName">The name of the blob container.</param>
+    /// <param name="options">Optional configuration options.</param>
+    /// <param name="logger">Optional logger.</param>
     public AzureBlobStorageProvider(string connectionString, string containerName, AzureBlobStorageOptions? options = null, ILogger<AzureBlobStorageProvider>? logger = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
@@ -50,6 +63,14 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         _logger?.LogInformation("Azure Blob Storage container {ContainerName} initialized", _containerClient.Name);
     }
 
+    /// <summary>
+    /// Stores a file and returns the generated (or updated) version info.
+    /// </summary>
+    /// <param name="path">The path of the file to save.</param>
+    /// <param name="content">The content stream of the file.</param>
+    /// <param name="options">Optional write options.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The result of the save operation.</returns>
     public async Task<StorageWriteResult> SaveAsync(
         string path,
         Stream content,
@@ -95,6 +116,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
             ExtractCustomMetadata(properties.Value.Metadata));
     }
 
+    /// <summary>
+    /// Reads a specific file version. If version is null, reads the latest.
+    /// </summary>
+    /// <param name="path">The path of the file to read.</param>
+    /// <param name="version">Optional version to read. If null, reads the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The read result if the file exists; otherwise, null.</returns>
     public async Task<StorageReadResult?> ReadAsync(
         string path,
         string? version = null,
@@ -128,6 +156,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
     }
 
+    /// <summary>
+    /// Deletes a file or a specific version (depending on provider capabilities).
+    /// </summary>
+    /// <param name="path">The path of the file to delete.</param>
+    /// <param name="version">Optional version to delete. If null, deletes the file and all versions.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>True if the deletion was successful; otherwise, false.</returns>
     public async Task<bool> DeleteAsync(
         string path,
         string? version = null,
@@ -161,6 +196,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
     }
 
+    /// <summary>
+    /// Checks if a file or a specific version exists.
+    /// </summary>
+    /// <param name="path">The path of the file to check.</param>
+    /// <param name="version">Optional version to check. If null, checks the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>True if the file exists; otherwise, false.</returns>
     public async Task<bool> ExistsAsync(
         string path,
         string? version = null,
@@ -184,6 +226,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
     }
 
+    /// <summary>
+    /// Gets metadata for a file or a specific version.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">Optional version to get metadata for. If null, gets for the latest.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The metadata if available; otherwise, null.</returns>
     public async Task<StorageMetadata?> GetMetadataAsync(
         string path,
         string? version = null,
@@ -215,6 +264,12 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         }
     }
 
+    /// <summary>
+    /// Returns all versions of a file, latest first.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>A read-only list of version information.</returns>
     public async Task<IReadOnlyList<StorageVersionInfo>> ListVersionsAsync(
         string path,
         CancellationToken cancellationToken = default)
@@ -256,6 +311,13 @@ public sealed class AzureBlobStorageProvider : IStorageProvider
         return result;
     }
 
+    /// <summary>
+    /// Restores a previous version as the new latest version.
+    /// </summary>
+    /// <param name="path">The path of the file.</param>
+    /// <param name="version">The version to restore.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The result of the restore operation.</returns>
     public async Task<StorageWriteResult> RestoreVersionAsync(
         string path,
         string version,

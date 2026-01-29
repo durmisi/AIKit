@@ -5,12 +5,19 @@ using Xunit.Abstractions;
 
 namespace AIKit.Storage.Tests;
 
+/// <summary>
+/// Tests for the local versioned storage provider.
+/// </summary>
 public class LocalVersionedStorageProviderTests : IDisposable
 {
     private readonly string _tempDirectory;
     private readonly LocalVersionedStorageProvider _provider;
     private readonly ITestOutputHelper _output;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LocalVersionedStorageProviderTests"/> class.
+    /// </summary>
+    /// <param name="output">The test output helper.</param>
     public LocalVersionedStorageProviderTests(ITestOutputHelper output)
     {
         _output = output;
@@ -18,6 +25,9 @@ public class LocalVersionedStorageProviderTests : IDisposable
         _provider = new LocalVersionedStorageProvider(_tempDirectory);
     }
 
+    /// <summary>
+    /// Disposes the test resources.
+    /// </summary>
     public void Dispose()
     {
         if (Directory.Exists(_tempDirectory))

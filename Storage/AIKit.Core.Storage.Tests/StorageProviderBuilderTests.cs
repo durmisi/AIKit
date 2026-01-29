@@ -4,6 +4,9 @@ using Xunit;
 
 namespace AIKit.Storage.Tests;
 
+/// <summary>
+/// Tests for the storage provider builders.
+/// </summary>
 public class StorageProviderBuilderTests
 {
     [Fact]
