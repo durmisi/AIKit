@@ -1,17 +1,17 @@
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.PromptTemplates.Liquid;
+using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace AIKit.Prompts.Liquid;
+namespace AIKit.Prompts.Handlebars;
 
-public sealed class LiquidPromptExecutor : IPromptExecutor
+public sealed class PromptExecutor : IPromptExecutor
 {
     private readonly Kernel _kernel;
-    private readonly LiquidPromptTemplateFactory _templateFactory;
+    private readonly HandlebarsPromptTemplateFactory _templateFactory;
 
     // Security limits
     private const int MaxTemplateLength = 50000;
@@ -20,17 +20,17 @@ public sealed class LiquidPromptExecutor : IPromptExecutor
     private const int MaxArgumentKeyLength = 100;
     private const int MaxArgumentValueLength = 10000;
 
-    public string TemplateType => "liquid";
+    public string TemplateType => "handlebars";
 
-    public LiquidPromptExecutor(IChatClient chatClient)
+    public PromptExecutor(IChatClient chatClient)
         : this(BuildKernel(chatClient))
     {
     }
 
-    public LiquidPromptExecutor(Kernel kernel)
+    public PromptExecutor(Kernel kernel)
     {
         _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        _templateFactory = new LiquidPromptTemplateFactory();
+        _templateFactory = new HandlebarsPromptTemplateFactory();
     }
 
     private static Kernel BuildKernel(IChatClient chatClient)
@@ -54,7 +54,7 @@ public sealed class LiquidPromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "LiquidPrompt",
+            Name = "HandlebarsPrompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -88,7 +88,7 @@ public sealed class LiquidPromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "LiquidPrompt",
+            Name = "HandlebarsPrompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -171,16 +171,16 @@ public sealed class LiquidPromptExecutor : IPromptExecutor
         var suspiciousPatterns = new[]
         {
             @"\{\{\s*\$",           // Dollar signs in variables
-            @"env\s*\.\s*",         // Environment variable access
-            @"global\s*\.",         // Global object access
-            @"window\s*\.",         // Browser window access
-            @"document\s*\.",       // DOM access
-            @"process\s*\.",        // Node.js process access
-            @"require\s*\(",        // Module require
-            @"import\s+",           // Import statements
-            @"eval\s*\(",           // Eval function
-            @"exec\s*\(",           // Exec function
-            @"system\s*\(",         // System calls
+            @"\{\{\s*env",          // Environment variable access
+            @"\{\{\s*global",       // Global object access
+            @"\{\{\s*window",       // Browser window access
+            @"\{\{\s*document",     // DOM access
+            @"\{\{\s*process",      // Node.js process access
+            @"\{\{\s*require",      // Module require
+            @"\{\{\s*import",       // Import statements
+            @"\{\{\s*eval",         // Eval function
+            @"\{\{\s*exec",         // Exec function
+            @"\{\{\s*system",       // System calls
         };
 
         foreach (var pattern in suspiciousPatterns)

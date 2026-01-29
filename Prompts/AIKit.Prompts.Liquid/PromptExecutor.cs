@@ -2,15 +2,16 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.PromptTemplates.Liquid;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace AIKit.Prompts.Jinja2;
+namespace AIKit.Prompts.Liquid;
 
-public sealed class Jinja2PromptExecutor : IPromptExecutor
+public sealed class PromptExecutor : IPromptExecutor
 {
     private readonly Kernel _kernel;
-    private readonly Jinja2PromptTemplateFactory _templateFactory;
+    private readonly LiquidPromptTemplateFactory _templateFactory;
 
     // Security limits
     private const int MaxTemplateLength = 50000;
@@ -19,17 +20,17 @@ public sealed class Jinja2PromptExecutor : IPromptExecutor
     private const int MaxArgumentKeyLength = 100;
     private const int MaxArgumentValueLength = 10000;
 
-    public string TemplateType => "jinja2";
+    public string TemplateType => "liquid";
 
-    public Jinja2PromptExecutor(IChatClient chatClient)
+    public PromptExecutor(IChatClient chatClient)
         : this(BuildKernel(chatClient))
     {
     }
 
-    public Jinja2PromptExecutor(Kernel kernel)
+    public PromptExecutor(Kernel kernel)
     {
         _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        _templateFactory = new Jinja2PromptTemplateFactory();
+        _templateFactory = new LiquidPromptTemplateFactory();
     }
 
     private static Kernel BuildKernel(IChatClient chatClient)
@@ -53,7 +54,7 @@ public sealed class Jinja2PromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "Jinja2Prompt",
+            Name = "LiquidPrompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -87,7 +88,7 @@ public sealed class Jinja2PromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "Jinja2Prompt",
+            Name = "LiquidPrompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -170,10 +171,7 @@ public sealed class Jinja2PromptExecutor : IPromptExecutor
         var suspiciousPatterns = new[]
         {
             @"\{\{\s*\$",           // Dollar signs in variables
-            @"\{\%\s*set\s+.*=.*import", // Import statements in Jinja2
-            @"\{\%\s*set\s+.*=.*exec",   // Exec in assignments
-            @"\{\%\s*set\s+.*=.*eval",   // Eval in assignments
-            @"env\s*\.",            // Environment variable access
+            @"env\s*\.\s*",         // Environment variable access
             @"global\s*\.",         // Global object access
             @"window\s*\.",         // Browser window access
             @"document\s*\.",       // DOM access
@@ -183,8 +181,6 @@ public sealed class Jinja2PromptExecutor : IPromptExecutor
             @"eval\s*\(",           // Eval function
             @"exec\s*\(",           // Exec function
             @"system\s*\(",         // System calls
-            @"__import__\s*\(",     // Python import
-            @"__builtins__",       // Python builtins
         };
 
         foreach (var pattern in suspiciousPatterns)

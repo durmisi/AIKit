@@ -44,7 +44,7 @@ public class PromptExecutorTests
     [Fact]
     public async Task LiquidPromptExecutor_RendersComplexTemplate_WithLoopsAndConditionals()
     {
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
+        var executor = new Liquid.PromptExecutor(_mockChatClient.Object);
 
         var template = """
             Hello {{ user.name }}!
@@ -96,7 +96,7 @@ public class PromptExecutorTests
     [Fact]
     public async Task LiquidPromptExecutor_HandlesMissingNestedProperties()
     {
-        var executor = new LiquidPromptExecutor(_mockChatClient.Object);
+        var executor = new Liquid.PromptExecutor(_mockChatClient.Object);
 
         var template = """
             User: {{ user.name }}
@@ -135,7 +135,7 @@ public class PromptExecutorTests
     [Fact]
     public async Task HandlebarsPromptExecutor_RendersComplexTemplate_WithEachAndIf()
     {
-        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
+        var executor = new Handlebars.PromptExecutor(_mockChatClient.Object);
 
         var template = """
             Hello {{user.name}}!
@@ -187,7 +187,7 @@ public class PromptExecutorTests
     [Fact]
     public async Task HandlebarsPromptExecutor_HandlesMissingCollection()
     {
-        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
+        var executor = new Handlebars.PromptExecutor(_mockChatClient.Object);
 
         var template = """
             Orders:
@@ -222,7 +222,7 @@ public class PromptExecutorTests
     {
         var executors = new List<IPromptExecutor>
         {
-            new LiquidPromptExecutor(_mockChatClient.Object)
+            new Liquid.PromptExecutor(_mockChatClient.Object)
         };
 
         var promptExecutor = new PromptExecutor(executors);
@@ -241,7 +241,7 @@ public class PromptExecutorTests
     [Fact]
     public async Task HandlebarsPromptExecutor_ExecuteStreamingAsync_WithComplexTemplate()
     {
-        var executor = new HandlebarsPromptExecutor(_mockChatClient.Object);
+        var executor = new Handlebars.PromptExecutor(_mockChatClient.Object);
 
         var template = "Hello {{name}}";
 

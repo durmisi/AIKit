@@ -1,17 +1,16 @@
-﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace AIKit.Prompts.Handlebars;
+namespace AIKit.Prompts.Jinja2;
 
-public sealed class HandlebarsPromptExecutor : IPromptExecutor
+public sealed class PromptExecutor : IPromptExecutor
 {
     private readonly Kernel _kernel;
-    private readonly HandlebarsPromptTemplateFactory _templateFactory;
+    private readonly Jinja2PromptTemplateFactory _templateFactory;
 
     // Security limits
     private const int MaxTemplateLength = 50000;
@@ -20,17 +19,17 @@ public sealed class HandlebarsPromptExecutor : IPromptExecutor
     private const int MaxArgumentKeyLength = 100;
     private const int MaxArgumentValueLength = 10000;
 
-    public string TemplateType => "handlebars";
+    public string TemplateType => "jinja2";
 
-    public HandlebarsPromptExecutor(IChatClient chatClient)
+    public PromptExecutor(IChatClient chatClient)
         : this(BuildKernel(chatClient))
     {
     }
 
-    public HandlebarsPromptExecutor(Kernel kernel)
+    public PromptExecutor(Kernel kernel)
     {
         _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        _templateFactory = new HandlebarsPromptTemplateFactory();
+        _templateFactory = new Jinja2PromptTemplateFactory();
     }
 
     private static Kernel BuildKernel(IChatClient chatClient)
@@ -54,7 +53,7 @@ public sealed class HandlebarsPromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "HandlebarsPrompt",
+            Name = "Jinja2Prompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -88,7 +87,7 @@ public sealed class HandlebarsPromptExecutor : IPromptExecutor
 
         var config = new PromptTemplateConfig
         {
-            Name = "HandlebarsPrompt",
+            Name = "Jinja2Prompt",
             Template = template,
             TemplateFormat = TemplateType,
         };
@@ -171,16 +170,21 @@ public sealed class HandlebarsPromptExecutor : IPromptExecutor
         var suspiciousPatterns = new[]
         {
             @"\{\{\s*\$",           // Dollar signs in variables
-            @"\{\{\s*env",          // Environment variable access
-            @"\{\{\s*global",       // Global object access
-            @"\{\{\s*window",       // Browser window access
-            @"\{\{\s*document",     // DOM access
-            @"\{\{\s*process",      // Node.js process access
-            @"\{\{\s*require",      // Module require
-            @"\{\{\s*import",       // Import statements
-            @"\{\{\s*eval",         // Eval function
-            @"\{\{\s*exec",         // Exec function
-            @"\{\{\s*system",       // System calls
+            @"\{\%\s*set\s+.*=.*import", // Import statements in Jinja2
+            @"\{\%\s*set\s+.*=.*exec",   // Exec in assignments
+            @"\{\%\s*set\s+.*=.*eval",   // Eval in assignments
+            @"env\s*\.",            // Environment variable access
+            @"global\s*\.",         // Global object access
+            @"window\s*\.",         // Browser window access
+            @"document\s*\.",       // DOM access
+            @"process\s*\.",        // Node.js process access
+            @"require\s*\(",        // Module require
+            @"import\s+",           // Import statements
+            @"eval\s*\(",           // Eval function
+            @"exec\s*\(",           // Exec function
+            @"system\s*\(",         // System calls
+            @"__import__\s*\(",     // Python import
+            @"__builtins__",       // Python builtins
         };
 
         foreach (var pattern in suspiciousPatterns)
