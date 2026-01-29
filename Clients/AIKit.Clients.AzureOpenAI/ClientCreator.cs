@@ -1,6 +1,7 @@
 using Azure;
 using Azure.AI.Inference;
 using Azure.Core;
+using Azure.Core.Pipeline;
 using Azure.Identity;
 using System.Net;
 
@@ -35,6 +36,8 @@ internal static class ClientCreator
         string? userAgent = null,
         Dictionary<string, string>? customHeaders = null)
     {
+        var options = new AzureAIInferenceClientOptions();
+
         if (httpClient == null)
         {
             var handler = new HttpClientHandler();
@@ -46,7 +49,7 @@ internal static class ClientCreator
         }
         else if (proxy != null)
         {
-            // Log warning if needed, but since no logger, skip
+            // HttpClient provided, proxy ignored
         }
 
         if (!string.IsNullOrEmpty(userAgent))
@@ -62,25 +65,30 @@ internal static class ClientCreator
             }
         }
 
+        options.Transport = new HttpClientTransport(httpClient);
+
         ChatCompletionsClient client;
 
         if (tokenCredential != null)
         {
             client = new ChatCompletionsClient(
                 new Uri(endpoint),
-                tokenCredential);
+                tokenCredential,
+                options);
         }
         else if (useDefaultAzureCredential)
         {
             client = new ChatCompletionsClient(
                 new Uri(endpoint),
-                new DefaultAzureCredential());
+                new DefaultAzureCredential(),
+                options);
         }
         else
         {
             client = new ChatCompletionsClient(
                 new Uri(endpoint),
-                new AzureKeyCredential(apiKey!));
+                new AzureKeyCredential(apiKey!),
+                options);
         }
 
         return client;
@@ -93,32 +101,76 @@ internal static class ClientCreator
     /// <param name="apiKey">The API key (optional if using credential).</param>
     /// <param name="useDefaultAzureCredential">Whether to use default Azure credential.</param>
     /// <param name="tokenCredential">Custom token credential.</param>
+    /// <param name="httpClient">Optional pre-configured HttpClient.</param>
+    /// <param name="proxy">Optional web proxy.</param>
+    /// <param name="timeoutSeconds">Timeout in seconds.</param>
+    /// <param name="userAgent">Optional user agent.</param>
+    /// <param name="customHeaders">Optional custom headers.</param>
     /// <returns>The configured EmbeddingsClient.</returns>
     internal static EmbeddingsClient CreateEmbeddingsClient(
         string endpoint,
         string? apiKey = null,
         bool useDefaultAzureCredential = false,
-        TokenCredential? tokenCredential = null)
+        TokenCredential? tokenCredential = null,
+        HttpClient? httpClient = null,
+        IWebProxy? proxy = null,
+        int timeoutSeconds = 30,
+        string? userAgent = null,
+        Dictionary<string, string>? customHeaders = null)
     {
+        var options = new AzureAIInferenceClientOptions();
+
+        if (httpClient == null)
+        {
+            var handler = new HttpClientHandler();
+            if (proxy != null)
+            {
+                handler.Proxy = proxy;
+            }
+            httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
+        }
+        else if (proxy != null)
+        {
+            // HttpClient provided, proxy ignored
+        }
+
+        if (!string.IsNullOrEmpty(userAgent))
+        {
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
+        }
+
+        if (customHeaders != null)
+        {
+            foreach (var kvp in customHeaders)
+            {
+                httpClient.DefaultRequestHeaders.Add(kvp.Key, kvp.Value);
+            }
+        }
+
+        options.Transport = new HttpClientTransport(httpClient);
+
         EmbeddingsClient client;
 
         if (tokenCredential != null)
         {
             client = new EmbeddingsClient(
                 new Uri(endpoint),
-                tokenCredential);
+                tokenCredential,
+                options);
         }
         else if (useDefaultAzureCredential)
         {
             client = new EmbeddingsClient(
                 new Uri(endpoint),
-                new DefaultAzureCredential());
+                new DefaultAzureCredential(),
+                options);
         }
         else
         {
             client = new EmbeddingsClient(
                 new Uri(endpoint),
-                new AzureKeyCredential(apiKey!));
+                new AzureKeyCredential(apiKey!),
+                options);
         }
 
         return client;
