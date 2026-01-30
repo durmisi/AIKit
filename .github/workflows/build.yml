@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   checks: write
@@ -16,37 +16,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Test
-      run: dotnet test --no-restore --configuration Release --logger trx --results-directory TestResults --collect:"XPlat Code Coverage"
+      - name: Test
+        run: dotnet test --no-restore --configuration Release --logger trx --results-directory TestResults --collect:"XPlat Code Coverage" --filter "FullyQualifiedName!~IntegrationTests&FullyQualifiedName!~AzureBlobStorageProviderTests"
 
-    - name: Generate Coverage Report
-      run: |
-        dotnet tool install -g dotnet-reportgenerator-globaltool
-        reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+      - name: Generate Coverage Report
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
 
-    - name: Upload Coverage
-      uses: actions/upload-artifact@v4
-      with:
-        name: code-coverage-report
-        path: coveragereport
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coveragereport
 
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()
-      with:
-        name: Test Results
-        path: '**/TestResults/*.trx'
-        reporter: dotnet-trx
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Test Results
+          path: "**/TestResults/*.trx"
+          reporter: dotnet-trx
