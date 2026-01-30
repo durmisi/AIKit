@@ -25,7 +25,7 @@
     <Project Path="Prompts/AIKit.Prompts/AIKit.Prompts.csproj" />
   </Folder>
   <Folder Name="/Samples/">
-    <Project Path="../samples/AIKit.Samples.BasicRAG/AIKit.Samples.BasicRAG.csproj" Id="9d77df39-08ee-4ac7-b7e5-cb6e8c92ab90" />
+    <Project Path="Samples/AIKit.Samples.BasicRAG/AIKit.Samples.BasicRAG.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
