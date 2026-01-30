@@ -8,7 +8,7 @@
     <Authors>Admir Durmishi</Authors>
     <Description>Prompt management abstractions for AIKit.</Description>
     <PackageTags>AI;Prompts</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>

@@ -7,7 +7,7 @@
     <PackageId>AIKit.Storage</PackageId>
     <Description>Storage abstractions for AIKit.</Description>
     <Authors>Admir Durmishi</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>AI;Storage</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

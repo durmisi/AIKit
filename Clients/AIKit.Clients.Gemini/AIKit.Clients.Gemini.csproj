@@ -5,8 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>AIKit.Clients.Gemini</PackageId>
-		<Version>1.0.0</Version>
 		<Authors>AIKit Team</Authors>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<Description>Google Gemini client provider for AIKit, supporting chat.</Description>
 		<PackageTags>AI, Gemini, Google, Chat</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>

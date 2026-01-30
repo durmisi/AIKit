@@ -5,8 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>AIKit.VectorStores.CosmosMongoDB</PackageId>
-		<Version>1.0.0</Version>
 		<Authors>AIKit Team</Authors>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<Description>CosmosMongoDB vector store provider for AIKit.</Description>
 		<PackageTags>AI, VectorStore, CosmosMongoDB</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>

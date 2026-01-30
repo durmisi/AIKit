@@ -9,7 +9,7 @@
 		<Description>In-memory vector store provider for AIKit.</Description>
 		<PackageTags>AI, VectorStore, InMemory</PackageTags>
 		<RepositoryUrl>https://github.com/durmisi/AIKit</RepositoryUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>NU5104</NoWarn>
