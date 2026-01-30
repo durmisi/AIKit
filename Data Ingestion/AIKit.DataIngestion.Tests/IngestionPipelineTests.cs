@@ -28,12 +28,14 @@ public class IngestionPipelineTests
         //IChatClient chatClient = new MockChatClient();
         //processors.Add(".jpg", new[] { new ImageAlternativeTextProcessor(new EnricherOptions(chatClient)) });
 
-        var chunkingStrategy = new SectionBasedChunkingStrategy(new ChunkingOptions
-        {
-            MaxTokensPerChunk = 100,
-            OverlapTokens = 10,
-            Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
-        });
+        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
+        var chunkingStrategy = new SectionBasedChunkingStrategy(
+            tokenizer,
+            new ChunkingOptions
+            {
+                MaxTokensPerChunk = 100,
+                OverlapTokens = 10
+            });
 
         var context = new DataIngestionContext();
 
@@ -66,12 +68,14 @@ public class IngestionPipelineTests
 
         var processors = new Dictionary<string, IEnumerable<IIngestionDocumentProcessor>>();
 
-        var chunkingStrategy = new SectionBasedChunkingStrategy(new ChunkingOptions
-        {
-            MaxTokensPerChunk = 100,
-            OverlapTokens = 10,
-            Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
-        });
+        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
+        var chunkingStrategy = new SectionBasedChunkingStrategy(
+            tokenizer,
+            new ChunkingOptions
+            {
+                MaxTokensPerChunk = 100,
+                OverlapTokens = 10
+            });
 
         var context = new DataIngestionContext();
 
@@ -136,12 +140,14 @@ public class IngestionPipelineTests
             { ".md", new[] { new FailingProcessor() } }
         };
 
-        var chunkingStrategy = new SectionBasedChunkingStrategy(new ChunkingOptions
-        {
-            MaxTokensPerChunk = 100,
-            OverlapTokens = 10,
-            Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
-        });
+        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");  
+        var chunkingStrategy = new SectionBasedChunkingStrategy(
+            tokenizer,
+            new ChunkingOptions
+            {
+                MaxTokensPerChunk = 100,
+                OverlapTokens = 10
+            });
 
         var context = new DataIngestionContext();
 

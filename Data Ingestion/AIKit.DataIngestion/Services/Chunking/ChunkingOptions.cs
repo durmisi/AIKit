@@ -1,6 +1,3 @@
-using Microsoft.Extensions.AI;
-using Microsoft.ML.Tokenizers;
-
 namespace AIKit.Core.Ingestion.Services.Chunking;
 
 public sealed class ChunkingOptions
@@ -9,7 +6,4 @@ public sealed class ChunkingOptions
 
     public int OverlapTokens { get; init; } = 0;
 
-    public Tokenizer? Tokenizer { get; init; }
-
-    public IEmbeddingGenerator<string, Embedding<float>>? EmbeddingGenerator { get; init; }
 }
