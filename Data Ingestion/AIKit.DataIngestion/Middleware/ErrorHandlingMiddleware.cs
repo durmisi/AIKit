@@ -1,6 +1,7 @@
+using AIKit.DataIngestion;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion.Middleware;
+namespace AIKit.DataIngestion.Middleware;
 
 /// <summary>
 /// Middleware that catches exceptions during pipeline execution and adds error messages to the context.

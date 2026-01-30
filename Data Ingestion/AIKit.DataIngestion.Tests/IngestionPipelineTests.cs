@@ -1,7 +1,8 @@
-﻿using AIKit.Core.Ingestion.Middleware;
-using AIKit.Core.Ingestion.Services.Chunking;
-using AIKit.Core.Ingestion.Services.Processors;
-using AIKit.Core.Ingestion.Services.Providers;
+﻿using AIKit.DataIngestion;
+using AIKit.DataIngestion.Middleware;
+using AIKit.DataIngestion.Services.Chunking;
+using AIKit.DataIngestion.Services.Processors;
+using AIKit.DataIngestion.Services.Providers;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.ML.Tokenizers;
 

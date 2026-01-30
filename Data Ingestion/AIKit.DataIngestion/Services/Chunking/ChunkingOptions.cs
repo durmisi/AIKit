@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion.Services.Chunking;
+namespace AIKit.DataIngestion.Services.Chunking;
 
 public sealed class ChunkingOptions
 {

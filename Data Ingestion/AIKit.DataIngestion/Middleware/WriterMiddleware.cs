@@ -1,8 +1,9 @@
-using AIKit.Core.Ingestion.Services.Writers;
+using AIKit.DataIngestion;
+using AIKit.DataIngestion.Services.Writers;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion.Middleware;
+namespace AIKit.DataIngestion.Middleware;
 
 public sealed class WriterMiddleware : IIngestionMiddleware<DataIngestionContext>
 {

@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion.Services.Providers;
+namespace AIKit.DataIngestion.Services.Providers;
 
 public interface IIngestionFileProvider
 {

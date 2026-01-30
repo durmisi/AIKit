@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion;
+namespace AIKit.DataIngestion;
 
 public sealed class DataIngestionContext : IngestionContext
 {

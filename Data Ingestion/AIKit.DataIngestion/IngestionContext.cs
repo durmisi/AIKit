@@ -1,4 +1,4 @@
-namespace AIKit.Core.Ingestion;
+namespace AIKit.DataIngestion;
 
 /// <summary>
 /// Base class for ingestion contexts that provides error tracking.

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DataIngestion;
 
-namespace AIKit.Core.Ingestion.Services.Writers;
+namespace AIKit.DataIngestion.Services.Writers;
 
 public interface IDocumentWriter
 {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DataIngestion;
 using System.Runtime.CompilerServices;
 
-namespace AIKit.Core.Ingestion.Services.Chunking;
+namespace AIKit.DataIngestion.Services.Processors;
 
 public sealed class SummaryChunkProcessor : IChunkProcessor
 {

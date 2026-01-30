@@ -1,7 +1,7 @@
-using AIKit.Core.Ingestion.Middleware;
+using AIKit.DataIngestion.Middleware;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion;
+namespace AIKit.DataIngestion;
 
 /// <summary>
 /// Builder for constructing an <see cref="IngestionPipeline{T}"/> with a fluent API.

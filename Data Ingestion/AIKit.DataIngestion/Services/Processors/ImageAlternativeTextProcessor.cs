@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DataIngestion;
 
-namespace AIKit.Core.Ingestion.Services.Processors;
+namespace AIKit.DataIngestion.Services.Processors;
 
 public sealed class ImageAlternativeTextProcessor : IIngestionDocumentProcessor
 {

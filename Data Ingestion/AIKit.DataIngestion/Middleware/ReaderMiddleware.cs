@@ -1,9 +1,10 @@
-using AIKit.Core.Ingestion.Services.Processors;
-using AIKit.Core.Ingestion.Services.Providers;
+using AIKit.DataIngestion;
+using AIKit.DataIngestion.Services.Processors;
+using AIKit.DataIngestion.Services.Providers;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion.Middleware;
+namespace AIKit.DataIngestion.Middleware;
 
 public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext>
 {

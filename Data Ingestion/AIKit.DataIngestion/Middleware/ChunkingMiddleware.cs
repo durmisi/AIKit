@@ -1,8 +1,10 @@
-using AIKit.Core.Ingestion.Services.Chunking;
+using AIKit.DataIngestion;
+using AIKit.DataIngestion.Services.Chunking;
+using AIKit.DataIngestion.Services.Processors;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
 
-namespace AIKit.Core.Ingestion.Middleware;
+namespace AIKit.DataIngestion.Middleware;
 
 public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionContext>
 {

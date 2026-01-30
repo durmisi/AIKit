@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace AIKit.Core.Ingestion.Services.Providers;
+namespace AIKit.DataIngestion.Services.Providers;
 
 public sealed class FileSystemFileProvider : IIngestionFileProvider
 {

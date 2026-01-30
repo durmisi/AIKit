@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DataIngestion;
 
-namespace AIKit.Core.Ingestion.Services.Chunking;
+namespace AIKit.DataIngestion.Services.Processors;
 
 public interface IChunkProcessor
 {
