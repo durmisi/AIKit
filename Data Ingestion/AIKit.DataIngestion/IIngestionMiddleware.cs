@@ -1,4 +1,4 @@
-namespace AIKit.DataIngestion.Middleware;
+namespace AIKit.DataIngestion;
 
 /// <summary>
 /// Represents a delegate for the next step in the ingestion pipeline.

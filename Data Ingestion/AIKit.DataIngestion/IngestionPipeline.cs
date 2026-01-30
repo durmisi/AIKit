@@ -1,4 +1,3 @@
-using AIKit.DataIngestion.Middleware;
 using Microsoft.Extensions.Logging;
 
 namespace AIKit.DataIngestion;
@@ -7,7 +6,7 @@ namespace AIKit.DataIngestion;
 /// Represents a pipeline for executing middleware on a context of type T.
 /// </summary>
 /// <typeparam name="T">The type of the context.</typeparam>
-public class IngestionPipeline<T>
+public class IngestionPipeline<T> where T : IngestionContext
 {
     private readonly IList<Func<IngestionDelegate<T>, IngestionDelegate<T>>> _components;
     private readonly ILoggerFactory? _loggerFactory;

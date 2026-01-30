@@ -7,7 +7,7 @@ public sealed class DataIngestionContext : IngestionContext
 {
     public IList<IngestionDocument> Documents { get; } = [];
 
-    public IDictionary<string, List<IngestionChunk<string>>> DocumentChunks { get; } = new Dictionary<string, List<IngestionChunk<string>>>();
+    public IDictionary<string, IReadOnlyList<IngestionChunk<string>>> DocumentChunks { get; } = new Dictionary<string, IReadOnlyList<IngestionChunk<string>>>();
 
     public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 

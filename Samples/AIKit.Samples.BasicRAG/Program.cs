@@ -1,45 +1,60 @@
 ﻿using AIKit.Clients.GitHub;
-using AIKit.Core.Ingestion;
-using AIKit.Core.Ingestion.Services.Chunking;
+using AIKit.DataIngestion;
+using AIKit.DataIngestion.Services.Chunking;
 using AIKit.VectorStores.InMemory;
+using Microsoft.Extensions.DataIngestion;
 using Microsoft.ML.Tokenizers;
+
+var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("");
 
 // 1. Set up AI client
 var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
-    .WithGitHubToken("your-github-token")
+    .WithGitHubToken(gitHubToken)
     .WithModel("gpt-4o-mini")
     .Build();
 
 // 2. Set up embedding generator
 var embeddingGenerator = new EmbeddingGeneratorBuilder()
-    .WithGitHubToken("your-github-token")
+    .WithGitHubToken(gitHubToken)
     .WithModel("text-embedding-ada-002")
     .Build();
 
 // 3. Create vector store
 var vectorStore = new VectorStoreBuilder().Build();
 
-await vectorStore.CollectionExistsAsync("my-collection");
+await vectorStore.CollectionExistsAsync("My-vectors");
 
 // 4. Build ingestion pipeline
-
-var chunkingStrategy = new SectionBasedChunkingStrategy(new ChunkingOptions
+var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
+var chunkingStrategy = new SectionBasedChunkingStrategy(tokenizer, new ChunkingOptions
 {
     MaxTokensPerChunk = 100,
-    OverlapTokens = 10,
-    Tokenizer = TiktokenTokenizer.CreateForModel("gpt-4")
+    OverlapTokens = 10
 });
 
-var pipeline = new IngestionPipelineBuilder<IngestionContext>()
+var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
     .Use(next => async (ctx, ct) =>
     {
         Console.WriteLine("Starting ingestion...");
+
+        var markDownReader = new MarkdownReader();
+        var doc1 = await markDownReader.ReadAsync(new FileInfo(""), "Document1");
+
+        ctx.Documents.Add(doc1);
+
         await next(ctx, ct);
     })
     .Use(next => async (ctx, ct) =>
     {
         Console.WriteLine("Step 2: Chunking data...");
-        await next(ctx, ct);    
+        
+        foreach (var document in ctx.Documents)
+        {
+            var chunks = await chunkingStrategy.Chunk(document);
+            ctx.DocumentChunks[document.Identifier] = chunks;
+        }
+
+        await next(ctx, ct);
     })
     .Use(next => async (ctx, ct) =>
     {
@@ -48,26 +63,24 @@ var pipeline = new IngestionPipelineBuilder<IngestionContext>()
     })
    .Build();
 
-////// 5. Ingest data
-await pipeline.ExecuteAsync(new IngestionContext
-{
-    DocumentId = "doc1",
-    Content = @"
+// 5. Ingest data
+await pipeline.ExecuteAsync(new DataIngestionContext());
 
+//await pipeline.ExecuteAsync(new IngestionContext
+//{
+//    DocumentId = "doc1",
+//    Content = @"
 //AIKit is a comprehensive .NET library built for .NET 10 that simplifies integrating AI into your applications. 
 //Whether you're building chatbots, RAG (Retrieval-Augmented Generation) systems, or AI-powered tools, 
 //AIKit provides a unified API to interact with multiple AI providers, vector databases, storage solutions, 
 //and more—without vendor lock-in. Designed for .NET developers, it abstracts complexities so you can focus on your app's logic.
-
 //"
-}, CancellationToken.None);
+//}, CancellationToken.None);
 
-////// 6. Query with RAG
+// 6. Query with RAG
 //var texts = new List<string> { "What is AIKit?", "AI embeddings are cool" };
-
 //var queryEmbeddings = await embeddingGenerator.GenerateAsync(texts, new EmbeddingGenerationOptions
 //{
-
 //});
 
 //foreach (var embedding in queryEmbeddings)
@@ -79,18 +92,3 @@ await pipeline.ExecuteAsync(new IngestionContext
 ////var context = string.Join("\n", searchResults.Select(r => r.Record.Metadata["content"]));
 ////var prompt = $"Context: {context}\nQuestion: What is AIKit?";
 ////var answer = await chatClient.GetResponseAsync(prompt);
-/// 
-/// 
-/// 
-
-
-class IngestionContext
-{
-    public string DocumentId { get; set; }
-    
-    public string Content { get; set; }
-
-    public List<string>? Chunks { get; set; }
-
-    public List<float[]>? Embeddings { get; set; }
-}
