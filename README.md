@@ -157,20 +157,26 @@ var chatClient = new ChatClientBuilder()
     .WithApiKey("your-api-key")
     .Build();
 
-// 2. Create vector store
+// 2. Set up embedding generator
+var embeddingGenerator = new EmbeddingGeneratorBuilder()
+    .WithApiKey("your-api-key")
+    .WithModelId("text-embedding-ada-002")
+    .Build();
+
+// 3. Create vector store
 var vectorStore = new InMemoryVectorStore();
 
-// 3. Build ingestion pipeline
+// 4. Build ingestion pipeline
 var pipeline = new IngestionPipelineBuilder<string>()
     .WithChunking(new TokenChunkingStrategy(512)) // Chunk text
     .WithWriter(new VectorStoreWriter(vectorStore, chatClient)) // Index to store
     .Build();
 
-// 4. Ingest data
+// 5. Ingest data
 await pipeline.ProcessAsync("Your large text document here.");
 
-// 5. Query with RAG
-var queryEmbedding = await chatClient.GetEmbeddingAsync("What is AIKit?");
+// 6. Query with RAG
+var queryEmbedding = await embeddingGenerator.GenerateAsync("What is AIKit?");
 var searchResults = await vectorStore.SearchAsync(queryEmbedding.Vector, new VectorSearchOptions { Top = 3 });
 var context = string.Join("\n", searchResults.Select(r => r.Record.Metadata["content"]));
 var prompt = $"Context: {context}\nQuestion: What is AIKit?";
