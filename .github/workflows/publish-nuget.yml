@@ -33,7 +33,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run tests (optional)
-        run: dotnet test --configuration Release --no-build
+        run: dotnet test --configuration Release --no-build --filter "FullyQualifiedName!~IntegrationTests&FullyQualifiedName!~AzureBlobStorageProviderTests"
 
       - name: Pack NuGet packages
         run: dotnet pack --configuration Release --no-build --output ./nupkgs --version ${{ steps.version.outputs.version }}

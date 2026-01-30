@@ -1,9 +1,11 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Shouldly;
+using Xunit;
 
 namespace AIKit.VectorStores.Tests;
 
+[Trait("Category", "RequiresDocker")]
 public class RedisIntegrationTests : IAsyncLifetime
 {
     private IContainer _redisContainer = null!;

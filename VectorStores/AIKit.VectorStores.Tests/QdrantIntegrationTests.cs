@@ -2,9 +2,11 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.VectorData;
 using Shouldly;
+using Xunit;
 
 namespace AIKit.VectorStores.Tests;
 
+[Trait("Category", "RequiresDocker")]
 public class QdrantIntegrationTests : IAsyncLifetime
 {
     private IContainer _qdrantContainer = null!;

@@ -1,9 +1,11 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Shouldly;
+using Xunit;
 
 namespace AIKit.VectorStores.Tests;
 
+[Trait("Category", "RequiresDocker")]
 public class ElasticsearchIntegrationTests : IAsyncLifetime
 {
     private IContainer _elasticsearchContainer = null!;

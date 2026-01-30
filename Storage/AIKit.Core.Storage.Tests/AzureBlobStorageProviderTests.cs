@@ -8,6 +8,7 @@ namespace AIKit.Storage.Tests;
 /// <summary>
 /// Tests for the Azure Blob Storage provider.
 /// </summary>
+[Trait("Category", "RequiresDocker")]
 public class AzureBlobStorageProviderTests : IAsyncLifetime, IClassFixture<AzuriteFixture>
 {
     private readonly AzuriteFixture _fixture;

@@ -6,9 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.VectorData;
 using Shouldly;
+using Xunit;
 
 namespace AIKit.VectorStores.Tests;
 
+[Trait("Category", "RequiresDocker")]
 public class WeaviateIntegrationTests : IAsyncLifetime
 {
     private IContainer _weaviateContainer = null!;
