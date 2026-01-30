@@ -2,10 +2,12 @@
 using AIKit.DataIngestion;
 using AIKit.DataIngestion.Services.Chunking;
 using AIKit.VectorStores.InMemory;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
+using Microsoft.Extensions.VectorData;
 using Microsoft.ML.Tokenizers;
 
-var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("");
+var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("Please provide a valid github token");
 
 // 1. Set up AI client
 var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
@@ -78,17 +80,17 @@ await pipeline.ExecuteAsync(new DataIngestionContext());
 //}, CancellationToken.None);
 
 // 6. Query with RAG
-//var texts = new List<string> { "What is AIKit?", "AI embeddings are cool" };
-//var queryEmbeddings = await embeddingGenerator.GenerateAsync(texts, new EmbeddingGenerationOptions
-//{
-//});
+var queryEmbedding = await embeddingGenerator.GenerateAsync("What is AIKit?");
 
 //foreach (var embedding in queryEmbeddings)
 //{
 //    Console.WriteLine($"Vector length: {embedding.Vector.Length}");
 //}
 
-////var searchResults = await vectorStore.SearchAsync(queryEmbedding.Vector, new VectorSearchOptions { Top = 3 });
+//var searchResults = await vectorStore.SearchAsync(queryEmbedding.Vector, 
+//    new VectorSearchOptions { Top = 3 });
+
+
 ////var context = string.Join("\n", searchResults.Select(r => r.Record.Metadata["content"]));
 ////var prompt = $"Context: {context}\nQuestion: What is AIKit?";
 ////var answer = await chatClient.GetResponseAsync(prompt);
