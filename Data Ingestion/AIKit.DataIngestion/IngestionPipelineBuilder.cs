@@ -7,7 +7,7 @@ namespace AIKit.Core.Ingestion;
 /// Builder for constructing an <see cref="IngestionPipeline{T}"/> with a fluent API.
 /// </summary>
 /// <typeparam name="T">The type of the context.</typeparam>
-public class IngestionPipelineBuilder<T>
+public class IngestionPipelineBuilder<T> where T : IngestionContext
 {
     private readonly List<Func<IngestionDelegate<T>, IngestionDelegate<T>>> _components = new();
     private ILoggerFactory? _loggerFactory;
