@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.Core.Ingestion\AIKit.DataIngestion.csproj" />
+    <Content Include="TestData\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="..\AIKit.DataIngestion\AIKit.DataIngestion.csproj" />
   </ItemGroup>
 
   <ItemGroup>
