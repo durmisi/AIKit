@@ -14,8 +14,8 @@
     <Project Path="Clients/AIKit.Clients/AIKit.Clients.csproj" />
   </Folder>
   <Folder Name="/Data Ingestion/">
-    <Project Path="Ingestion/AIKit.Core.Ingestion.Tests/AIKit.Core.Ingestion.Tests.csproj" />
-    <Project Path="Ingestion/AIKit.Core.Ingestion/AIKit.Core.Ingestion.csproj" Id="0cb86e91-acdf-4b3c-a961-9768dcfd365f" />
+    <Project Path="Ingestion/AIKit.Core.Ingestion.Tests/AIKit.DataIngestion.Tests.csproj" />
+    <Project Path="Ingestion/AIKit.Core.Ingestion/AIKit.DataIngestion.csproj" Id="0cb86e91-acdf-4b3c-a961-9768dcfd365f" />
   </Folder>
   <Folder Name="/Prompts/">
     <Project Path="Prompts/AIKit.Prompts.Handlebars/AIKit.Prompts.Handlebars.csproj" Id="14fcccc2-57a3-4d67-8b11-4978f0774fed" />
@@ -23,6 +23,9 @@
     <Project Path="Prompts/AIKit.Prompts.Liquid/AIKit.Prompts.Liquid.csproj" />
     <Project Path="Prompts/AIKit.Prompts.Tests/AIKit.Prompts.Tests.csproj" />
     <Project Path="Prompts/AIKit.Prompts/AIKit.Prompts.csproj" />
+  </Folder>
+  <Folder Name="/Samples/">
+    <Project Path="../samples/AIKit.Samples.BasicRAG/AIKit.Samples.BasicRAG.csproj" Id="9d77df39-08ee-4ac7-b7e5-cb6e8c92ab90" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

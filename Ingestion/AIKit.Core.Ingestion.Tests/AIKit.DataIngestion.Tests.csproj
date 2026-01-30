@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.Core.Ingestion\AIKit.Core.Ingestion.csproj" />
+    <ProjectReference Include="..\AIKit.Core.Ingestion\AIKit.DataIngestion.csproj" />
   </ItemGroup>
 
   <ItemGroup>
