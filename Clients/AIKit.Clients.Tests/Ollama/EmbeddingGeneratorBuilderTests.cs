@@ -13,7 +13,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("http://localhost:11434")
-            .WithModelId("nomic-embed-text");
+            .WithModel("nomic-embed-text");
 
         // Act
         var result = builder.Provider;
@@ -27,7 +27,7 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
-            .WithModelId("nomic-embed-text");
+            .WithModel("nomic-embed-text");
 
         // Act
         Action act = () => builder.Build();
@@ -43,7 +43,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("http://localhost:11434")
-            .WithModelId("nomic-embed-text");
+            .WithModel("nomic-embed-text");
 
         // Act
         var generator = builder.Build();

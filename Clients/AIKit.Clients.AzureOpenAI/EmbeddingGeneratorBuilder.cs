@@ -10,7 +10,7 @@ namespace AIKit.Clients.AzureOpenAI;
 public sealed class EmbeddingGeneratorBuilder
 {
     private string? _endpoint;
-    private string? _modelId;
+    private string? _model;
     private string? _apiKey;
     private bool _useDefaultAzureCredential;
     private TokenCredential? _tokenCredential;
@@ -31,13 +31,13 @@ public sealed class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
-    /// Sets the model ID.
+    /// Sets the model.
     /// </summary>
-    /// <param name="modelId">The model ID.</param>
+    /// <param name="model">The model.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModelId(string modelId)
+    public EmbeddingGeneratorBuilder WithModel(string model)
     {
-        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
+        _model = model ?? throw new ArgumentNullException(nameof(model));
         return this;
     }
 
@@ -132,14 +132,14 @@ public sealed class EmbeddingGeneratorBuilder
         if (string.IsNullOrWhiteSpace(_endpoint))
             throw new InvalidOperationException("Endpoint is required. Call WithEndpoint().");
 
-        if (string.IsNullOrWhiteSpace(_modelId))
-            throw new InvalidOperationException("ModelId is required. Call WithModelId().");
+        if (string.IsNullOrWhiteSpace(_model))
+            throw new InvalidOperationException("Model is required. Call WithModel().");
 
         if (_tokenCredential == null && !_useDefaultAzureCredential && string.IsNullOrWhiteSpace(_apiKey))
             throw new InvalidOperationException("Either ApiKey, DefaultAzureCredential, or TokenCredential is required. Call WithApiKey(), WithDefaultAzureCredential(), or WithTokenCredential().");
 
         var client = ClientCreator.CreateEmbeddingsClient(_endpoint!, _apiKey, _useDefaultAzureCredential, _tokenCredential, _httpClient, _userAgent, _customHeaders);
-        var generator = client.AsIEmbeddingGenerator(_modelId!);
+        var generator = client.AsIEmbeddingGenerator(_model!);
 
         if (_retryPolicy != null)
         {

@@ -9,7 +9,7 @@ namespace AIKit.Clients.GitHub;
 /// </summary>
 public sealed class EmbeddingGeneratorBuilder 
 {
-    private string? _modelId;
+    private string? _model;
     private HttpClient? _httpClient;
     private string? _gitHubToken;
     private RetryPolicySettings? _retryPolicy;
@@ -41,13 +41,13 @@ public sealed class EmbeddingGeneratorBuilder
     }
 
     /// <summary>
-    /// Sets the model ID.
+    /// Sets the model.
     /// </summary>
-    /// <param name="modelId">The model ID.</param>
+    /// <param name="model">The model.</param>
     /// <returns>The builder instance.</returns>
-    public EmbeddingGeneratorBuilder WithModelId(string modelId)
+    public EmbeddingGeneratorBuilder WithModel(string model)
     {
-        _modelId = modelId ?? throw new ArgumentNullException(nameof(modelId));
+        _model = model ?? throw new ArgumentNullException(nameof(model));
         return this;
     }
 
@@ -117,7 +117,7 @@ public sealed class EmbeddingGeneratorBuilder
         var client = ClientCreator.CreateOpenAIClient(
             _gitHubToken!, _organizationId, _projectId, Constants.GitHubModelsEndpoint, _httpClient);
 
-        var targetModel = _modelId!;
+        var targetModel = _model!;
         _logger?.LogInformation("Creating GitHub Models embedding generator for model {Model}", targetModel);
 
         var embeddingClient = client.GetEmbeddingClient(targetModel).AsIEmbeddingGenerator();
@@ -136,7 +136,7 @@ public sealed class EmbeddingGeneratorBuilder
         if (string.IsNullOrWhiteSpace(_gitHubToken))
             throw new ArgumentException("GitHubToken is required.", nameof(_gitHubToken));
 
-        if (string.IsNullOrWhiteSpace(_modelId))
-            throw new ArgumentException("ModelId is required.", nameof(_modelId));
+        if (string.IsNullOrWhiteSpace(_model))
+            throw new ArgumentException("Model is required.", nameof(_model));
     }
 }

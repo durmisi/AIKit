@@ -13,7 +13,7 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
-            .WithModelId("openai-embed");
+            .WithModel("openai-embed");
 
         // Act
         Action act = () => builder.Build();
@@ -35,7 +35,7 @@ public class EmbeddingGeneratorBuilderTests
 
         // Assert
         act.ShouldThrow<InvalidOperationException>()
-            .Message.ShouldContain("ModelId is required");
+            .Message.ShouldContain("Model is required");
     }
 
     [Fact]
@@ -44,7 +44,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithApiKey("test-key")
-            .WithModelId("openai-embed");
+            .WithModel("openai-embed");
 
         // Act
         var generator = builder.Build();
@@ -60,7 +60,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithApiKey("test-key")
-            .WithModelId("openai-embed")
+            .WithModel("openai-embed")
             .WithRetryPolicy(new RetryPolicySettings()
             {
                 MaxRetries = 3,

@@ -13,7 +13,7 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
-            .WithModelId("azure-embed")
+            .WithModel("azure-embed")
             .WithApiKey("test-key");
 
         // Act
@@ -37,7 +37,7 @@ public class EmbeddingGeneratorBuilderTests
 
         // Assert
         act.ShouldThrow<InvalidOperationException>()
-            .Message.ShouldContain("ModelId is required");
+            .Message.ShouldContain("Model is required");
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("https://example.azure.com")
-            .WithModelId("azure-embed");
+            .WithModel("azure-embed");
 
         // Act
         Action act = () => builder.Build();
@@ -62,7 +62,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("https://example.azure.com")
-            .WithModelId("azure-embed")
+            .WithModel("azure-embed")
             .WithApiKey("test-key");
 
         // Act
@@ -79,7 +79,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithEndpoint("https://example.azure.com")
-            .WithModelId("azure-embed")
+            .WithModel("azure-embed")
             .WithApiKey("test-key")
             .WithRetryPolicy(new RetryPolicySettings()
             {

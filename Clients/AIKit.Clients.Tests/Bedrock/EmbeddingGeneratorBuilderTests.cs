@@ -15,7 +15,7 @@ public class EmbeddingGeneratorBuilderTests
             .WithAwsAccessKey("test")
             .WithAwsSecretKey("test")
             .WithAwsRegion("us-east-1")
-            .WithModelId("amazon.titan-embed-text-v1");
+            .WithModel("amazon.titan-embed-text-v1");
 
         // Act
         var result = builder.Provider;
@@ -44,7 +44,7 @@ public class EmbeddingGeneratorBuilderTests
             .WithAwsAccessKey("test-key")
             .WithAwsSecretKey("test-secret")
             .WithAwsRegion("us-east-1")
-            .WithModelId("amazon.titan-embed-text-v1");
+            .WithModel("amazon.titan-embed-text-v1");
 
         // Act
         var generator = builder.Build();

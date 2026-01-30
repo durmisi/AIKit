@@ -13,7 +13,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithGitHubToken("test")
-            .WithModelId("text-embedding-3-small");
+            .WithModel("text-embedding-3-small");
 
         // Act
         var result = builder.Provider;
@@ -27,7 +27,7 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Act
         Action act = () => new EmbeddingGeneratorBuilder()
-        .WithModelId("text-embedding-3-small")
+        .WithModel("text-embedding-3-small")
         .Build();
 
         // Assert
@@ -41,7 +41,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithGitHubToken("test-token")
-            .WithModelId("text-embedding-3-small");
+            .WithModel("text-embedding-3-small");
 
         // Act
         var generator = builder.Build();

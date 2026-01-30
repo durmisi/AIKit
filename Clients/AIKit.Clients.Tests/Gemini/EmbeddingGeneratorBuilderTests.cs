@@ -12,7 +12,7 @@ public class EmbeddingGeneratorBuilderTests
     {
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
-            .WithModelId("text-embedding-004");
+            .WithModel("text-embedding-004");
 
         // Act
         Action act = () => builder.Build();
@@ -34,7 +34,7 @@ public class EmbeddingGeneratorBuilderTests
 
         // Assert
         act.ShouldThrow<InvalidOperationException>()
-            .Message.ShouldContain("ModelId is required");
+            .Message.ShouldContain("Model is required");
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class EmbeddingGeneratorBuilderTests
         // Arrange
         var builder = new EmbeddingGeneratorBuilder()
             .WithApiKey("test-key")
-            .WithModelId("text-embedding-004");
+            .WithModel("text-embedding-004");
 
         // Act
         var generator = builder.Build();
