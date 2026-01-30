@@ -8,8 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AIKit.Clients.GitHub" Version="0.0.5" />
-    <PackageReference Include="AIKit.VectorStores.InMemory" Version="0.0.5" />
+    <PackageReference Include="AIKit.Clients.GitHub" Version="0.0.6" />
+    <PackageReference Include="AIKit.DataIngestion" Version="0.0.6" />
+    <PackageReference Include="AIKit.VectorStores.InMemory" Version="0.0.6" />
   </ItemGroup>
 
 </Project>

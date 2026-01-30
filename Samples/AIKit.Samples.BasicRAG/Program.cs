@@ -10,7 +10,7 @@ var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
 // 2. Set up embedding generator
 var embeddingGenerator = new EmbeddingGeneratorBuilder()
     .WithGitHubToken("your-github-token")
-    .WithModelId("text-embedding-ada-002")
+    .WithModel("text-embedding-ada-002")
     .Build();
 
 // 3. Create vector store
