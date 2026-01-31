@@ -266,7 +266,7 @@ var answer = await chatClient.GetResponseAsync(prompt);
 Console.WriteLine(answer.Text);
 ```
 
-![Basic RAG](../docs/Basic RAG.png)
+![Basic RAG](Documentation/Basic RAG.png)
 
 ### Using Prompt Templating
 
