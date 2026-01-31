@@ -148,39 +148,109 @@ foreach (var result in results)
 Combine clients, ingestion, and vector stores:
 
 ```csharp
-using AIKit.Core.Ingestion;
-using AIKit.Clients.OpenAI;
-using AIKit.VectorStores.InMemory;
+using AIKit.Clients.GitHub;
+using AIKit.DataIngestion;
+using AIKit.DataIngestion.Services.Chunking;
+using Microsoft.Extensions.AI;
+using Microsoft.ML.Tokenizers;
+using System.Text;
+
+public class VectorRecord
+{
+    [Microsoft.Extensions.VectorData.VectorStoreKey]
+    public required string Key { get; set; }
+
+    [Microsoft.Extensions.VectorData.VectorStoreVector(1536)]
+    public ReadOnlyMemory<float> Vector { get; set; }
+
+    public required Dictionary<string, object?> Metadata { get; set; }
+}
 
 // 1. Set up AI client
-var chatClient = new ChatClientBuilder()
-    .WithApiKey("your-api-key")
+var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
+    .WithGitHubToken("your-github-token")
+    .WithModel("gpt-4o-mini")
     .Build();
 
 // 2. Set up embedding generator
 var embeddingGenerator = new EmbeddingGeneratorBuilder()
-    .WithApiKey("your-api-key")
-    .WithModelId("text-embedding-ada-002")
+    .WithGitHubToken("your-github-token")
+    .WithModel("text-embedding-3-small")
     .Build();
 
 // 3. Create vector store
-var vectorStore = new InMemoryVectorStore();
+var builder = new AIKit.VectorStores.InMemory.VectorStoreBuilder();
+var vectorStore = builder.Build();
+var collection = vectorStore.GetCollection<string, VectorRecord>("My-vectors");
+await collection.EnsureCollectionExistsAsync();
 
 // 4. Build ingestion pipeline
-var pipeline = new IngestionPipelineBuilder<string>()
-    .WithChunking(new TokenChunkingStrategy(512)) // Chunk text
-    .WithWriter(new VectorStoreWriter(vectorStore, chatClient)) // Index to store
+var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
+var chunkingStrategy = new SectionBasedChunkingStrategy(tokenizer, new ChunkingOptions
+{
+    MaxTokensPerChunk = 100,
+    OverlapTokens = 10
+});
+
+var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
+    .Use(next => async (ctx, ct) =>
+    {
+        var content = """
+# AIKit Overview
+
+AIKit is a comprehensive .NET library built for .NET 10 that simplifies integrating AI into your applications.
+""";
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        var document = await new MarkdownReader().ReadAsync(stream, "document.md", "text/markdown");
+        ctx.Documents.Add(document);
+        await next(ctx, ct);
+    })
+    .Use(next => async (ctx, ct) =>
+    {
+        foreach (var document in ctx.Documents)
+        {
+            var chunks = await chunkingStrategy.Chunk(document);
+            ctx.DocumentChunks[document.Identifier] = chunks;
+        }
+        await next(ctx, ct);
+    })
+    .Use(next => async (ctx, ct) =>
+    {
+        foreach (var kvp in ctx.DocumentChunks)
+        {
+            var documentId = kvp.Key;
+            var chunks = kvp.Value;
+            foreach (var chunk in chunks)
+            {
+                var embedding = await embeddingGenerator.GenerateAsync(chunk.Content);
+                var record = new VectorRecord
+                {
+                    Key = Guid.NewGuid().ToString(),
+                    Vector = embedding.Vector,
+                    Metadata = new Dictionary<string, object?> { ["content"] = chunk.Content, ["documentId"] = documentId }
+                };
+                await collection.UpsertAsync(record);
+            }
+        }
+        await next(ctx, ct);
+    })
     .Build();
 
 // 5. Ingest data
-await pipeline.ProcessAsync("Your large text document here.");
+await pipeline.ExecuteAsync(new DataIngestionContext());
 
 // 6. Query with RAG
 var queryEmbedding = await embeddingGenerator.GenerateAsync("What is AIKit?");
-var searchResults = await vectorStore.SearchAsync(queryEmbedding.Vector, new VectorSearchOptions { Top = 3 });
-var context = string.Join("\n", searchResults.Select(r => r.Record.Metadata["content"]));
+var contextBuilder = new StringBuilder();
+await foreach (var r in collection.SearchAsync(queryEmbedding.Vector, top: 3))
+{
+    var content = r.Record.Metadata["content"]?.ToString();
+    contextBuilder.AppendLine(content);
+}
+var context = contextBuilder.ToString().Trim();
 var prompt = $"Context: {context}\nQuestion: What is AIKit?";
 var answer = await chatClient.GetResponseAsync(prompt);
+Console.WriteLine(answer.Text);
 ```
 
 ### Using Prompt Templating
