@@ -4,6 +4,7 @@ using AIKit.DataIngestion.Services.Chunking;
 using AIKit.VectorStores.InMemory;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
+using Microsoft.Extensions.Logging;
 using Microsoft.ML.Tokenizers;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -21,6 +22,8 @@ using var meterProvider = Sdk.CreateMeterProviderBuilder()
     .AddAIKitMetrics()
     .AddConsoleExporter()
     .Build();
+
+var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
 // 1. Set up AI client
 var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
@@ -49,6 +52,7 @@ var chunkingStrategy = new SectionBasedChunkingStrategy(tokenizer, new ChunkingO
 
 var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
     .WithTelemetry(new TelemetryOptions { Enabled = true, ServiceName = "BasicRAGSample" })
+    .WithLoggerFactory(loggerFactory)
     .Use(next => async (ctx, ct) =>
     {
         Console.WriteLine("Starting ingestion...");
