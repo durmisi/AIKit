@@ -266,6 +266,8 @@ var answer = await chatClient.GetResponseAsync(prompt);
 Console.WriteLine(answer.Text);
 ```
 
+![Basic RAG](../docs/Basic RAG.png)
+
 ### Using Prompt Templating
 
 Render dynamic prompts:
