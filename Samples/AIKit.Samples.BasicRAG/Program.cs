@@ -5,8 +5,22 @@ using AIKit.VectorStores.InMemory;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.ML.Tokenizers;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("Please provide a valid github token");
+
+// Configure OpenTelemetry with console exporter for AIKit telemetry
+using var tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
+    .AddAIKitTracing()
+    .AddConsoleExporter()
+    .Build();
+
+using var meterProvider = Sdk.CreateMeterProviderBuilder()
+    .AddAIKitMetrics()
+    .AddConsoleExporter()
+    .Build();
 
 // 1. Set up AI client
 var chatClient = new AIKit.Clients.GitHub.ChatClientBuilder()
@@ -34,6 +48,7 @@ var chunkingStrategy = new SectionBasedChunkingStrategy(tokenizer, new ChunkingO
 });
 
 var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
+    .WithTelemetry(new TelemetryOptions { Enabled = true, ServiceName = "BasicRAGSample" })
     .Use(next => async (ctx, ct) =>
     {
         Console.WriteLine("Starting ingestion...");
