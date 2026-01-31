@@ -74,10 +74,10 @@ Store and search vector embeddings for RAG and similarity search.
 
 ### Data Ingestion
 
-| Package                          | Purpose                   | Key Classes                                       |
-| -------------------------------- | ------------------------- | ------------------------------------------------- |
-| `AIKit.DataIngestion`            | Data ingestion pipelines  | `IngestionPipelineBuilder<T>`, `ChunkingStrategy` |
-| `AIKit.DataIngestion.Extensions` | Data ingestion extensions | `SectionBasedChunkingStrategy`, `MarkdownReader`  |
+| Package                          | Purpose                                                                                                                                          | Key Classes                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `AIKit.DataIngestion`            | Data ingestion pipelines                                                                                                                         | `IngestionPipelineBuilder<T>`, `ChunkingStrategy` |
+| `AIKit.DataIngestion.Extensions` | Data ingestion extensions (built on [Microsoft.Extensions.DataIngestion](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/data-ingestion)) | `SectionBasedChunkingStrategy`, `MarkdownReader`  |
 
 ### Prompts
 
