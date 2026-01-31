@@ -3,6 +3,7 @@ using AIKit.DataIngestion;
 using AIKit.DataIngestion.Services.Chunking;
 using AIKit.VectorStores.InMemory;
 using AIKit.VectorStores.Search;
+using AIKit.VectorStores.Stores;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
@@ -169,8 +170,7 @@ AIKit provides a unified API for multiple AI providers, vector databases, and st
             var queryEmbedding = await embeddingGenerator.GenerateAsync(question);
 
             var contextBuilder = new System.Text.StringBuilder();
-            var search = (IVectorStoreSearch<VectorRecord>)collection;
-            await foreach (var r in search.VectorSearchAsync(queryEmbedding.Vector, new VectorSearchRequest<VectorRecord> { Top = 3 }))
+            await foreach (var r in collection.SearchAsync(queryEmbedding.Vector, top: 3))
             {
                 var content = r.Record.Metadata["content"]?.ToString();
                 contextBuilder.AppendLine(content);
