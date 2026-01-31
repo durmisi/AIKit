@@ -1,15 +1,10 @@
 ﻿using AIKit.Clients.GitHub;
 using AIKit.DataIngestion;
 using AIKit.DataIngestion.Services.Chunking;
-using AIKit.VectorStores.InMemory;
-using AIKit.VectorStores.Search;
-using AIKit.VectorStores.Stores;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.VectorData;
 using Microsoft.ML.Tokenizers;
-using Microsoft.SemanticKernel.Connectors.InMemory;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -34,16 +29,16 @@ public static class Program
 
         var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("Please provide a valid github token");
 
-        // Configure OpenTelemetry with console exporter for AIKit telemetry
+        // Configure OpenTelemetry with console exporter for AIKit telemetry (using debug writer)
         using var tracerProvider = OpenTelemetry.Sdk.CreateTracerProviderBuilder()
-
+    
             .AddAIKitTracing()
-            .AddConsoleExporter()
+            .AddConsoleExporter(options => options.Targets = OpenTelemetry.Exporter.ConsoleExporterOutputTargets.Debug)
             .Build();
 
         using var meterProvider = Sdk.CreateMeterProviderBuilder()
             .AddAIKitMetrics()
-            .AddConsoleExporter()
+            .AddConsoleExporter(options => options.Targets = OpenTelemetry.Exporter.ConsoleExporterOutputTargets.Debug)
             .Build();
 
         var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
