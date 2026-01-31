@@ -30,11 +30,6 @@ public class IngestionPipeline<T> where T : IngestionContext
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task ExecuteAsync(T ctx, CancellationToken cancellationToken = default)
     {
-        if (ctx is DataIngestionContext dataCtx)
-        {
-            dataCtx.LoggerFactory = _loggerFactory;
-        }
-
         var logger = _loggerFactory?.CreateLogger("IngestionPipeline");
         logger?.LogInformation("Starting pipeline execution");
 

@@ -1,7 +1,6 @@
 using AIKit.DataIngestion.Services.Processors;
 using AIKit.DataIngestion.Services.Providers;
 using Microsoft.Extensions.DataIngestion;
-using Microsoft.Extensions.Logging;
 
 namespace AIKit.DataIngestion.Middleware;
 
@@ -26,9 +25,6 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
         IngestionDelegate<DataIngestionContext> next,
         CancellationToken cancellationToken = default)
     {
-        var logger = ctx.LoggerFactory?.CreateLogger("ReaderMiddleware");
-        logger?.LogInformation("Starting document reading");
-
         await foreach (var file in _fileProvider.ReadAsync(cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -55,8 +51,6 @@ public sealed class ReaderMiddleware : IIngestionMiddleware<DataIngestionContext
             }
             // Skip files with unsupported extensions
         }
-
-        logger?.LogInformation("Reading completed, loaded {DocumentCount} documents", ctx.Documents.Count);
 
         await next(ctx, cancellationToken);
     }

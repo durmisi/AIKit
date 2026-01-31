@@ -4,7 +4,6 @@ using AIKit.DataIngestion.Services.Chunking;
 using AIKit.VectorStores.InMemory;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
-using Microsoft.Extensions.VectorData;
 using Microsoft.ML.Tokenizers;
 
 var gitHubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN") ?? throw new Exception("Please provide a valid github token");

@@ -141,7 +141,7 @@ public class IngestionPipelineTests
             { ".md", new[] { new FailingProcessor() } }
         };
 
-        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");  
+        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4");
         var chunkingStrategy = new SectionBasedChunkingStrategy(
             tokenizer,
             new ChunkingOptions

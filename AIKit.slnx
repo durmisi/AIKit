@@ -14,6 +14,7 @@
     <Project Path="Clients/AIKit.Clients/AIKit.Clients.csproj" />
   </Folder>
   <Folder Name="/Data Ingestion/">
+    <Project Path="Data Ingestion/AIKit.DataIngestion.Extensiions/AIKit.DataIngestion.Extensiions.csproj" Id="52223b2c-1413-4e74-a56c-ed0eb08a1e53" />
     <Project Path="Data Ingestion/AIKit.DataIngestion.Tests/AIKit.DataIngestion.Tests.csproj" />
     <Project Path="Data Ingestion/AIKit.DataIngestion/AIKit.DataIngestion.csproj" />
   </Folder>

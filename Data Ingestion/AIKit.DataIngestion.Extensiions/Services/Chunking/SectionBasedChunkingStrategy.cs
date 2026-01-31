@@ -9,7 +9,7 @@ public sealed class SectionBasedChunkingStrategy : IChunkingStrategy
     private readonly ChunkingOptions _options;
     private Tokenizer _tokenizer;
 
-    public SectionBasedChunkingStrategy(Tokenizer tokenizer, ChunkingOptions? options = null )
+    public SectionBasedChunkingStrategy(Tokenizer tokenizer, ChunkingOptions? options = null)
     {
         _options = options ?? new ChunkingOptions();
         _tokenizer = tokenizer ?? throw new ArgumentNullException(nameof(tokenizer));

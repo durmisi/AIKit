@@ -9,4 +9,6 @@ public class IngestionContext
     /// Gets the list of errors encountered during processing.
     /// </summary>
     public List<string> Errors { get; } = new();
+
+    public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 }

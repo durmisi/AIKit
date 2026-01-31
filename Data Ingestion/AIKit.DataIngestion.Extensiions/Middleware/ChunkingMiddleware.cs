@@ -1,7 +1,6 @@
 using AIKit.DataIngestion.Services.Chunking;
 using AIKit.DataIngestion.Services.Processors;
 using Microsoft.Extensions.DataIngestion;
-using Microsoft.Extensions.Logging;
 
 namespace AIKit.DataIngestion.Middleware;
 
@@ -21,9 +20,6 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
         IngestionDelegate<DataIngestionContext> next,
         CancellationToken cancellationToken = default)
     {
-        var logger = ctx.LoggerFactory?.CreateLogger("ChunkingMiddleware");
-        logger?.LogInformation("Starting chunking for {DocumentCount} documents", ctx.Documents.Count);
-
         var allChunks = new List<IngestionChunk<string>>();
 
         foreach (var doc in ctx.Documents)
@@ -35,7 +31,6 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
 
             foreach (var processor in _chunkProcessors)
             {
-                logger?.LogInformation("Applying chunk processor: {ProcessorName}", processor.GetType().Name);
                 chunksAsync = processor.ProcessAsync(chunksAsync, cancellationToken);
             }
 
@@ -43,8 +38,6 @@ public sealed class ChunkingMiddleware : IIngestionMiddleware<DataIngestionConte
             ctx.DocumentChunks[doc.Identifier] = processedDocChunks;
             allChunks.AddRange(processedDocChunks);
         }
-
-        logger?.LogInformation("Chunking completed, produced {ChunkCount} chunks", allChunks.Count);
 
         await next(ctx, cancellationToken);
     }

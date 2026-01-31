@@ -1,6 +1,5 @@
 using AIKit.DataIngestion.Services.Writers;
 using Microsoft.Extensions.DataIngestion;
-using Microsoft.Extensions.Logging;
 
 namespace AIKit.DataIngestion.Middleware;
 
@@ -18,8 +17,6 @@ public sealed class WriterMiddleware : IIngestionMiddleware<DataIngestionContext
         IngestionDelegate<DataIngestionContext> next,
         CancellationToken cancellationToken = default)
     {
-        var logger = ctx.LoggerFactory?.CreateLogger("WriterMiddleware");
-
         foreach (var doc in ctx.Documents)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -30,8 +27,6 @@ public sealed class WriterMiddleware : IIngestionMiddleware<DataIngestionContext
 
             await _writer.WriteAsync(doc, chunks, cancellationToken);
         }
-
-        logger?.LogInformation("Writing completed");
 
         await next(ctx, cancellationToken);
     }
