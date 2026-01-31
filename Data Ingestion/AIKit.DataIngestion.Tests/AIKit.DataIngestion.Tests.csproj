@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AIKit.DataIngestion.Extensiions\AIKit.DataIngestion.Extensiions.csproj" />
+    <ProjectReference Include="..\AIKit.DataIngestion.Extensions\AIKit.DataIngestion.Extensions.csproj" />
     <ProjectReference Include="..\AIKit.DataIngestion\AIKit.DataIngestion.csproj" />
   </ItemGroup>
 

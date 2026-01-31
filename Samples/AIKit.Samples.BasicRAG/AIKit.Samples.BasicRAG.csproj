@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\AIKit.Clients.GitHub\AIKit.Clients.GitHub.csproj" />
-    <ProjectReference Include="..\..\Data Ingestion\AIKit.DataIngestion.Extensiions\AIKit.DataIngestion.Extensiions.csproj" />
+    <ProjectReference Include="..\..\Data Ingestion\AIKit.DataIngestion.Extensions\AIKit.DataIngestion.Extensions.csproj" />
     <ProjectReference Include="..\..\Data Ingestion\AIKit.DataIngestion\AIKit.DataIngestion.csproj" />
     <ProjectReference Include="..\..\VectorStores\AIKit.VectorStores.InMemory\AIKit.VectorStores.InMemory.csproj" />
   </ItemGroup>
