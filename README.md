@@ -72,15 +72,28 @@ Store and search vector embeddings for RAG and similarity search.
 | `AIKit.VectorStores.Weaviate`      | Weaviate                      | `WeaviateVectorStore`      |
 | `AIKit.VectorStores.AzureAISearch` | Azure AI Search               | `AzureAISearchVectorStore` |
 
-### Other Packages
+### Data Ingestion
 
-| Package                    | Purpose                  | Key Classes                                                 |
-| -------------------------- | ------------------------ | ----------------------------------------------------------- |
-| `AIKit.Core.Ingestion`     | Data ingestion pipelines | `IngestionPipelineBuilder<T>`, `ChunkingStrategy`           |
-| `AIKit.Prompts.Jinja2`     | Jinja2 templating        | `Jinja2PromptExecutor`                                      |
-| `AIKit.Prompts.Handlebars` | Handlebars templating    | `HandlebarsPromptExecutor`                                  |
-| `AIKit.Prompts.Liquid`     | Liquid templating        | `LiquidPromptExecutor`                                      |
-| `AIKit.Storage`            | Storage abstractions     | `LocalVersionedStorageProvider`, `AzureBlobStorageProvider` |
+| Package                          | Purpose                   | Key Classes                                       |
+| -------------------------------- | ------------------------- | ------------------------------------------------- |
+| `AIKit.DataIngestion`            | Data ingestion pipelines  | `IngestionPipelineBuilder<T>`, `ChunkingStrategy` |
+| `AIKit.DataIngestion.Extensions` | Data ingestion extensions | `SectionBasedChunkingStrategy`, `MarkdownReader`  |
+
+### Prompts
+
+| Package                    | Purpose               | Key Classes                |
+| -------------------------- | --------------------- | -------------------------- |
+| `AIKit.Prompts.Jinja2`     | Jinja2 templating     | `Jinja2PromptExecutor`     |
+| `AIKit.Prompts.Handlebars` | Handlebars templating | `HandlebarsPromptExecutor` |
+| `AIKit.Prompts.Liquid`     | Liquid templating     | `LiquidPromptExecutor`     |
+
+### Storage
+
+| Package               | Purpose              | Key Classes                     |
+| --------------------- | -------------------- | ------------------------------- |
+| `AIKit.Storage`       | Storage abstractions | `IStorageProvider`              |
+| `AIKit.Storage.Azure` | Azure Blob storage   | `AzureBlobStorageProvider`      |
+| `AIKit.Storage.Local` | Local file storage   | `LocalVersionedStorageProvider` |
 
 ## Quick Start
 
