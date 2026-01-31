@@ -88,12 +88,13 @@ public class IngestionPipelineBuilder<T> where T : IngestionContext
     }
 
     /// <summary>
-    /// Enables telemetry for the pipeline.
+    /// Enables telemetry for the pipeline with the specified options.
     /// </summary>
+    /// <param name="options">The telemetry options. If null, enables with default options.</param>
     /// <returns>The builder instance for chaining.</returns>
-    public IngestionPipelineBuilder<T> WithTelemetry()
+    public IngestionPipelineBuilder<T> WithTelemetry(TelemetryOptions? options = null)
     {
-        _telemetryOptions.Enabled = true;
+        _telemetryOptions = options ?? new TelemetryOptions { Enabled = true };
         return this;
     }
 

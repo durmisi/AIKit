@@ -10,12 +10,10 @@ namespace AIKit.DataIngestion;
 /// <typeparam name="T">The type of the context.</typeparam>
 public class IngestionPipeline<T> where T : IngestionContext
 {
-    private static readonly ActivitySource ActivitySource = new("AIKit.DataIngestion");
-    private static readonly Meter Meter = new("AIKit.DataIngestion");
-    private static readonly Histogram<double> ExecutionTimeHistogram = Meter.CreateHistogram<double>("ingestion_pipeline_execution_time", "ms", "Time taken to execute the ingestion pipeline");
-    private static readonly Counter<long> MiddlewareCountCounter = Meter.CreateCounter<long>("ingestion_pipeline_middleware_count", description: "Number of middleware components in the pipeline");
-    private static readonly Counter<long> ExecutionCounter = Meter.CreateCounter<long>("ingestion_pipeline_executions", description: "Number of pipeline executions");
-    private static readonly Counter<long> ErrorCounter = Meter.CreateCounter<long>("ingestion_pipeline_errors", description: "Number of pipeline execution errors");
+    private static readonly Histogram<double> ExecutionTimeHistogram = Telemetry.Meter.CreateHistogram<double>("ingestion_pipeline_execution_time", "ms", "Time taken to execute the ingestion pipeline");
+    private static readonly Counter<long> MiddlewareCountCounter = Telemetry.Meter.CreateCounter<long>("ingestion_pipeline_middleware_count", description: "Number of middleware components in the pipeline");
+    private static readonly Counter<long> ExecutionCounter = Telemetry.Meter.CreateCounter<long>("ingestion_pipeline_executions", description: "Number of pipeline executions");
+    private static readonly Counter<long> ErrorCounter = Telemetry.Meter.CreateCounter<long>("ingestion_pipeline_errors", description: "Number of pipeline execution errors");
 
     private readonly List<Func<IngestionDelegate<T>, IngestionDelegate<T>>> _components;
     private readonly ILoggerFactory? _loggerFactory;
@@ -48,7 +46,7 @@ public class IngestionPipeline<T> where T : IngestionContext
         var logger = _loggerFactory?.CreateLogger("IngestionPipeline");
         logger?.LogInformation("Starting pipeline execution");
 
-        using var activity = _telemetryOptions.Enabled ? ActivitySource.StartActivity("IngestionPipeline.Execute") : null;
+        using var activity = _telemetryOptions.Enabled ? Telemetry.ActivitySource.StartActivity("IngestionPipeline.Execute") : null;
         var stopwatch = Stopwatch.StartNew();
 
         IngestionDelegate<T> app = (c, ct) => Task.CompletedTask;
@@ -76,6 +74,7 @@ public class IngestionPipeline<T> where T : IngestionContext
 
                 activity?.SetTag("execution_time_ms", executionTime);
                 activity?.SetTag("middleware_count", _components.Count);
+                activity?.SetTag("service.name", _telemetryOptions.ServiceName);
             }
 
             if (t.IsCompletedSuccessfully)
