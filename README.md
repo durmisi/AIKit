@@ -1,7 +1,7 @@
 # AIKit
 
 [![Build Status](https://github.com/durmisi/AIKit/actions/workflows/publish-nuget.yml/badge.svg)](https://github.com/durmisi/AIKit/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![.NET Version](https://img.shields.io/badge/.NET-10-blue.svg)](https://dotnet.microsoft.com/)
 
 AIKit is a comprehensive .NET library built for .NET 10 that simplifies integrating AI into your applications. Whether you're building chatbots, RAG (Retrieval-Augmented Generation) systems, or AI-powered tools, AIKit provides a unified API to interact with multiple AI providers, vector databases, storage solutions, and more—without vendor lock-in. Designed for .NET developers, it abstracts complexities so you can focus on your app's logic.
