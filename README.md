@@ -8,7 +8,7 @@ AIKit is a comprehensive .NET library built for .NET 10 that simplifies integrat
 
 ## Why AIKit?
 
-As a .NET developer exploring AI integration, you might face challenges like switching between providers (e.g., OpenAI to Claude), managing vector embeddings for search, or processing large datasets. AIKit solves this with consistent interfaces, extensible builders, and built-in features like data ingestion pipelines and prompt templating. It's open-source, MIT-licensed, and leverages modern .NET patterns like dependency injection and async operations.
+As a .NET developer exploring AI integration, you might face challenges like switching between providers (e.g., OpenAI to Claude), managing vector embeddings for search, or processing large datasets. AIKit solves this with consistent interfaces, extensible builders, and built-in features like data ingestion pipelines and prompt templating. It's open-source, Apache-2.0-licensed, and leverages modern .NET patterns like dependency injection and async operations.
 
 ## Architecture
 
@@ -300,7 +300,7 @@ We welcome contributions! Fork the repo, make changes, and submit a PR. See [CON
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ## Support
 
