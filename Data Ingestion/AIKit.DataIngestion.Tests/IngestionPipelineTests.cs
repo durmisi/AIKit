@@ -41,7 +41,7 @@ public class IngestionPipelineTests
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
-            .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
+            .UseMiddleware<ErrorHandlingMiddleware>()
             .Use(next => async (ctx, ct) => await new ReaderMiddleware(provider, readers, processors).InvokeAsync(ctx, next, ct))
             .Use(next => async (ctx, ct) => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next, ct))
             .Build();
@@ -81,7 +81,7 @@ public class IngestionPipelineTests
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
-            .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
+            .UseMiddleware<ErrorHandlingMiddleware>()
             .Use(next => async (ctx, ct) => await new ReaderMiddleware(provider, readers, processors).InvokeAsync(ctx, next, ct))
             .Use(next => async (ctx, ct) => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next, ct))
             .Build();
@@ -112,7 +112,7 @@ public class IngestionPipelineTests
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
-            .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
+            .UseMiddleware<ErrorHandlingMiddleware>()
             .Use(next => async (ctx, ct) => await new ReaderMiddleware(provider, readers, processors).InvokeAsync(ctx, next, ct))
             .Use(next => async (ctx, ct) => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next, ct))
             .Build();
@@ -153,7 +153,7 @@ public class IngestionPipelineTests
         var context = new DataIngestionContext();
 
         var pipeline = new IngestionPipelineBuilder<DataIngestionContext>()
-            .UseMiddleware<ErrorHandlingMiddleware<DataIngestionContext>>()
+            .UseMiddleware<ErrorHandlingMiddleware>()
             .Use(next => async (ctx, ct) => await new ReaderMiddleware(provider, readers, processors).InvokeAsync(ctx, next, ct))
             .Use(next => async (ctx, ct) => await new ChunkingMiddleware(chunkingStrategy, new List<IChunkProcessor>()).InvokeAsync(ctx, next, ct))
             .Build();
