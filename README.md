@@ -53,6 +53,8 @@ Interact with AI providers for chat and embeddings.
 | `AIKit.Clients.Ollama`      | Local Ollama models    | `ChatClientBuilder`                              |
 | `AIKit.Clients.GitHub`      | GitHub Models          | `ChatClientBuilder`, `EmbeddingGeneratorBuilder` |
 
+All Chat Clients in AIKit are developed on top of the Microsoft.Extensions.AI `IChatClient` interface, providing a standardized way to interact with AI providers. For more information, see [Microsoft.Extensions.AI documentation](https://learn.microsoft.com/en-us/dotnet/ai/microsoft-extensions-ai).
+
 ### Vector Stores
 
 Store and search vector embeddings for RAG and similarity search.
@@ -72,12 +74,16 @@ Store and search vector embeddings for RAG and similarity search.
 | `AIKit.VectorStores.Weaviate`      | Weaviate                      | `WeaviateVectorStore`      |
 | `AIKit.VectorStores.AzureAISearch` | Azure AI Search               | `AzureAISearchVectorStore` |
 
+All Vector Stores in AIKit are developed on top of the Microsoft.Extensions.VectorData.Abstractions, providing a standardized way to interact with vector databases. For more information, see [Vector Store Connectors in Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/concepts/vector-store-connectors/?pivots=programming-language-csharp).
+
 ### Data Ingestion
 
 | Package                          | Purpose                                                                                                                                          | Key Classes                                       |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
 | `AIKit.DataIngestion`            | Data ingestion pipelines                                                                                                                         | `IngestionPipelineBuilder<T>`, `ChunkingStrategy` |
 | `AIKit.DataIngestion.Extensions` | Data ingestion extensions (built on [Microsoft.Extensions.DataIngestion](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/data-ingestion)) | `SectionBasedChunkingStrategy`, `MarkdownReader`  |
+
+The idea behind AIKit.DataIngestion is inspired from Microsoft.Extensions.DataIngestion, but the pipelines, like the .NET Core middleware system, make them even more flexible. The AIKit.DataIngestion.Extensions build on top of Microsoft.Extensions.DataIngestion. For more information, see [Introducing Data Ingestion Building Blocks Preview](https://devblogs.microsoft.com/dotnet/introducing-data-ingestion-building-blocks-preview/).
 
 ### Prompts
 
@@ -86,6 +92,8 @@ Store and search vector embeddings for RAG and similarity search.
 | `AIKit.Prompts.Jinja2`     | Jinja2 templating     | `Jinja2PromptExecutor`     |
 | `AIKit.Prompts.Handlebars` | Handlebars templating | `HandlebarsPromptExecutor` |
 | `AIKit.Prompts.Liquid`     | Liquid templating     | `LiquidPromptExecutor`     |
+
+The prompt templating packages in AIKit are wrappers around Semantic Kernel's prompt templates. For more information, see [Handlebars Prompt Templates](https://learn.microsoft.com/en-us/semantic-kernel/concepts/prompts/handlebars-prompt-templates?pivots=programming-language-csharp), [Liquid Prompt Templates](https://learn.microsoft.com/en-us/semantic-kernel/concepts/prompts/liquid-prompt-templates), and [Jinja2 Prompt Templates](https://learn.microsoft.com/en-us/semantic-kernel/concepts/prompts/jinja2-prompt-templates?pivots=programming-language-csharp).
 
 ### Storage
 
